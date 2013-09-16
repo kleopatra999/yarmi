@@ -1,4 +1,4 @@
-Yet Another RMI
+Yet Another [RMI](http://en.wikipedia.org/wiki/Java_remote_method_invocation)
 =========
 
 Comunication protocol constructor using C++ preprocessor
