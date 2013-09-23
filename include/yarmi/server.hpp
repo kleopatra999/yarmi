@@ -1,4 +1,3 @@
-
 #ifndef _yarmi__server_hpp
 #define _yarmi__server_hpp
 
@@ -50,11 +49,13 @@ public:
 			,gc
 			,[this](session_base *session) {
 				if ( ! gc.has_session(session) ) {
-					std::ostringstream os;
-					os << "session 0x" << std::hex << session << " not in connected sessions list";
-					throw std::runtime_error(os.str());
+					std::cerr << "session 0x" << std::hex << session << " not in connected sessions list" << std::endl << std::flush;
 				}
-				session->on_disconnected();
+				try {
+					session->on_disconnected();
+				} catch (const std::exception &ex) {
+					std::cerr << "[exception] session->on_disconnected(): \"" << ex.what() << "\"" << std::endl << std::flush;
+				}
 				gc.del_session(session);
 				delete session;
 			}
@@ -65,7 +66,11 @@ public:
 			,[this, session](const boost::system::error_code &ec) {
 				if ( ! ec ) {
 					gc.add_session(session.get());
-					session->on_connected();
+					try {
+						session->on_connected();
+					} catch (const std::exception &ex) {
+						std::cerr << "[exception] session->on_connected(): \"" << ex.what() << "\"" << std::endl << std::flush;
+					}
 					session->start();
 					start();
 				}
