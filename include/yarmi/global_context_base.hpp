@@ -33,7 +33,17 @@ struct global_context_base: private boost::noncopyable {
 	/** info */
 	std::size_t sessions() const;
 
-	/** operation */
+	/** operations */
+
+	void send_to(std::int64_t id, const std::shared_ptr<char> &buffer, std::size_t size);
+
+	template<typename T, typename Allocator, template<typename, typename> class container>
+	void send_to(const container<T, Allocator> &cont, const std::shared_ptr<char> &buffer, std::size_t size) {
+		for ( const auto &it: cont ) {
+			send_to(it, buffer, size);
+		}
+	}
+
 	void send_to_all(const std::shared_ptr<char> &buffer, std::size_t size);
 
 	/** IO stats */
