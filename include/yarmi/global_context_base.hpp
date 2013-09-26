@@ -65,16 +65,6 @@ struct global_context_base: private boost::noncopyable {
 		send_to_all(session, serialize(o));
 	}
 
-	/** IO stats */
-	void inc_recv_bytes(std::uint64_t bytes);
-	void inc_sent_bytes(std::uint64_t bytes);
-	std::uint64_t recv_bytes() const;
-	std::uint64_t sent_bytes() const;
-	void inc_requests();
-	void inc_replies();
-	std::uint64_t requests() const;
-	std::uint64_t replies() const;
-
 private:
 	template<typename T>
 	std::pair<std::shared_ptr<char>, std::size_t>
@@ -86,6 +76,7 @@ private:
 		const yas::shared_buffer &buffer = pa.get_shared_buffer();
 		return std::make_pair(buffer.data, buffer.size);
 	}
+
 private:
 	struct pimpl;
 	pimpl *impl;

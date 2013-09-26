@@ -22,8 +22,6 @@ void session_base::start() {
 			return;
 		}
 
-		gcb.inc_recv_bytes(header_size);
-
 		YARMI_IARCHIVE_TYPE ia(header_buffer.get(), header_size);
 		std::uint32_t body_length = 0;
 		ia & body_length;
@@ -35,10 +33,7 @@ void session_base::start() {
 				return;
 			}
 
-			gcb.inc_recv_bytes(body_length);
-
 			try {
-				gcb.inc_requests();
 				on_received(body_buffer.get(), body_length);
 			} catch (const std::exception &ex) {
 				std::cerr << "exception is thrown when invoking: " << ex.what() << std::endl;
@@ -70,10 +65,8 @@ void session_base::send(const std::shared_ptr<char> &buffer, std::size_t size) {
 	boost::asio::async_write(
 		 socket
 		,boost::asio::buffer(buffer.get(), size)
-		,[this, self, buffer](const boost::system::error_code &ec, std::size_t wr) {
+		,[this, self, buffer](const boost::system::error_code &ec, std::size_t) {
 			if ( ec ) throw std::runtime_error("session_base::send() error: "+ec.message());
-			gcb.inc_sent_bytes(wr);
-			gcb.inc_replies();
 		}
 	);
 }

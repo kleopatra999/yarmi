@@ -28,10 +28,6 @@ struct global_context_base::pimpl {
 	pimpl()
 		:session_ids(0)
 		,sessions()
-		,recv_bytes(0)
-		,sent_bytes(0)
-		,requests(0)
-		,replies(0)
 	{}
 
 	std::uint64_t session_ids;
@@ -54,11 +50,6 @@ struct global_context_base::pimpl {
 		>
 	> sessions_cont;
 	sessions_cont sessions;
-
-	std::uint64_t recv_bytes;
-	std::uint64_t sent_bytes;
-	std::uint64_t requests;
-	std::uint64_t replies;
 }; // struct pimpl
 
 /***************************************************************************/
@@ -162,18 +153,6 @@ void global_context_base::send_to_all(const session_base *session, const std::pa
 		it.session->send(pair.first, pair.second);
 	}
 }
-
-/***************************************************************************/
-
-void global_context_base::inc_recv_bytes(std::uint64_t bytes) { impl->recv_bytes += bytes; }
-void global_context_base::inc_sent_bytes(std::uint64_t bytes) { impl->sent_bytes += bytes; }
-std::uint64_t global_context_base::recv_bytes() const { return impl->recv_bytes; }
-std::uint64_t global_context_base::sent_bytes() const { return impl->sent_bytes; }
-
-void global_context_base::inc_requests() { ++(impl->requests); }
-void global_context_base::inc_replies() { ++(impl->replies); }
-std::uint64_t global_context_base::requests() const { return impl->requests; }
-std::uint64_t global_context_base::replies() const { return impl->replies; }
 
 /***************************************************************************/
 
