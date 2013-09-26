@@ -150,15 +150,16 @@ std::size_t global_context_base::sessions() const {
 
 /***************************************************************************/
 
-void global_context_base::send_to(std::int64_t id, const std::shared_ptr<char> &buffer, std::size_t size) {
+void global_context_base::send_to(std::int64_t id, const std::pair<std::shared_ptr<char>, std::size_t> &pair) {
 	const auto it = impl->sessions.get<session_wrapper::by_id>().find(id);
 	if ( it == impl->sessions.get<session_wrapper::by_id>().end() ) return;
-	it->session->send(buffer, size);
+	it->session->send(pair.first, pair.second);
 }
 
-void global_context_base::send_to_all(const std::shared_ptr<char> &buffer, std::size_t size) {
+void global_context_base::send_to_all(const session_base *session, const std::pair<std::shared_ptr<char>, std::size_t> &pair) {
 	for ( const auto &it: impl->sessions ) {
-		it.session->send(buffer, size);
+		if ( it.session == session ) continue;
+		it.session->send(pair.first, pair.second);
 	}
 }
 
