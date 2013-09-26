@@ -18,7 +18,7 @@ namespace yarmi {
 
 struct session_wrapper {
 	session_base *session;
-	std::uint64_t id;
+	std::int64_t id;
 
 	struct by_session;
 	struct by_id;
@@ -26,11 +26,11 @@ struct session_wrapper {
 
 struct global_context_base::pimpl {
 	pimpl()
-		:session_ids(0)
+		:session_ids(-1)
 		,sessions()
 	{}
 
-	std::uint64_t session_ids;
+	std::int64_t session_ids;
 
 	typedef boost::multi_index::multi_index_container<
 		 session_wrapper
@@ -44,7 +44,7 @@ struct global_context_base::pimpl {
 			,boost::multi_index::ordered_unique<
 				 boost::multi_index::tag<session_wrapper::by_id>
 				,boost::multi_index::member<
-					session_wrapper, std::uint64_t, &session_wrapper::id
+					session_wrapper, std::int64_t, &session_wrapper::id
 				>
 			>
 		>
@@ -74,7 +74,7 @@ std::uint64_t global_context_base::add_session(session_base *session) {
 		throw std::runtime_error(os.str());
 	}
 
-	std::uint64_t idx = impl->session_ids++;
+	std::int64_t idx = impl->session_ids--;
 	impl->sessions.insert(session_wrapper{session, idx});
 
 	return idx;
@@ -92,7 +92,7 @@ void global_context_base::del_session(session_base *session) {
 	index.erase(it);
 }
 
-void global_context_base::del_session(std::uint64_t id) {
+void global_context_base::del_session(std::int64_t id) {
 	if ( !has_session(id) ) {
 		std::ostringstream os;
 		os << "session with ID " << id << " not in sessions list";
@@ -106,7 +106,7 @@ void global_context_base::del_session(std::uint64_t id) {
 
 /***************************************************************************/
 
-void global_context_base::set_id(session_base *session, std::uint64_t id) {
+void global_context_base::set_id(session_base *session, std::int64_t id) {
 	auto &index = impl->sessions.get<session_wrapper::by_session>();
 
 	auto it = index.find(session);
@@ -128,7 +128,7 @@ bool global_context_base::has_session(session_base *session) const {
 	return index.find(session) != index.end();
 }
 
-bool global_context_base::has_session(std::uint64_t id) const {
+bool global_context_base::has_session(std::int64_t id) const {
 	const auto &index = impl->sessions.get<session_wrapper::by_id>();
 	return index.find(id) != index.end();
 }

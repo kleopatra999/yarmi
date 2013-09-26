@@ -25,12 +25,12 @@ struct global_context_base: private boost::noncopyable {
 	/** add/rm */
 	std::uint64_t add_session(session_base *session);
 	void del_session(session_base *session);
-	void del_session(std::uint64_t id);
-	void set_id(session_base *session, std::uint64_t id);
+	void del_session(std::int64_t id);
+	void set_id(session_base *session, std::int64_t id);
 
 	/** test */
 	bool has_session(session_base *session) const;
-	bool has_session(std::uint64_t id) const;
+	bool has_session(std::int64_t id) const;
 
 	/** info */
 	std::size_t sessions() const;
