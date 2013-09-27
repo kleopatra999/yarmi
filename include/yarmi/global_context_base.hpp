@@ -22,60 +22,37 @@ struct global_context_base: private boost::noncopyable {
 	global_context_base& get_global_context_base();
 	const global_context_base& get_global_context_base() const;
 
-	/** add/rm */
+	/** add */
 	std::uint64_t add_session(session_base *session);
+
+	/** rm */
 	void del_session(session_base *session);
 	void del_session(std::int64_t id);
+
+	/** manip */
 	void set_id(session_base *session, std::int64_t id);
 
 	/** test */
 	bool has_session(session_base *session) const;
 	bool has_session(std::int64_t id) const;
 
+	/** get */
+	session_base* get_session(std::int64_t id) const;
+
 	/** info */
 	std::size_t sessions() const;
 
 	/** operations */
-	void send_to(std::int64_t id, const std::pair<std::shared_ptr<char>, std::size_t> &pair);
-	template<typename T>
-	void send_to(std::int64_t id, const T &o) { send_to(serialize(o)); }
+	void send_to(std::int64_t id, const yas::shared_buffer &buffer);
 
-
-	template<
-		 typename Allocator
-		,template<typename, typename> class container
-	>
-	void send_to(const container<std::int64_t, Allocator> &cont, const std::pair<std::shared_ptr<char>, std::size_t> &pair) {
+	template<typename Allocator, template<typename, typename> class container>
+	void send_to(const container<std::int64_t, Allocator> &cont, const yas::shared_buffer &buffer) {
 		for ( const auto &it: cont ) {
-			send_to(it, pair);
+			send_to(it, buffer);
 		}
 	}
-	template<
-		 typename T
-		,typename Allocator
-		,template<typename, typename> class container
-	>
-	void send_to(const container<std::int64_t, Allocator> &cont, const T &o) {
-		send_to(cont, serialize(o));
-	}
 
-	void send_to_all(const session_base *session, const std::pair<std::shared_ptr<char>, std::size_t> &pair);
-	template<typename T>
-	void send_to_all(const session_base *session, const T &o) {
-		send_to_all(session, serialize(o));
-	}
-
-private:
-	template<typename T>
-	std::pair<std::shared_ptr<char>, std::size_t>
-	serialize(const T &o) {
-		YARMI_OARCHIVE_TYPE oa(yas::no_header);
-		oa & o;
-		YARMI_OARCHIVE_TYPE pa;
-		pa & oa.get_intrusive_buffer();
-		const yas::shared_buffer &buffer = pa.get_shared_buffer();
-		return std::make_pair(buffer.data, buffer.size);
-	}
+	void send_to_all(const session_base *session, const yas::shared_buffer &buffer);
 
 private:
 	struct pimpl;

@@ -59,12 +59,12 @@ void session_base::start() {
 
 /***************************************************************************/
 
-void session_base::send(const std::shared_ptr<char> &buffer, std::size_t size) {
+void session_base::send(const yas::shared_buffer &buffer) {
 	auto self = this->shared_from_this();
 
 	boost::asio::async_write(
 		 socket
-		,boost::asio::buffer(buffer.get(), size)
+		,boost::asio::buffer(buffer.data.get(), buffer.size)
 		,[this, self, buffer](const boost::system::error_code &ec, std::size_t) {
 			if ( ec ) throw std::runtime_error("session_base::send() error: "+ec.message());
 		}

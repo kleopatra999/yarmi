@@ -133,6 +133,13 @@ bool global_context_base::has_session(std::int64_t id) const {
 	return index.find(id) != index.end();
 }
 
+session_base* global_context_base::get_session(std::int64_t id) const {
+	if ( ! has_session(id) ) return 0;
+
+	const auto it = impl->sessions.get<session_wrapper::by_id>().find(id);
+	return it->session;
+}
+
 /***************************************************************************/
 
 std::size_t global_context_base::sessions() const {
@@ -141,16 +148,16 @@ std::size_t global_context_base::sessions() const {
 
 /***************************************************************************/
 
-void global_context_base::send_to(std::int64_t id, const std::pair<std::shared_ptr<char>, std::size_t> &pair) {
+void global_context_base::send_to(std::int64_t id, const yas::shared_buffer &buffer) {
 	const auto it = impl->sessions.get<session_wrapper::by_id>().find(id);
 	if ( it == impl->sessions.get<session_wrapper::by_id>().end() ) return;
-	it->session->send(pair.first, pair.second);
+	it->session->send(buffer);
 }
 
-void global_context_base::send_to_all(const session_base *session, const std::pair<std::shared_ptr<char>, std::size_t> &pair) {
+void global_context_base::send_to_all(const session_base *session, const yas::shared_buffer &buffer) {
 	for ( const auto &it: impl->sessions ) {
 		if ( it.session == session ) continue;
-		it.session->send(pair.first, pair.second);
+		it.session->send(buffer);
 	}
 }
 

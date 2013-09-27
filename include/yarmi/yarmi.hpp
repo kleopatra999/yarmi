@@ -191,8 +191,7 @@
 		; \
 		YARMI_OARCHIVE_TYPE pa; \
 		pa & oa.get_intrusive_buffer(); \
-		const yas::shared_buffer buffer = pa.get_shared_buffer(); \
-		io->send(buffer.data, buffer.size); \
+		io->send(pa.get_shared_buffer()); \
 	}
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION(unused, idx, tuple) \

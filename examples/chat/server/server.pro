@@ -22,7 +22,8 @@ SOURCES += \
 	main.cpp \
 	 user_context.cpp \
 	 global_context.cpp \
-	 ../../../include/yarmi/global_context_base.cpp
+    ../../../src/session_base.cpp \
+    ../../../src/global_context_base.cpp
 
 HEADERS += \
 	 user_context.hpp \
