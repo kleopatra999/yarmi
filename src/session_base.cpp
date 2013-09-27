@@ -1,4 +1,3 @@
-
 #include <yarmi/session_base.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -73,4 +72,4 @@ void session_base::send(const yas::shared_buffer &buffer) {
 
 /***************************************************************************/
 
-}
+} // ns yarmi
