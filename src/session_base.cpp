@@ -9,6 +9,32 @@ namespace yarmi {
 
 /***************************************************************************/
 
+struct session_base::impl {
+	impl(boost::asio::io_service &ios, global_context_base &gcb)
+		:socket(ios)
+		,gcb(gcb)
+	{}
+
+	boost::asio::ip::tcp::socket socket;
+	global_context_base &gcb;
+}; // struct session_base::impl
+
+/***************************************************************************/
+
+session_base::session_base(boost::asio::io_service &ios, global_context_base &gcb)
+	:pimpl(new impl(ios, gcb))
+{}
+
+session_base::~session_base()
+{ delete pimpl; }
+
+/***************************************************************************/
+
+boost::asio::ip::tcp::socket &session_base::get_socket()
+{ return pimpl->socket; }
+
+/***************************************************************************/
+
 void session_base::start() {
 	auto self = this->shared_from_this();
 
@@ -42,14 +68,14 @@ void session_base::start() {
 		};
 
 		boost::asio::async_read(
-			 socket
+			 pimpl->socket
 			,boost::asio::buffer(body_buffer.get(), body_length)
 			,body_readed
 		);
 	};
 
 	boost::asio::async_read(
-		 socket
+		 pimpl->socket
 		,boost::asio::buffer(header_buffer.get(), header_size)
 		,read_body
 	);
@@ -58,16 +84,27 @@ void session_base::start() {
 
 /***************************************************************************/
 
+void session_base::stop() { pimpl->socket.cancel(); }
+void session_base::close() { pimpl->socket.close(); }
+
+/***************************************************************************/
+
 void session_base::send(const yas::shared_buffer &buffer) {
 	auto self = this->shared_from_this();
 
 	boost::asio::async_write(
-		 socket
+		 pimpl->socket
 		,boost::asio::buffer(buffer.data.get(), buffer.size)
 		,[this, self, buffer](const boost::system::error_code &ec, std::size_t) {
 			if ( ec ) throw std::runtime_error("session_base::send() error: "+ec.message());
 		}
 	);
+}
+
+/***************************************************************************/
+
+void session_base::on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
+	std::cerr << "on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): '" << msg << "'" << std::endl << std::flush;
 }
 
 /***************************************************************************/

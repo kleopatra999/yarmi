@@ -30,17 +30,15 @@ struct session_base: std::enable_shared_from_this<session_base> {
 		return ptr;
 	}
 
-	session_base(boost::asio::io_service &ios, global_context_base &gcb)
-		:socket(ios)
-		,gcb(gcb)
-	{}
-
-	virtual ~session_base() {}
+	session_base(boost::asio::io_service &ios, global_context_base &gcb);
+	virtual ~session_base();
 
 	boost::asio::ip::tcp::socket&
-	get_socket() { return socket; }
+	get_socket();
 
 	void start();
+	void stop();
+	void close();
 
 	void send(const yas::shared_buffer &buffer);
 
@@ -48,13 +46,11 @@ struct session_base: std::enable_shared_from_this<session_base> {
 	virtual void on_disconnected() = 0;
 	virtual void on_received(const char *ptr, std::size_t size) = 0;
 
-	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
-		std::cerr << "on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): '" << msg << "'" << std::endl;
-	}
+	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg);
 
 private:
-	boost::asio::ip::tcp::socket socket;
-	global_context_base &gcb;
+	struct impl;
+	impl *pimpl;
 };
 
 /***************************************************************************/

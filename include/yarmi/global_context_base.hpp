@@ -17,7 +17,7 @@ struct session_base;
 
 struct global_context_base: private boost::noncopyable {
 	global_context_base();
-	~global_context_base();
+	virtual ~global_context_base();
 
 	global_context_base& get_global_context_base();
 	const global_context_base& get_global_context_base() const;
