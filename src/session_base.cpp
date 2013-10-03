@@ -29,11 +29,11 @@ struct session_base::impl {
 	bool in_process;
 
 	void send(session_base::session_ptr self) {
-		yas::shared_buffer buf = buffers.front();
-		buffers.pop_front();
-
 		if ( !in_process ) {
 			in_process = true;
+
+			yas::shared_buffer buf = buffers.front();
+			buffers.pop_front();
 
 			boost::asio::async_write(
 				 socket
