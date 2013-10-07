@@ -50,13 +50,16 @@ public:
 			,[this](session_base *session) {
 				if ( ! gc.has_session(session) ) {
 					std::cerr << "session 0x" << std::hex << session << " not in connected sessions list" << std::endl << std::flush;
+				} else {
+					gc.del_session(session);
 				}
+				
 				try {
 					session->on_disconnected();
 				} catch (const std::exception &ex) {
 					std::cerr << "[exception] session->on_disconnected(): \"" << ex.what() << "\"" << std::endl << std::flush;
 				}
-				gc.del_session(session);
+				
 				delete session;
 			}
 		);
