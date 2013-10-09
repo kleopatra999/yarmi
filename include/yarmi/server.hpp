@@ -54,6 +54,7 @@ public:
 					gc.del_session(session);
 				}
 				
+				session->on_destruction = true;
 				try {
 					session->on_disconnected();
 				} catch (const std::exception &ex) {
