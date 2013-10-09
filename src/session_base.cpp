@@ -1,4 +1,3 @@
-
 #include <yarmi/session_base.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -18,6 +17,7 @@ struct session_base::impl {
 		,gcb(gcb)
 		,buffers()
 		,in_process(false)
+		,on_destruction(false)
 	{}
 
 	boost::asio::ip::tcp::socket socket;
@@ -27,6 +27,7 @@ struct session_base::impl {
 	/** buffers list */
 	std::list<yas::shared_buffer> buffers;
 	bool in_process;
+	bool on_destruction;
 
 	void send(session_base::session_ptr self) {
 		if ( !in_process ) {
@@ -123,6 +124,11 @@ void session_base::close() { pimpl->socket.close(); }
 /***************************************************************************/
 
 void session_base::send(const yas::shared_buffer &buffer) {
+	if ( get_on_destruction() ) {
+		std::cerr << "cannot send data when session already in destruction state" << std::endl;
+		return;
+	}
+	
 	auto self = this->shared_from_this();
 
 	pimpl->buffers.push_back(buffer);
@@ -134,6 +140,11 @@ void session_base::send(const yas::shared_buffer &buffer) {
 void session_base::on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
 	std::cerr << "on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): \"" << msg << "\"" << std::endl << std::flush;
 }
+
+/***************************************************************************/
+
+void session_base::set_on_destruction(bool flag) { pimpl->on_destruction = flag; }
+bool session_base::get_on_destruction() const { return pimpl->on_destruction; }
 
 /***************************************************************************/
 
