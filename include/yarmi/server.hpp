@@ -21,7 +21,7 @@ private:
 		return true;
 	}
 	static void default_error_handler(const std::string &msg) {
-		std::cout << "server: \"" << msg << "\"" << std::endl;
+		std::cerr << "server: \"" << msg << "\"" << std::endl;
 	}
 
 public:
