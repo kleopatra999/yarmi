@@ -1,3 +1,4 @@
+
 #ifndef _yarmi__session_base_hpp
 #define _yarmi__session_base_hpp
 
