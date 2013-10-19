@@ -21,14 +21,11 @@ private:
 		return true;
 	}
 	static void default_error_handler(const std::string &msg) {
-		std::cerr << "server: \"" << msg << "\"" << std::endl;
+		std::cerr << "server: \"" << msg << "\"" << std::endl << std::flush;
 	}
 
 public:
-	template<
-		 typename CP
-		,typename EH
-	>
+	template<typename CP, typename EH>
 	server(
 		 const std::string &ip
 		,std::uint16_t port
