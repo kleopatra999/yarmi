@@ -1,4 +1,3 @@
-
 #ifndef _yarmi__server_hpp
 #define _yarmi__server_hpp
 
@@ -27,16 +26,16 @@ private:
 
 public:
 	template<
-		 typename CP = decltype(&default_on_connected_predicate)
-		,typename EH = decltype(&default_error_handler)
+		 typename CP
+		,typename EH
 	>
 	server(
 		 const std::string &ip
 		,std::uint16_t port
 		,boost::asio::io_service &ios
 		,GC<UC> &gc
-		,CP cp = default_on_connected_predicate
-		,EH eh = default_error_handler
+		,CP cp = &default_on_connected_predicate
+		,EH eh = &default_error_handler
 	)
 		:acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(ip), port))
 		,gc(gc)
