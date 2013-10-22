@@ -5,17 +5,10 @@
 #include <yarmi/yarmi.hpp>
 #include <yarmi/global_context_base.hpp>
 
+#include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 #include <memory>
-
-namespace boost {
-namespace asio {
-
-struct io_service;
-
-} // ns asio
-} // ns boost
 
 namespace yarmi {
 
@@ -47,7 +40,7 @@ struct session_base: std::enable_shared_from_this<session_base> {
 	virtual void on_received(const char *ptr, std::size_t size) = 0;
 
 	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg);
-	
+
 	void set_on_destruction(bool flag);
 	bool get_on_destruction() const;
 

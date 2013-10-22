@@ -1,3 +1,4 @@
+
 #ifndef _yarmi__server_hpp
 #define _yarmi__server_hpp
 
@@ -5,9 +6,11 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <string>
-#include <unordered_set>
 #include <cstdint>
+
+#include <string>
+#include <sstream>
+#include <unordered_set>
 #include <functional>
 
 namespace yarmi {
@@ -21,7 +24,7 @@ private:
 		return true;
 	}
 	static void default_error_handler(const std::string &msg) {
-		std::cerr << "server: \"" << msg << "\"" << std::endl << std::flush;
+		std::cerr << "YARMI: server: \"" << msg << "\"" << std::endl << std::flush;
 	}
 
 public:
@@ -49,19 +52,30 @@ public:
 			,gc
 			,[this](session_base *session) {
 				if ( ! gc.has_session(session) ) {
-					std::cerr << "session 0x" << std::hex << session << " not in connected sessions list" << std::endl << std::flush;
+					std::ostringstream os;
+					os << "YARMI: session " << std::hex << session << " not in connected sessions list";
+					eh(os.str());
 				} else {
 					gc.del_session(session);
 				}
-				
+
 				session->set_on_destruction(true);
+
 				try {
 					session->on_disconnected();
 				} catch (const std::exception &ex) {
-					std::cerr << "[exception] session->on_disconnected(): \"" << ex.what() << "\"" << std::endl << std::flush;
+					std::ostringstream os;
+					os << "YARMI: [exception] session->on_disconnected(): \"" << ex.what() << "\"";
+					eh(os.str());
 				}
-				
-				delete session;
+
+				try {
+					delete session;
+				} catch (const std::exception &ex) {
+					std::ostringstream os;
+					os << "YARMI: [exception] delete session: \"" << ex.what() << "\"";
+					eh(os.str());
+				}
 			}
 		);
 
@@ -69,13 +83,27 @@ public:
 			 session->get_socket()
 			,[this, session](const boost::system::error_code &ec) {
 				if ( ! ec ) {
-					gc.add_session(session.get());
-					try {
-						session->on_connected();
-					} catch (const std::exception &ex) {
-						std::cerr << "[exception] session->on_connected(): \"" << ex.what() << "\"" << std::endl << std::flush;
+					const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint();
+					if ( ! cp(ep) ) {
+						std::ostringstream os;
+						os << "YARMI: IP \"" << ep.address().to_string() << "\" is in backlist";
+						eh(os.str());
+					} else {
+						gc.add_session(session.get());
+
+						try {
+							session->on_connected();
+						} catch (const std::exception &ex) {
+							std::ostringstream os;
+							os << "YARMI: [exception] session->on_connected(): \"" << ex.what() << "\"";
+							eh(os.str());
+						}
+
+						/** start session */
+						session->start();
 					}
-					session->start();
+
+					/** start accepting next connection */
 					start();
 				}
 			}

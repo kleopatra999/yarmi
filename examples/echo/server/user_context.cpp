@@ -13,11 +13,11 @@ user_context::user_context(boost::asio::io_service &ios, global_context<user_con
 /***************************************************************************/
 
 void user_context::on_connected() {
-	std::cout << "on_connected(" << get_socket().remote_endpoint().address().to_string() << ") called" << std::endl;
+	std::cout << "YARMI: on_connected(" << get_socket().remote_endpoint().address().to_string() << ") called" << std::endl;
 }
 
 void user_context::on_disconnected() {
-	std::cout << "on_disconnected() called" << std::endl;
+	std::cout << "YARMI: on_disconnected() called" << std::endl;
 }
 
 void user_context::on_received(const char *ptr, std::size_t size) {

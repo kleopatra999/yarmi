@@ -70,7 +70,7 @@ const global_context_base &global_context_base::get_global_context_base() const 
 std::uint64_t global_context_base::add_session(session_base *session) {
 	if ( has_session(session) ) {
 		std::ostringstream os;
-		os << "session 0x" << std::hex << session << " already in sessions list";
+		os << "YARMI: session " << std::hex << session << " already in sessions list";
 		throw std::runtime_error(os.str());
 	}
 
@@ -83,7 +83,7 @@ std::uint64_t global_context_base::add_session(session_base *session) {
 void global_context_base::del_session(session_base *session) {
 	if ( !has_session(session) ) {
 		std::ostringstream os;
-		os << "session 0x" << std::hex << session << " not in sessions list";
+		os << "YARMI: session " << std::hex << session << " not in sessions list";
 		throw std::runtime_error(os.str());
 	}
 
@@ -95,7 +95,7 @@ void global_context_base::del_session(session_base *session) {
 void global_context_base::del_session(std::int64_t id) {
 	if ( !has_session(id) ) {
 		std::ostringstream os;
-		os << "session with ID " << id << " not in sessions list";
+		os << "YARMI: session with ID " << id << " not in sessions list";
 		throw std::runtime_error(os.str());
 	}
 
@@ -112,7 +112,7 @@ void global_context_base::set_id(session_base *session, std::int64_t id) {
 	auto it = index.find(session);
 	if ( it == index.end() ) {
 		std::ostringstream os;
-		os << "session 0x" << std::hex << session << " not in sessions list";
+		os << "YARMI: session " << std::hex << session << " not in sessions list";
 		throw std::runtime_error(os.str());
 	}
 

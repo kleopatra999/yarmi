@@ -41,7 +41,7 @@ struct session_base::impl {
 				,boost::asio::buffer(buf.data.get(), buf.size)
 				,[this, self, buf](const boost::system::error_code &ec, std::size_t wr) {
 					if ( ec || wr != buf.size ) {
-						std::cerr << "write error: \"" << ec.message() << "\"" << std::endl;
+						std::cerr << "YARMI: write error: \"" << ec.message() << "\"" << std::endl;
 					}
 					in_process = false;
 					if ( ! buffers.empty() ) {
@@ -77,7 +77,7 @@ void session_base::start() {
 
 	auto read_body = [this, self, header_buffer](const boost::system::error_code &ec, std::size_t rd) {
 		if ( ec || rd != header_size ) {
-			std::cerr << "header read error: \"" << ec.message() << "\"" << std::endl;
+			std::cerr << "YARMI: header read error: \"" << ec.message() << "\"" << std::endl;
 			return;
 		}
 
@@ -88,14 +88,14 @@ void session_base::start() {
 		std::shared_ptr<char> body_buffer(new char[body_length], [](char *ptr){delete []ptr;});
 		auto body_readed = [this, self, body_buffer, body_length](const boost::system::error_code &ec, std::size_t rd) {
 			if ( ec || rd != body_length ) {
-				std::cerr << "body read error: \"" << ec.message() << "\"" << std::endl;
+				std::cerr << "YARMI: body read error: \"" << ec.message() << "\"" << std::endl;
 				return;
 			}
 
 			try {
 				on_received(body_buffer.get(), body_length);
 			} catch (const std::exception &ex) {
-				std::cerr << "exception is thrown when invoking: \"" << ex.what() << "\"" << std::endl;
+				std::cerr << "YARMI: exception is thrown when invoking: \"" << ex.what() << "\"" << std::endl;
 			}
 
 			start();
@@ -125,10 +125,10 @@ void session_base::close() { pimpl->socket.close(); }
 
 void session_base::send(const yas::shared_buffer &buffer) {
 	if ( get_on_destruction() ) {
-		std::cerr << "cannot send data when session already in destruction state" << std::endl;
+		std::cerr << "YARMI: cannot send data when session already in destruction state" << std::endl;
 		return;
 	}
-	
+
 	auto self = this->shared_from_this();
 
 	pimpl->buffers.push_back(buffer);
@@ -138,7 +138,7 @@ void session_base::send(const yas::shared_buffer &buffer) {
 /***************************************************************************/
 
 void session_base::on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
-	std::cerr << "on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): \"" << msg << "\"" << std::endl << std::flush;
+	std::cerr << "YARMI: on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): \"" << msg << "\"" << std::endl << std::flush;
 }
 
 /***************************************************************************/
