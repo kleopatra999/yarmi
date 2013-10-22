@@ -2,8 +2,9 @@
 #ifndef _yarmi__client_hpp
 #define _yarmi__client_hpp
 
-#include <boost/noncopyable.hpp>
+#include <yas/detail/tools/buffers.hpp>
 
+#include <boost/noncopyable.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
@@ -37,10 +38,10 @@ struct client_base: private boost::noncopyable {
 		socket.close(ec);
 	}
 
-	void send(std::shared_ptr<char> buffer, std::size_t size) {
+	void send(const yas::shared_buffer &buffer) {
 		boost::asio::async_write(
 			 socket
-			,boost::asio::buffer(buffer.get(), size)
+			,boost::asio::buffer(buffer.data.get(), buffer.size)
 			,[this, buffer](const boost::system::error_code &ec, std::size_t) {
 				if ( ec ) throw std::runtime_error("client_base send callback: "+ec.message());
 			}
