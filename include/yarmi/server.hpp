@@ -25,7 +25,10 @@ private:
 	}
 
 public:
-	template<typename CP, typename EH>
+	template<
+		 typename CP = decltype(&default_on_connected_predicate)
+		,typename EH = decltype(&default_error_handler)
+	>
 	server(
 		 const std::string &ip
 		,std::uint16_t port
