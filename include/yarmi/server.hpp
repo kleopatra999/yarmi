@@ -48,66 +48,78 @@ public:
 
 	void start() {
 		auto session = session_base::create<UC>(
-			 acceptor.get_io_service()
+			acceptor.get_io_service()
 			,gc
-			,[this](session_base *session) {
-				if ( ! gc.has_session(session) ) {
-					std::ostringstream os;
-					os << "YARMI: session " << std::hex << session << " not in connected sessions list";
-					eh(os.str());
-				} else {
-					gc.del_session(session);
-				}
-
-				session->set_on_destruction(true);
-
-				try {
-					session->on_disconnected();
-				} catch (const std::exception &ex) {
-					std::ostringstream os;
-					os << "YARMI: [exception] session->on_disconnected(): \"" << ex.what() << "\"";
-					eh(os.str());
-				}
-
-				try {
-					delete session;
-				} catch (const std::exception &ex) {
-					std::ostringstream os;
-					os << "YARMI: [exception] delete session: \"" << ex.what() << "\"";
-					eh(os.str());
-				}
-			}
+			,std::bind(&server<UC, GC>::session_deleter, this, std::placeholders::_1)
 		);
 
 		acceptor.async_accept(
 			 session->get_socket()
-			,[this, session](const boost::system::error_code &ec) {
-				if ( ! ec ) {
-					const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint();
-					if ( ! cp(ep) ) {
-						std::ostringstream os;
-						os << "YARMI: IP \"" << ep.address().to_string() << "\" is in backlist";
-						eh(os.str());
-					} else {
-						gc.add_session(session.get());
-
-						try {
-							session->on_connected();
-						} catch (const std::exception &ex) {
-							std::ostringstream os;
-							os << "YARMI: [exception] session->on_connected(): \"" << ex.what() << "\"";
-							eh(os.str());
-						}
-
-						/** start session */
-						session->start();
-					}
-
-					/** start accepting next connection */
-					start();
-				}
-			}
+			,std::bind(&server<UC, GC>::on_accepted, this, std::placeholders::_1, session)
 		);
+	}
+
+private:
+	void session_deleter(session_base *session) {
+		if ( ! gc.has_session(session) ) {
+			std::ostringstream os;
+			os << "YARMI: session " << std::hex << session << " not in connected sessions list";
+			eh(os.str());
+		} else {
+			gc.del_session(session);
+		}
+
+		session->set_on_destruction(true);
+
+		try {
+			session->on_disconnected();
+		} catch (const std::exception &ex) {
+			std::ostringstream os;
+			os << "YARMI: [exception] session->on_disconnected(): \"" << ex.what() << "\"";
+			eh(os.str());
+		}
+
+		try {
+			delete session;
+		} catch (const std::exception &ex) {
+			std::ostringstream os;
+			os << "YARMI: [exception] delete session: \"" << ex.what() << "\"";
+			eh(os.str());
+		}
+	}
+
+	void on_accepted(const boost::system::error_code &ec, session_base::session_ptr session) {
+		if ( ! ec ) {
+			boost::system::error_code ec2;
+			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
+			if ( ec2 ) {
+				std::ostringstream os;
+				os << "YARMI: cannot get remote endpoint\"" << ec2.message() << "\"";
+				eh(os.str());
+			}
+
+			if ( ! cp(ep) ) {
+				std::ostringstream os;
+				os << "YARMI: IP \"" << ep.address().to_string() << "\" is in backlist";
+				eh(os.str());
+			} else {
+				gc.add_session(session.get());
+
+				try {
+					session->on_connected();
+				} catch (const std::exception &ex) {
+					std::ostringstream os;
+					os << "YARMI: [exception] session->on_connected(): \"" << ex.what() << "\"";
+					eh(os.str());
+				}
+
+				/** start session */
+				session->start();
+			}
+
+			/** start accepting next connection */
+			start();
+		}
 	}
 
 private:
