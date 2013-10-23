@@ -1,6 +1,6 @@
 
-#ifndef _yarmi__client_hpp
-#define _yarmi__client_hpp
+#ifndef _yarmi__client_base_hpp
+#define _yarmi__client_base_hpp
 
 #include <yas/detail/tools/buffers.hpp>
 
@@ -102,4 +102,4 @@ private:
 
 } // ns yarmi
 
-#endif // _yarmi__client_hpp
+#endif // _yarmi__client_base_hpp

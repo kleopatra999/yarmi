@@ -1,7 +1,7 @@
 
 #include <protocol.hpp>
 
-#include <yarmi/client.hpp>
+#include <yarmi/client_base.hpp>
 
 #include <iostream>
 
