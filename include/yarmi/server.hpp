@@ -11,7 +11,6 @@
 #include <string>
 #include <sstream>
 #include <unordered_set>
-#include <functional>
 
 namespace yarmi {
 

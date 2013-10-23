@@ -1,3 +1,4 @@
+
 #include <yarmi/session_base.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -6,57 +7,112 @@
 #include <boost/asio/write.hpp>
 
 #include <list>
+#include <functional>
 
 namespace yarmi {
 
 /***************************************************************************/
 
 struct session_base::impl {
-	impl(boost::asio::io_service &ios, global_context_base &gcb)
+	enum { header_size = sizeof(yas::uint32_t)+YARMI_IARCHIVE_TYPE::_header_size };
+
+	impl(boost::asio::io_service &ios)
 		:socket(ios)
-		,gcb(gcb)
 		,buffers()
 		,in_process(false)
 		,on_destruction(false)
 	{}
 
-	boost::asio::ip::tcp::socket socket;
-	global_context_base &gcb;
+	void read_header(session_base::session_ptr self) {
+		boost::asio::async_read(
+			 socket
+			,boost::asio::buffer(header_buffer)
+			,std::bind(&impl::header_readed, this, std::placeholders::_1, std::placeholders::_2, self)
+		);
+	}
 
+	void header_readed(const boost::system::error_code &ec, std::size_t rd, session_base::session_ptr self) {
+		if ( ec || rd != header_size ) {
+			std::cerr << "YARMI: header read error: \"" << ec.message() << "\"" << std::endl;
+			return;
+		}
+
+		YARMI_IARCHIVE_TYPE ia(header_buffer, header_size);
+		std::uint32_t body_length = 0;
+		ia & body_length;
+
+		std::shared_ptr<char> body_buffer(new char[body_length], [](char *ptr){delete []ptr;});
+		boost::asio::async_read(
+			 socket
+			,boost::asio::buffer(body_buffer.get(), body_length)
+			,std::bind(&impl::body_readed, this, std::placeholders::_1, std::placeholders::_2, self, body_buffer, body_length)
+		);
+	}
+	void body_readed(
+		 const boost::system::error_code &ec
+		,std::size_t rd
+		,session_base::session_ptr self
+		,std::shared_ptr<char> buffer
+		,std::size_t buffer_size
+	) {
+		if ( ec || rd != buffer_size ) {
+			std::cerr << "YARMI: body read error: \"" << ec.message() << "\"" << std::endl;
+			return;
+		}
+
+		try {
+			self->on_received(buffer.get(), buffer_size);
+		} catch (const std::exception &ex) {
+			std::cerr << "YARMI: exception is thrown when invoking: \"" << ex.what() << "\"" << std::endl;
+		}
+
+		read_header(self);
+	}
+
+	void send(session_base::session_ptr self) {
+		if ( !in_process ) {
+			in_process = true;
+
+			yas::shared_buffer buffer = buffers.front();
+			buffers.pop_front();
+
+			boost::asio::async_write(
+				 socket
+				,boost::asio::buffer(buffer.data.get(), buffer.size)
+				,std::bind(&impl::sent, this, std::placeholders::_1, std::placeholders::_2, self, buffer)
+			);
+		}
+	}
+
+	void sent(
+		 const boost::system::error_code &ec
+		,std::size_t wr
+		,session_base::session_ptr self
+		,yas::shared_buffer buffer
+	) {
+		if ( ec || wr != buffer.size ) {
+			std::cerr << "YARMI: write error: \"" << ec.message() << "\"" << std::endl;
+		}
+		in_process = false;
+		if ( ! buffers.empty() ) {
+			send(self);
+		}
+	}
+
+	boost::asio::ip::tcp::socket socket;
 
 	/** buffers list */
 	std::list<yas::shared_buffer> buffers;
 	bool in_process;
 	bool on_destruction;
 
-	void send(session_base::session_ptr self) {
-		if ( !in_process ) {
-			in_process = true;
-
-			yas::shared_buffer buf = buffers.front();
-			buffers.pop_front();
-
-			boost::asio::async_write(
-				 socket
-				,boost::asio::buffer(buf.data.get(), buf.size)
-				,[this, self, buf](const boost::system::error_code &ec, std::size_t wr) {
-					if ( ec || wr != buf.size ) {
-						std::cerr << "YARMI: write error: \"" << ec.message() << "\"" << std::endl;
-					}
-					in_process = false;
-					if ( ! buffers.empty() ) {
-						send(self);
-					}
-				}
-			);
-		}
-	}
+	char header_buffer[header_size];
 }; // struct session_base::impl
 
 /***************************************************************************/
 
-session_base::session_base(boost::asio::io_service &ios, global_context_base &gcb)
-	:pimpl(new impl(ios, gcb))
+session_base::session_base(boost::asio::io_service &ios)
+	:pimpl(new impl(ios))
 {}
 
 session_base::~session_base()
@@ -70,50 +126,7 @@ boost::asio::ip::tcp::socket &session_base::get_socket()
 /***************************************************************************/
 
 void session_base::start() {
-	auto self = this->shared_from_this();
-
-	enum { header_size = sizeof(yas::uint32_t)+YARMI_IARCHIVE_TYPE::_header_size };
-	std::shared_ptr<char> header_buffer(new char[header_size], [](char *ptr){delete []ptr;});
-
-	auto read_body = [this, self, header_buffer](const boost::system::error_code &ec, std::size_t rd) {
-		if ( ec || rd != header_size ) {
-			std::cerr << "YARMI: header read error: \"" << ec.message() << "\"" << std::endl;
-			return;
-		}
-
-		YARMI_IARCHIVE_TYPE ia(header_buffer.get(), header_size);
-		std::uint32_t body_length = 0;
-		ia & body_length;
-
-		std::shared_ptr<char> body_buffer(new char[body_length], [](char *ptr){delete []ptr;});
-		auto body_readed = [this, self, body_buffer, body_length](const boost::system::error_code &ec, std::size_t rd) {
-			if ( ec || rd != body_length ) {
-				std::cerr << "YARMI: body read error: \"" << ec.message() << "\"" << std::endl;
-				return;
-			}
-
-			try {
-				on_received(body_buffer.get(), body_length);
-			} catch (const std::exception &ex) {
-				std::cerr << "YARMI: exception is thrown when invoking: \"" << ex.what() << "\"" << std::endl;
-			}
-
-			start();
-		};
-
-		boost::asio::async_read(
-			 pimpl->socket
-			,boost::asio::buffer(body_buffer.get(), body_length)
-			,std::move(body_readed)
-		);
-	};
-
-	boost::asio::async_read(
-		 pimpl->socket
-		,boost::asio::buffer(header_buffer.get(), header_size)
-		,std::move(read_body)
-	);
-
+	pimpl->read_header(shared_from_this());
 }
 
 /***************************************************************************/
@@ -129,10 +142,9 @@ void session_base::send(const yas::shared_buffer &buffer) {
 		return;
 	}
 
-	auto self = this->shared_from_this();
-
 	pimpl->buffers.push_back(buffer);
-	pimpl->send(self);
+
+	pimpl->send(shared_from_this());
 }
 
 /***************************************************************************/

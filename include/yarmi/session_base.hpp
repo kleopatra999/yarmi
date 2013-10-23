@@ -9,6 +9,7 @@
 #include <boost/asio/ip/tcp.hpp>
 
 #include <memory>
+#include <functional>
 
 namespace yarmi {
 
@@ -23,7 +24,7 @@ struct session_base: std::enable_shared_from_this<session_base> {
 		return ptr;
 	}
 
-	session_base(boost::asio::io_service &ios, global_context_base &gcb);
+	session_base(boost::asio::io_service &ios);
 	virtual ~session_base();
 
 	boost::asio::ip::tcp::socket&

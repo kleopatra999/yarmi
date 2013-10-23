@@ -5,7 +5,7 @@
 /***************************************************************************/
 
 user_context::user_context(boost::asio::io_service &ios, global_context<user_context> &gc)
-	:yarmi::session_base(ios, gc)
+	:yarmi::session_base(ios)
 	,yarmi::server_invoker<user_context>(this, this)
 	,gc(gc)
 {}
