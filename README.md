@@ -38,6 +38,7 @@ YARMI_CONSTRUCT(
 Ну вот же:
 ```cpp
 namespace yarmi {
+
 template<typename Impl, typename IO = Impl>
 struct client_invoker {
 	client_invoker(Impl *impl, IO *io)
@@ -45,66 +46,68 @@ struct client_invoker {
 		,io(io)
 	{}
 	
-	void ping( const std::string &arg0 ) {
-		yas::text_mem_oarchive oa(yas::no_header);
-		oa & static_cast<yas::uint8_t>(0)
-			& static_cast<yas::uint8_t>(0)
-			& arg0
-		;
-		yas::text_mem_oarchive pa;
+	void ping(const std::string &arg0) {
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(0)
+			& static_cast<std::uint8_t>(0)
+			& arg0;
+		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
 		io->send(pa.get_shared_buffer());
 	}
 	
-	void yarmi_error(const yas::uint8_t &arg0, const yas::uint8_t &arg1, const std::string &arg2) {
-		yas::text_mem_oarchive oa(yas::no_header);
-		oa & static_cast<yas::uint8_t>(1)
-			& static_cast<yas::uint8_t>(0)
+	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(1)
+			& static_cast<std::uint8_t>(0)
 			& arg0
 			& arg1
-			& arg2
-		;
-		yas::text_mem_oarchive pa;
+			& arg2;
+		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
 		io->send(pa.get_shared_buffer());
 	}
 	
 	void invoke(const char *ptr, std::size_t size) {
-		yas::uint8_t call_id, call_version;
+		std::uint8_t call_id, call_version;
 		static const char* names[] = {
 			 "pong"
 			,"yarmi_error"
 		};
-		static const yas::uint8_t versions[] = {
+		static const std::uint8_t versions[] = {
 			 0
 			,0
 		};
 		
 		try {
-			yas::text_mem_iarchive ia(ptr, size, yas::no_header);
+			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
 			ia & call_id
-				& call_version
-			;
-			
+				& call_version;
 			if ( call_id < 0 || call_id > 1 ) {
-				const std::string errstr = (
-					boost::format("%s::%s(): bad call_id %d") 
-						% "client_invoker"
-						% __FUNCTION__ 
-						% ((std::size_t)call_id)
-				).str();
+				char errstr[1024] = {0};
+				std::snprintf(
+					 errstr
+					,sizeof(errstr)
+					,"%s::%s(): bad call_id %d"
+					,"client_invoker"
+					,__FUNCTION__
+					,static_cast<int>(call_id)
+				);
 				throw std::runtime_error(errstr);
 			}
 			if ( call_version > versions[call_id] ) {
-				const std::string errstr = (
-					boost::format("%s::%s(): bad call_version %d for call_id %d(%s::%s())")
-						% "client_invoker"
-						% __FUNCTION__
-						% ((std::size_t)call_version)
-						% ((std::size_t)call_id)
-						% "client_invoker"
-						% names[call_id]
-				).str();
+				char errstr[1024] = {0};
+				std::snprintf(
+					 errstr
+					,sizeof(errstr)
+					,"%s::%s(): bad call_version %d for call_id %d(%s::%s())"
+					,"client_invoker"
+					,__FUNCTION__
+					,static_cast<int>(call_version)
+					,static_cast<int>(call_id)
+					,"client_invoker"
+					,names[call_id]
+				);
 				throw std::runtime_error(errstr);
 			}
 			
@@ -114,39 +117,48 @@ struct client_invoker {
 						case 0: {
 							std::string arg0;
 							ia & arg0;
-							impl->on_pong( arg0);
-						}; break;
+							impl->on_pong(arg0);
+						};
+						break;
 					}
-				}; break;
+				};
+				break;
 				case 1: {
 					switch ( call_version ) {
 						case 0: {
-							yas::uint8_t arg0;
-							yas::uint8_t arg1;
+							std::uint8_t arg0;
+							std::uint8_t arg1;
 							std::string arg2;
-							ia & arg0 
+							ia & arg0
 								& arg1
-								& arg2
-							;
-							impl->on_yarmi_error(arg0 , arg1 , arg2);
-						}; break;
+								& arg2;
+							impl->on_yarmi_error(arg0, arg1, arg2);
+						};
+						break;
 					}
-				}; break;
+				};
+				break;
 			}
 		} catch (const std::exception &ex) {
-			const std::string errstr = (
-				boost::format("std::exception is thrown when %s::%s() is called: '%s'")
-					% "client_invoker"
-					% names[call_id]
-					% ex.what()
-			).str();
+			char errstr[1024] = {0};
+			std::snprintf(
+				 errstr
+				,sizeof(errstr)
+				,"std::exception is thrown when %s::%s() is called: '%s'"
+				,"client_invoker"
+				,names[call_id]
+				,ex.what()
+			);
 			yarmi_error(call_id, call_version, errstr);
 		} catch (...) {
-			const std::string errstr = (
-				boost::format("unknown exception is thrown when %s::%s() is called")
-					% "client_invoker"
-					% names[call_id]
-			).str();
+			char errstr[1024] = {0};
+			std::snprintf(
+				 errstr
+				,sizeof(errstr)
+				,"unknown exception is thrown when %s::%s() is called"
+				,"client_invoker"
+				,names[call_id]
+			);
 			yarmi_error(call_id, call_version, errstr);
 		}
 	}
@@ -164,63 +176,67 @@ struct server_invoker {
 	{}
 	
 	void pong(const std::string &arg0) {
-		yas::text_mem_oarchive oa(yas::no_header);
-		oa & static_cast<yas::uint8_t>(0)
-			& static_cast<yas::uint8_t>(0)
-			& arg0
-		;
-		yas::text_mem_oarchive pa;
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(0)
+			& static_cast<std::uint8_t>(0)
+			& arg0;
+		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
 		io->send(pa.get_shared_buffer());
 	}
-	void yarmi_error(const yas::uint8_t &arg0, const yas::uint8_t &arg1, const std::string &arg2) {
-		yas::text_mem_oarchive oa(yas::no_header);
-		oa & static_cast<yas::uint8_t>(1)
-			& static_cast<yas::uint8_t>(0)
+	
+	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(1)
+			& static_cast<std::uint8_t>(0)
 			& arg0
 			& arg1
-			& arg2
-		;
-		yas::text_mem_oarchive pa;
+			& arg2;
+		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
 		io->send(pa.get_shared_buffer());
 	}
 	
 	void invoke(const char *ptr, std::size_t size) {
-		yas::uint8_t call_id, call_version;
+		std::uint8_t call_id, call_version;
 		static const char* names[] = {
 			 "ping"
 			,"yarmi_error"
 		};
-		static const yas::uint8_t versions[] = {
+		static const std::uint8_t versions[] = {
 			 0
 			,0
 		};
 		
 		try {
-			yas::text_mem_iarchive ia(ptr, size, yas::no_header);
+			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
 			ia & call_id
-				& call_version
-			;
+				& call_version;
 			if ( call_id < 0 || call_id > 1 ) {
-				const std::string errstr = (
-					boost::format("%s::%s(): bad call_id %d")
-						% "server_invoker"
-						% __FUNCTION__
-						% ((std::size_t)call_id)
-				).str();
+				char errstr[1024] = {0};
+				std::snprintf(
+					 errstr
+					,sizeof(errstr)
+					,"%s::%s(): bad call_id %d"
+					,"server_invoker"
+					,__FUNCTION__
+					,static_cast<int>(call_id)
+				);
 				throw std::runtime_error(errstr);
 			}
 			if ( call_version > versions[call_id] ) {
-				const std::string errstr = (
-					boost::format("%s::%s(): bad call_version %d for call_id %d(%s::%s())")
-						% "server_invoker"
-						% __FUNCTION__
-						% ((std::size_t)call_version)
-						% ((std::size_t)call_id)
-						% "server_invoker"
-						% names[call_id]
-				).str();
+				char errstr[1024] = {0};
+				std::snprintf(
+					 errstr
+					,sizeof(errstr)
+					,"%s::%s(): bad call_version %d for call_id %d(%s::%s())"
+					,"server_invoker"
+					,__FUNCTION__
+					,static_cast<int>(call_version)
+					,static_cast<int>(call_id)
+					,"server_invoker"
+					,names[call_id]
+				);
 				throw std::runtime_error(errstr);
 			}
 			
@@ -230,39 +246,48 @@ struct server_invoker {
 						case 0: {
 							std::string arg0;
 							ia & arg0;
-							impl->on_ping( arg0);
-						}; break;
+							impl->on_ping(arg0);
+						};
+						break;
 					}
-				}; break;
+				};
+				break;
 				case 1: {
 					switch ( call_version ) {
 						case 0: {
-							yas::uint8_t arg0;
-							yas::uint8_t arg1;
+							std::uint8_t arg0;
+							std::uint8_t arg1;
 							std::string arg2;
 							ia & arg0
 								& arg1
-								& arg2
-							;
+								& arg2;
 							impl->on_yarmi_error(arg0, arg1, arg2);
-						}; break;
+						};
+						break;
 					}
-				}; break;
+				};
+				break;
 			}
 		} catch (const std::exception &ex) {
-			const std::string errstr = (
-				boost::format("std::exception is thrown when %s::%s() is called: '%s'")
-					% "server_invoker"
-					% names[call_id]
-					% ex.what()
-			).str();
+			char errstr[1024] = {0};
+			std::snprintf(
+				 errstr
+				,sizeof(errstr)
+				,"std::exception is thrown when %s::%s() is called: '%s'"
+				,"server_invoker"
+				,names[call_id]
+				,ex.what()
+			);
 			yarmi_error(call_id, call_version, errstr);
 		} catch (...) {
-			const std::string errstr = (
-				boost::format("unknown exception is thrown when %s::%s() is called")
-					% "server_invoker"
-					% names[call_id]
-			).str();
+			char errstr[1024] = {0};
+			std::snprintf(
+				 errstr
+				,sizeof(errstr)
+				,"unknown exception is thrown when %s::%s() is called"
+				,"server_invoker"
+				,names[call_id]
+			);
 			yarmi_error(call_id, call_version, errstr);
 		}
 	}
@@ -270,7 +295,7 @@ struct server_invoker {
 private:
 	Impl *impl;
 	IO *io;
-}; //  struct server_invoker
+}; // struct server_invoker
 
 } // ns yarmi
 
