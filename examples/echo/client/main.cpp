@@ -9,7 +9,7 @@
 
 struct client: yarmi::client_base<client>, yarmi::client_invoker<client> {
 	client(boost::asio::io_service &ios)
-		:yarmi::client_base<client>(ios, this)
+		:yarmi::client_base<client>(ios, *this)
 		,yarmi::client_invoker<client>(*this, *this)
 		,msg_index(0)
 	{}

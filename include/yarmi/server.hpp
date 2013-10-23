@@ -62,7 +62,7 @@ private:
 	void session_deleter(session_base *session) {
 		if ( ! gc.has_session(session) ) {
 			std::ostringstream os;
-			os << "YARMI: session " << std::hex << session << " not in connected sessions list";
+			os << "session " << std::hex << session << " not in connected sessions list";
 			eh(os.str());
 		} else {
 			gc.del_session(session);
@@ -74,7 +74,7 @@ private:
 			session->on_disconnected();
 		} catch (const std::exception &ex) {
 			std::ostringstream os;
-			os << "YARMI: [exception] session->on_disconnected(): \"" << ex.what() << "\"";
+			os << "[exception] session->on_disconnected(): \"" << ex.what() << "\"";
 			eh(os.str());
 		}
 
@@ -82,7 +82,7 @@ private:
 			delete session;
 		} catch (const std::exception &ex) {
 			std::ostringstream os;
-			os << "YARMI: [exception] delete session: \"" << ex.what() << "\"";
+			os << "[exception] delete session: \"" << ex.what() << "\"";
 			eh(os.str());
 		}
 	}
@@ -93,13 +93,13 @@ private:
 			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
 			if ( ec2 ) {
 				std::ostringstream os;
-				os << "YARMI: cannot get remote endpoint\"" << ec2.message() << "\"";
+				os << "cannot get remote endpoint\"" << ec2.message() << "\"";
 				eh(os.str());
 			}
 
 			if ( ! cp(ep) ) {
 				std::ostringstream os;
-				os << "YARMI: IP \"" << ep.address().to_string() << "\" is in backlist";
+				os << "IP \"" << ep.address().to_string() << "\" is in backlist";
 				eh(os.str());
 			} else {
 				gc.add_session(session.get());
@@ -108,7 +108,7 @@ private:
 					session->on_connected();
 				} catch (const std::exception &ex) {
 					std::ostringstream os;
-					os << "YARMI: [exception] session->on_connected(): \"" << ex.what() << "\"";
+					os << "[exception] session->on_connected(): \"" << ex.what() << "\"";
 					eh(os.str());
 				}
 

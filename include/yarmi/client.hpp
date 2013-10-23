@@ -20,7 +20,7 @@ template<typename Invoker>
 struct client_base: private boost::noncopyable {
 	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::_header_size };
 
-	client_base(boost::asio::io_service &ios, Invoker *invoker)
+	client_base(boost::asio::io_service &ios, Invoker &invoker)
 		:socket(ios)
 		,invoker(invoker)
 	{}
@@ -30,8 +30,10 @@ struct client_base: private boost::noncopyable {
 		boost::system::error_code ec;
 		socket.connect(ep, ec);
 
-		if ( ec ) throw std::runtime_error("client_base::on_connect(): "+ec.message());
-		else on_connect();
+		if ( ec )
+			throw std::runtime_error("client_base::on_connect(): "+ec.message());
+		else
+			on_connect();
 	}
 	void disconnect() {
 		boost::system::error_code ec;
@@ -54,19 +56,20 @@ struct client_base: private boost::noncopyable {
 
 private:
 	void on_connect() {
-		std::shared_ptr<char> header_buffer(new char[header_size], [](char *ptr){delete []ptr;});
 		boost::asio::async_read(
 			 socket
-			,boost::asio::buffer(header_buffer.get(), header_size)
-			,[this, header_buffer](const boost::system::error_code &ec, std::size_t) {
-				if ( ! ec ) on_header_readed(header_buffer);
-				else throw std::runtime_error("on_on_header_readed(): "+ec.message());
+			,boost::asio::buffer(header_buffer)
+			,[this](const boost::system::error_code &ec, std::size_t) {
+				if ( ! ec )
+					on_header_readed();
+				else
+					throw std::runtime_error("on_on_header_readed(): "+ec.message());
 			}
 		);
 	}
 
-	void on_header_readed(std::shared_ptr<char> header_buffer) {
-		YARMI_IARCHIVE_TYPE ia(header_buffer.get(), header_size);
+	void on_header_readed() {
+		YARMI_IARCHIVE_TYPE ia(header_buffer, header_size);
 		std::uint32_t body_length = 0;
 		ia & body_length;
 
@@ -75,20 +78,24 @@ private:
 			 socket
 			,boost::asio::buffer(body_buffer.get(), body_length)
 			,[this, body_length, body_buffer](const boost::system::error_code &ec, std::size_t) {
-				if ( ! ec ) on_body_readed(body_buffer, body_length);
-				else throw std::runtime_error("on_body_readed(): "+ec.message());
+				if ( ! ec )
+					on_body_readed(body_buffer, body_length);
+				else
+					throw std::runtime_error("on_body_readed(): "+ec.message());
 			}
 		);
 	}
 
 	void on_body_readed(std::shared_ptr<char> body_buffer, std::size_t body_length) {
-		invoker->invoke(body_buffer.get(), body_length);
+		invoker.invoke(body_buffer.get(), body_length);
 		on_connect();
 	}
 
 private:
 	boost::asio::ip::tcp::socket socket;
-	Invoker *invoker;
+	Invoker &invoker;
+
+	char header_buffer[header_size];
 };
 
 /***************************************************************************/
