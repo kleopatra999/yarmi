@@ -27,7 +27,13 @@ struct session_base::impl {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(header_buffer)
-			,std::bind(&impl::header_readed, this, std::placeholders::_1, std::placeholders::_2, self)
+			,std::bind(
+				&impl::header_readed
+				,this
+				,std::placeholders::_1
+				,std::placeholders::_2
+				,self
+			)
 		);
 	}
 
@@ -45,7 +51,15 @@ struct session_base::impl {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(body_buffer.get(), body_length)
-			,std::bind(&impl::body_readed, this, std::placeholders::_1, std::placeholders::_2, self, body_buffer, body_length)
+			,std::bind(
+				&impl::body_readed
+				,this
+				,std::placeholders::_1
+				,std::placeholders::_2
+				,self
+				,body_buffer
+				,body_length
+			)
 		);
 	}
 	void body_readed(
@@ -79,7 +93,14 @@ struct session_base::impl {
 			boost::asio::async_write(
 				 socket
 				,boost::asio::buffer(buffer.data.get(), buffer.size)
-				,std::bind(&impl::sent, this, std::placeholders::_1, std::placeholders::_2, self, buffer)
+				,std::bind(
+					&impl::sent
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,self
+					,buffer
+				)
 			);
 		}
 	}

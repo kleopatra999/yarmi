@@ -30,8 +30,19 @@ int main() {
 
 	boost::asio::io_service ios;
 	client c(ios);
-	c.connect(ip, port);
-	c.ping("message");
+	//c.connect(ip, port);
+	c.async_connect(
+		 ip
+		,port
+		,[&c](const boost::system::error_code &ec) {
+			if ( ec ) {
+				std::cout << "async_connect handler: " << ec.message() << std::endl;
+				return;
+			}
+			c.start();
+			c.ping("message");
+		}
+	);
 
 	ios.run();
 

@@ -37,8 +37,27 @@ struct client_base: private boost::noncopyable {
 		if ( ec )
 			throw std::runtime_error("client_base::on_connect(): "+ec.message());
 		else
-			on_connected();
+			start();
 	}
+	template<typename F>
+	void async_connect(const std::string &ip, const std::uint16_t port, F f) {
+		boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address::from_string(ip), port);
+		socket.async_connect(ep, std::move(f));
+	}
+
+	void start() {
+		boost::asio::async_read(
+			 socket
+			,boost::asio::buffer(header_buffer)
+			,std::bind(
+				&client_base<Invoker>::on_header_readed
+				,this
+				,std::placeholders::_1
+				,std::placeholders::_2
+			)
+		);
+	}
+
 	void disconnect() {
 		boost::system::error_code ec;
 		socket.close(ec);
@@ -51,7 +70,13 @@ struct client_base: private boost::noncopyable {
 			boost::asio::async_write(
 				 socket
 				,boost::asio::buffer(buffer.data.get(), buffer.size)
-				,std::bind(&client_base<Invoker>::sent, this, std::placeholders::_1, std::placeholders::_2, buffer)
+				,std::bind(
+					&client_base<Invoker>::sent
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,buffer
+				)
 			);
 		} else {
 			buffers.push_back(buffer);
@@ -63,20 +88,10 @@ struct client_base: private boost::noncopyable {
 	}
 
 private:
-	void on_connected() {
-		boost::asio::async_read(
-			 socket
-			,boost::asio::buffer(header_buffer)
-			,[this](const boost::system::error_code &ec, std::size_t) {
-				if ( ! ec )
-					on_header_readed();
-				else
-					throw std::runtime_error("on_on_header_readed(): "+ec.message());
-			}
-		);
-	}
+	void on_header_readed(const boost::system::error_code &ec, std::size_t rd) {
+		if ( ec || rd != header_size )
+			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-	void on_header_readed() {
 		YARMI_IARCHIVE_TYPE ia(header_buffer, header_size);
 		std::uint32_t body_length = 0;
 		ia & body_length;
@@ -85,18 +100,29 @@ private:
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(body_buffer.get(), body_length)
-			,[this, body_length, body_buffer](const boost::system::error_code &ec, std::size_t) {
-				if ( ! ec )
-					on_body_readed(body_buffer, body_length);
-				else
-					throw std::runtime_error("on_body_readed(): "+ec.message());
-			}
+			,std::bind(
+				&client_base<Invoker>::on_body_readed
+				,this
+				,std::placeholders::_1
+				,std::placeholders::_2
+				,body_buffer
+				,body_length
+			)
 		);
 	}
 
-	void on_body_readed(std::shared_ptr<char> body_buffer, std::size_t body_length) {
+	void on_body_readed(
+		 const boost::system::error_code &ec
+		,std::size_t rd
+		,std::shared_ptr<char> body_buffer
+		,std::size_t body_length
+	) {
+		if ( ec || rd != body_length )
+			throw std::runtime_error("on_body_readed(): "+ec.message());
+
 		invoker.invoke(body_buffer.get(), body_length);
-		on_connected();
+
+		start();
 	}
 
 	void sent(const boost::system::error_code &ec, std::size_t wr, yas::shared_buffer buffer) {
