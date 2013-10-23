@@ -103,7 +103,7 @@ private:
 		in_process = false;
 
 		if ( ec || wr != buffer.size )
-			throw std::runtime_error("client_base send callback: "+ec.message());
+			throw std::runtime_error("client_base::sent(): "+ec.message());
 
 		if ( ! buffers.empty() ) {
 			yas::shared_buffer buf = buffers.front();
