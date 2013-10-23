@@ -30,6 +30,6 @@ HEADERS += \
 	 ../../../include/yarmi/server.hpp \
 	 ../../../include/yarmi/yarmi.hpp \
 	 ../../../include/yarmi/global_context_base.hpp \
-	 ../../../include/yarmi/client.hpp \
 	 command_processor.hpp \
-	 client_session.hpp
+	 client_session.hpp \
+    ../../../include/yarmi/client_base.hpp
