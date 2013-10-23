@@ -98,7 +98,7 @@
 /***************************************************************************/
 
 #define YARMI_PROCEDURE_INVOKING_FOR_EMPTY_ARGS(message_name) \
-	impl->on_##message_name();
+	impl.on_##message_name();
 
 #define YARMI_PROCEDURE_INVOKING_MEMBERS(unused, idx, tuple) \
 	BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple) arg##idx;
@@ -119,7 +119,7 @@
 			,tuple \
 		) \
 	; \
-	impl->on_##message_name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
+	impl.on_##message_name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
 
 #define YARMI_CASES_FOR_CALL_VERSION(unused, idx, tuple) \
 	case idx: { \
@@ -166,7 +166,7 @@
 		YARMI_OARCHIVE_TYPE pa; \
 		pa & oa.get_intrusive_buffer(); \
 		const yas::shared_buffer buffer = pa.get_shared_buffer(); \
-		io->send(buffer.data, buffer.size); \
+		io.send(buffer.data, buffer.size); \
 	}
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
@@ -191,7 +191,7 @@
 		; \
 		YARMI_OARCHIVE_TYPE pa; \
 		pa & oa.get_intrusive_buffer(); \
-		io->send(pa.get_shared_buffer()); \
+		io.send(pa.get_shared_buffer()); \
 	}
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION(unused, idx, tuple) \
@@ -269,7 +269,7 @@
 #define YARMI_INVOKER(classname, seq, opposeq) \
 	template<typename Impl, typename IO = Impl> \
 	struct classname { \
-		classname(Impl *impl, IO *io) \
+		classname(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
@@ -351,8 +351,8 @@
 		} \
 		\
 	private: \
-		Impl *impl; \
-		IO *io; \
+		Impl &impl; \
+		IO &io; \
 	};
 
 /***************************************************************************/
