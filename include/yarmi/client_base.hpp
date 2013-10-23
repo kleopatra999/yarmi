@@ -11,6 +11,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <list>
+#include <functional>
 
 namespace yarmi {
 
@@ -23,6 +25,8 @@ struct client_base: private boost::noncopyable {
 	client_base(boost::asio::io_service &ios, Invoker &invoker)
 		:socket(ios)
 		,invoker(invoker)
+		,buffers()
+		,in_process(false)
 	{}
 
 	void connect(const std::string &ip, const std::uint16_t port) {
@@ -33,7 +37,7 @@ struct client_base: private boost::noncopyable {
 		if ( ec )
 			throw std::runtime_error("client_base::on_connect(): "+ec.message());
 		else
-			on_connect();
+			on_connected();
 	}
 	void disconnect() {
 		boost::system::error_code ec;
@@ -41,13 +45,17 @@ struct client_base: private boost::noncopyable {
 	}
 
 	void send(const yas::shared_buffer &buffer) {
-		boost::asio::async_write(
-			 socket
-			,boost::asio::buffer(buffer.data.get(), buffer.size)
-			,[this, buffer](const boost::system::error_code &ec, std::size_t) {
-				if ( ec ) throw std::runtime_error("client_base send callback: "+ec.message());
-			}
-		);
+		if ( ! in_process ) {
+			in_process = true;
+
+			boost::asio::async_write(
+				 socket
+				,boost::asio::buffer(buffer.data.get(), buffer.size)
+				,std::bind(&client_base<Invoker>::sent, this, std::placeholders::_1, std::placeholders::_2, buffer)
+			);
+		} else {
+			buffers.push_back(buffer);
+		}
 	}
 
 	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
@@ -55,7 +63,7 @@ struct client_base: private boost::noncopyable {
 	}
 
 private:
-	void on_connect() {
+	void on_connected() {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(header_buffer)
@@ -88,12 +96,29 @@ private:
 
 	void on_body_readed(std::shared_ptr<char> body_buffer, std::size_t body_length) {
 		invoker.invoke(body_buffer.get(), body_length);
-		on_connect();
+		on_connected();
+	}
+
+	void sent(const boost::system::error_code &ec, std::size_t wr, yas::shared_buffer buffer) {
+		in_process = false;
+
+		if ( ec || wr != buffer.size )
+			throw std::runtime_error("client_base send callback: "+ec.message());
+
+		if ( ! buffers.empty() ) {
+			yas::shared_buffer buf = buffers.front();
+			buffers.pop_front();
+
+			send(buf);
+		}
 	}
 
 private:
 	boost::asio::ip::tcp::socket socket;
 	Invoker &invoker;
+
+	std::list<yas::shared_buffer> buffers;
+	bool in_process;
 
 	char header_buffer[header_size];
 };
