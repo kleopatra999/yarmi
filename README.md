@@ -409,6 +409,8 @@ YARMI_CONSTRUCT(
 	))
 );
 ```
+Результат [тут](https://github.com/niXman/yarmi/blob/master/examples/chat/protocol-preprocessed.hpp).
+
 Как вы могли заметить, имена процедур на стороне сервера и клиента пересекаются. Да, в этом нет ничего необычного ;)
 
 
