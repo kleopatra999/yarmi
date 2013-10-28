@@ -243,8 +243,8 @@
 
 /***************************************************************************/
 
-#define YARMI_APPEND_SEQ(seq) \
-	BOOST_PP_SEQ_PUSH_BACK( \
+#define YARMI_PREPEND_SEQ(seq) \
+	BOOST_PP_SEQ_PUSH_FRONT( \
 		 seq \
 		,(YARMI_SYSTEM_ERROR_API_NAME, (YARMI_SYSTEM_ERROR_API_SIG)) \
 	)
@@ -272,16 +272,16 @@
 			,io(io) \
 		{} \
 		\
-		YARMI_REMOTE_CALLS(YARMI_APPEND_SEQ(opposeq)) \
+		YARMI_REMOTE_CALLS(YARMI_PREPEND_SEQ(opposeq)) \
 		\
 		void invoke(const char *ptr, std::size_t size) { \
 			std::uint8_t call_id, call_version; \
 			\
 			static const char* names[] = { \
-				YARMI_CALLS_NAMES(YARMI_APPEND_SEQ(seq)) \
+				YARMI_CALLS_NAMES(YARMI_PREPEND_SEQ(seq)) \
 			}; \
 			static const std::uint8_t versions[] = { \
-				YARMI_CALLS_VERSIONS(YARMI_APPEND_SEQ(seq)) \
+				YARMI_CALLS_VERSIONS(YARMI_PREPEND_SEQ(seq)) \
 			}; \
 			\
 			try { \
@@ -319,9 +319,9 @@
 				\
 				switch ( call_id ) { \
 					BOOST_PP_REPEAT( \
-						 BOOST_PP_SEQ_SIZE(YARMI_APPEND_SEQ(seq)) \
+						 BOOST_PP_SEQ_SIZE(YARMI_PREPEND_SEQ(seq)) \
 						,YARMI_CASES \
-						,YARMI_APPEND_SEQ(seq) \
+						,YARMI_PREPEND_SEQ(seq) \
 					) \
 				} \
 			} catch (const std::exception &ex) { \
