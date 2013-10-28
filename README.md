@@ -37,6 +37,7 @@ YARMI_CONSTRUCT(
 #### *Что именно "оно" сделает?*
 Ну вот же:
 <!--more-->
+
 ```cpp
 namespace yarmi {
 
