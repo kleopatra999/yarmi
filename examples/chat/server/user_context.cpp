@@ -92,4 +92,8 @@ void user_context::on_users_online() {
 
 }
 
+void user_context::on_users_online(const std::string &substr) {
+
+}
+
 /***************************************************************************/

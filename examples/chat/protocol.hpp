@@ -67,6 +67,7 @@ YARMI_CONSTRUCT(
 	))
 	((users_online,
 		(()) // without args
+		((std::string)) // with nickname substring
 	))
 );
 

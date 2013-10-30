@@ -50,6 +50,7 @@ struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
 	void on_login(const std::string &useranme, const std::string &pass);
 	void on_logout();
 	void on_users_online();
+	void on_users_online(const std::string &substr);
 
 private:
 	void on_connected();
