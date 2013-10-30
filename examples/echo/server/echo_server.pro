@@ -64,4 +64,7 @@ HEADERS += \
 	 ../../../include/yarmi/client.hpp \
 	 ../protocol.hpp \
 	 ../../../include/yarmi/config.hpp \
-    ../../../include/yarmi/yarmi.hpp
+    ../../../include/yarmi/yarmi.hpp \
+    ../../../include/yarmi/preallocated_handler_invoker.hpp \
+    ../../../include/yarmi/make_preallocated_handler.hpp \
+    ../../../include/yarmi/handler_allocator.hpp

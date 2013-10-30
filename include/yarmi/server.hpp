@@ -32,7 +32,9 @@
 #ifndef _yarmi__server_hpp
 #define _yarmi__server_hpp
 
-#include "session_base.hpp"
+#include <yarmi/session_base.hpp>
+#include <yarmi/handler_allocator.hpp>
+#include <yarmi/make_preallocated_handler.hpp>
 
 #include <boost/noncopyable.hpp>
 
@@ -70,6 +72,7 @@ public:
 		,EH eh = &default_error_handler
 	)
 		:acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(ip), port))
+		,allocator()
 		,gc(gc)
 		,cp(cp)
 		,eh(eh)
@@ -84,7 +87,10 @@ public:
 
 		acceptor.async_accept(
 			 session->get_socket()
-			,std::bind(&server<UC, GC>::on_accepted, this, std::placeholders::_1, session)
+			,yarmi::make_preallocated_handler(
+				 allocator
+				,std::bind(&server<UC, GC>::on_accepted, this, std::placeholders::_1, session)
+			)
 		);
 	}
 
@@ -153,6 +159,7 @@ private:
 
 private:
 	boost::asio::ip::tcp::acceptor acceptor;
+	yarmi::handler_allocator<512> allocator;
 	GC<UC> &gc;
 
 	std::function<bool(const boost::asio::ip::tcp::endpoint &)> cp;

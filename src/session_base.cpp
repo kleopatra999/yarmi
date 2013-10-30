@@ -30,6 +30,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <yarmi/session_base.hpp>
+#include <yarmi/handler_allocator.hpp>
+#include <yarmi/make_preallocated_handler.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -57,12 +59,15 @@ struct session_base::impl {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(header_buffer)
-			,std::bind(
-				&impl::header_readed
-				,this
-				,std::placeholders::_1
-				,std::placeholders::_2
-				,self
+			,yarmi::make_preallocated_handler(
+				read_allocator
+				,std::bind(
+					&impl::header_readed
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,self
+				)
 			)
 		);
 	}
@@ -81,14 +86,17 @@ struct session_base::impl {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(body_buffer.get(), body_length)
-			,std::bind(
-				&impl::body_readed
-				,this
-				,std::placeholders::_1
-				,std::placeholders::_2
-				,self
-				,body_buffer
-				,body_length
+			,yarmi::make_preallocated_handler(
+				read_allocator
+				,std::bind(
+					&impl::body_readed
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,self
+					,body_buffer
+					,body_length
+				)
 			)
 		);
 	}
@@ -123,13 +131,16 @@ struct session_base::impl {
 			boost::asio::async_write(
 				 socket
 				,boost::asio::buffer(buffer.data.get(), buffer.size)
-				,std::bind(
-					&impl::sent
-					,this
-					,std::placeholders::_1
-					,std::placeholders::_2
-					,self
-					,buffer
+				,yarmi::make_preallocated_handler(
+					write_allocator
+					,std::bind(
+						&impl::sent
+						,this
+						,std::placeholders::_1
+						,std::placeholders::_2
+						,self
+						,buffer
+					)
 				)
 			);
 		}
@@ -149,6 +160,9 @@ struct session_base::impl {
 			send(self);
 		}
 	}
+
+	yarmi::handler_allocator<512> read_allocator;
+	yarmi::handler_allocator<512> write_allocator;
 
 	boost::asio::ip::tcp::socket socket;
 
