@@ -42,6 +42,7 @@ YARMI_CONSTRUCT(
 	server_invoker, // name of the server invoker
 	((ping,
 		((std::string))
+		((std::string, char))
 	))
 );
 

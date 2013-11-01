@@ -151,45 +151,68 @@
 	; \
 	impl.on_##message_name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
 
-#define YARMI_CASES_FOR_CALL_VERSION(unused, idx, tuple) \
-	BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(2, 0, tuple), case idx: {, ) /* if versions greater then one - write cases */ \
+#define YARMI_CASES_FOR_CALL_VERSION_0(unused, idx, tuple) \
+	YARMI_LAZY_IF( \
+		YARMI_TUPLE_IS_EMPTY(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))), \
+		( \
+			BOOST_PP_TUPLE_ELEM(2, 0, tuple) \
+		), \
+		( \
+			BOOST_PP_TUPLE_ELEM(2, 0, tuple), \
+			BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)) \
+		), \
+		YARMI_PROCEDURE_INVOKING_FOR_EMPTY_ARGS, \
+		YARMI_PROCEDURE_INVOKING_FOR_NONEMPTY_ARGS \
+	)
+
+#define YARMI_CASES_FOR_CALL_VERSION_1(unused, idx, tuple) \
+	case idx: { \
 		YARMI_LAZY_IF( \
-		YARMI_TUPLE_IS_EMPTY(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))), \
+		YARMI_TUPLE_IS_EMPTY(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))), \
 			( \
-				BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_TUPLE_ELEM(2, 1, tuple)) \
+				BOOST_PP_TUPLE_ELEM(2, 0, tuple) \
 			), \
 			( \
-				BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_TUPLE_ELEM(2, 1, tuple)), \
-				BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
+				BOOST_PP_TUPLE_ELEM(2, 0, tuple), \
+				BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)) \
 			), \
 			YARMI_PROCEDURE_INVOKING_FOR_EMPTY_ARGS, \
 			YARMI_PROCEDURE_INVOKING_FOR_NONEMPTY_ARGS \
 		) \
-	BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(2, 0, tuple), };break;, ) /* if versions greater then one - write cases */
-
-#define YARMI_CASES(unused, idx, seq) \
-	case idx: { \
-		BOOST_PP_IF( \
-			 BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))), 1) \
-			,switch ( call_version ) { \
-			, \
-		) /* if versions greater then one - write switch() */ \
-			BOOST_PP_REPEAT( \
-				BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))), \
-				YARMI_CASES_FOR_CALL_VERSION, \
-				( \
-					 BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))), 1) \
-					,BOOST_PP_SEQ_ELEM(idx, seq) \
-				) \
-			) \
-		BOOST_PP_IF( \
-			 BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))), 1) \
-			,} \
-			, \
-		) /* if versions greater then one - write switch() */ \
 	}; \
 	break;
 
+// generate cases for one version
+#define YARMI_CASES_0(unused, idx, seq) \
+	case idx: { \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))) \
+			,YARMI_CASES_FOR_CALL_VERSION_0 \
+			,BOOST_PP_SEQ_ELEM(idx, seq) \
+		) \
+	}; \
+	break;
+
+// generate cases for multiply versions
+#define YARMI_CASES_1(unused, idx, seq) \
+	case idx: { \
+		switch ( call_version ) { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))) \
+				,YARMI_CASES_FOR_CALL_VERSION_1 \
+				,BOOST_PP_SEQ_ELEM(idx, seq) \
+			) \
+		} \
+	}; \
+	break;
+
+// if versions for this procedure more then one - call 'YARMI_CASES_1', otherwise 'YARMI_CASES_0'
+#define YARMI_CASES(unused, idx, seq) \
+	BOOST_PP_CAT( \
+		 YARMI_CASES_ \
+		,BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))), 1) \
+	)(unused, idx, seq)
+	
 /***************************************************************************/
 
 #define YARMI_DECLARE_REMOTE_CALL_PARAMS(unused, idx, tuple) \
