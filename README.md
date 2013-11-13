@@ -41,48 +41,45 @@ namespace yarmi {
 
 template<typename Impl, typename IO = Impl>
 struct client_invoker {
-	client_invoker(Impl *impl, IO *io)
+	client_invoker(Impl &impl, IO &io)
 		:impl(impl)
 		,io(io)
 	{}
-	
-	void ping(const std::string &arg0) {
+
+	void yarmi_error(const std::uint8_t &arg0 ,const std::uint8_t &arg1 ,const std::string &arg2) {
 		yas::binary_mem_oarchive oa(yas::no_header);
 		oa & static_cast<std::uint8_t>(0)
-			& static_cast<std::uint8_t>(0)
-			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io->send(pa.get_shared_buffer());
-	}
-	
-	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(1)
 			& static_cast<std::uint8_t>(0)
 			& arg0
 			& arg1
 			& arg2;
 		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
-		io->send(pa.get_shared_buffer());
+		io.send(pa.get_shared_buffer());
 	}
-	
+	void ping(const std::string &arg0) {
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(1)
+			& static_cast<std::uint8_t>(0)
+			& arg0;
+		yas::binary_mem_oarchive pa;
+		pa & oa.get_intrusive_buffer();
+		io.send(pa.get_shared_buffer());
+	}
+
 	void invoke(const char *ptr, std::size_t size) {
 		std::uint8_t call_id, call_version;
 		static const char* names[] = {
-			 "pong"
-			,"yarmi_error"
+			 "yarmi_error"
+			,"pong"
 		};
-		static const std::uint8_t versions[] = {
-			 0
-			,0
-		};
-		
+		static const std::uint8_t versions[] = {0, 0};
+
 		try {
 			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
 			ia & call_id
 				& call_version;
+
 			if ( call_id < 0 || call_id > 1 ) {
 				char errstr[1024] = {0};
 				std::snprintf(
@@ -110,32 +107,22 @@ struct client_invoker {
 				);
 				throw std::runtime_error(errstr);
 			}
-			
+
 			switch ( call_id ) {
 				case 0: {
-					switch ( call_version ) {
-						case 0: {
-							std::string arg0;
-							ia & arg0;
-							impl->on_pong(arg0);
-						};
-						break;
-					}
+					std::uint8_t arg0;
+					std::uint8_t arg1;
+					std::string arg2;
+					ia & arg0
+						& arg1
+						& arg2;
+					impl.on_yarmi_error(arg0, arg1, arg2);
 				};
 				break;
 				case 1: {
-					switch ( call_version ) {
-						case 0: {
-							std::uint8_t arg0;
-							std::uint8_t arg1;
-							std::string arg2;
-							ia & arg0
-								& arg1
-								& arg2;
-							impl->on_yarmi_error(arg0, arg1, arg2);
-						};
-						break;
-					}
+					std::string arg0;
+					ia & arg0;
+					impl.on_pong(arg0);
 				};
 				break;
 			}
@@ -162,52 +149,46 @@ struct client_invoker {
 			yarmi_error(call_id, call_version, errstr);
 		}
 	}
-
 private:
-	Impl *impl;
-	IO *io;
+	Impl &impl;
+	IO &io;
 }; // struct client_invoker
 
 template<typename Impl, typename IO = Impl>
 struct server_invoker {
-	server_invoker(Impl *impl, IO *io)
+	server_invoker(Impl &impl, IO &io)
 		:impl(impl)
 		,io(io)
 	{}
-	
-	void pong(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(0)
-			& static_cast<std::uint8_t>(0)
-			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io->send(pa.get_shared_buffer());
-	}
-	
+
 	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
 		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(1)
+		oa & static_cast<std::uint8_t>(0)
 			& static_cast<std::uint8_t>(0)
 			& arg0
 			& arg1
 			& arg2;
 		yas::binary_mem_oarchive pa;
 		pa & oa.get_intrusive_buffer();
-		io->send(pa.get_shared_buffer());
+		io.send(pa.get_shared_buffer());
 	}
-	
+	void pong(const std::string &arg0) {
+		yas::binary_mem_oarchive oa(yas::no_header);
+		oa & static_cast<std::uint8_t>(1)
+			& static_cast<std::uint8_t>(0)
+			& arg0;
+		yas::binary_mem_oarchive pa;
+		pa & oa.get_intrusive_buffer();
+		io.send(pa.get_shared_buffer());
+	}
 	void invoke(const char *ptr, std::size_t size) {
 		std::uint8_t call_id, call_version;
 		static const char* names[] = {
-			 "ping"
-			,"yarmi_error"
+			 "yarmi_error"
+			,"ping"
 		};
-		static const std::uint8_t versions[] = {
-			 0
-			,0
-		};
-		
+		static const std::uint8_t versions[] = {0, 0};
+
 		try {
 			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
 			ia & call_id
@@ -239,32 +220,22 @@ struct server_invoker {
 				);
 				throw std::runtime_error(errstr);
 			}
-			
+
 			switch ( call_id ) {
 				case 0: {
-					switch ( call_version ) {
-						case 0: {
-							std::string arg0;
-							ia & arg0;
-							impl->on_ping(arg0);
-						};
-						break;
-					}
+					std::uint8_t arg0;
+					std::uint8_t arg1;
+					std::string arg2;
+					ia & arg0
+						& arg1
+						& arg2;
+					impl.on_yarmi_error(arg0, arg1, arg2);
 				};
 				break;
 				case 1: {
-					switch ( call_version ) {
-						case 0: {
-							std::uint8_t arg0;
-							std::uint8_t arg1;
-							std::string arg2;
-							ia & arg0
-								& arg1
-								& arg2;
-							impl->on_yarmi_error(arg0, arg1, arg2);
-						};
-						break;
-					}
+					std::string arg0;
+					ia & arg0;
+					impl.on_ping(arg0);
 				};
 				break;
 			}
@@ -290,11 +261,12 @@ struct server_invoker {
 			);
 			yarmi_error(call_id, call_version, errstr);
 		}
+
 	}
 
 private:
-	Impl *impl;
-	IO *io;
+	Impl &impl;
+	IO &io;
 }; // struct server_invoker
 
 } // ns yarmi
