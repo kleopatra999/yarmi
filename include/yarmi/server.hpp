@@ -1,4 +1,3 @@
-
 // Copyright (c) 2013, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
@@ -96,22 +95,21 @@ public:
 
 private:
 	void session_deleter(session_base *session) {
-		if ( ! gc.has_session(session) ) {
-			std::ostringstream os;
-			os << "session " << std::hex << session << " not in connected sessions list";
-			eh(os.str());
-		} else {
-			gc.del_session(session);
-		}
-
 		session->set_on_destruction(true);
-
 		try {
 			session->on_disconnected();
 		} catch (const std::exception &ex) {
 			std::ostringstream os;
 			os << "[exception] session->on_disconnected(): \"" << ex.what() << "\"";
 			eh(os.str());
+		}
+
+		if ( ! gc.has_session(session) ) {
+			std::ostringstream os;
+			os << "session " << std::hex << session << " not in connected sessions list";
+			eh(os.str());
+		} else {
+			gc.del_session(session);
 		}
 
 		try {
