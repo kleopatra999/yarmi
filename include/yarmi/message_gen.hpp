@@ -74,7 +74,11 @@
 
 /***************************************************************************/
 
-#define YARMI_DECLARE_MESSAGE(tname, seq, ...) \
+#define YARMI_DECLARE_MESSAGE( \
+	 tname /* type name */ \
+	,seq /* types sequence */ \
+	, ... /* some code */ \
+) \
 	struct tname { \
 	private: \
 		static constexpr const char* _names[] = { \
@@ -144,7 +148,7 @@
 			s << '}'; \
 			return s; \
 		} \
-		/* user code here */ \
+		/* some code expanded here */ \
 		__VA_ARGS__ \
 	};
 
