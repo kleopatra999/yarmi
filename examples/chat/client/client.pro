@@ -62,4 +62,19 @@ HEADERS += \
 	 ../../../include/yarmi/global_context_base.hpp \
 	 command_processor.hpp \
 	 client_session.hpp \
-    ../../../include/yarmi/client_base.hpp
+    ../../../include/yarmi/client_base.hpp \
+    ../../../include/yarmi/formatters/decorators.hpp \
+    ../../../include/yarmi/formatters/list.hpp \
+    ../../../include/yarmi/formatters/map.hpp \
+    ../../../include/yarmi/formatters/pair.hpp \
+    ../../../include/yarmi/formatters/quoting.hpp \
+    ../../../include/yarmi/formatters/set.hpp \
+    ../../../include/yarmi/formatters/tuple.hpp \
+    ../../../include/yarmi/formatters/unordered_map.hpp \
+    ../../../include/yarmi/formatters/unordered_set.hpp \
+    ../../../include/yarmi/formatters/vector.hpp \
+    ../../../include/yarmi/formatters.hpp \
+    ../../../include/yarmi/handler_allocator.hpp \
+    ../../../include/yarmi/make_preallocated_handler.hpp \
+    ../../../include/yarmi/message_gen.hpp \
+    ../../../include/yarmi/preallocated_handler_invoker.hpp
