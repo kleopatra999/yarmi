@@ -36,9 +36,6 @@ namespace decorators {
 
 static const char default_delimiter = ',';
 
-static const char tuple_open_symbol = '(';
-static const char tuple_close_symbol = ')';
-
 static const char pair_open_symbol = '(';
 static const char pair_close_symbol = ')';
 
