@@ -83,10 +83,10 @@
 
 /***************************************************************************/
 
-#define YARMI_DECLARE_MESSAGE_WRAP_X(x, y) \
-	((x, y)) YARMI_DECLARE_MESSAGE_WRAP_Y
-#define YARMI_DECLARE_MESSAGE_WRAP_Y(x, y) \
-	((x, y)) YARMI_DECLARE_MESSAGE_WRAP_X
+#define YARMI_DECLARE_MESSAGE_WRAP_X(...) \
+	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
+#define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
+	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
 #define YARMI_DECLARE_MESSAGE_WRAP_X0
 #define YARMI_DECLARE_MESSAGE_WRAP_Y0
 
