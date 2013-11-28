@@ -69,8 +69,6 @@ HEADERS += \
     ../../../include/yarmi/make_preallocated_handler.hpp \
     ../../../include/yarmi/handler_allocator.hpp \
     ../../../include/yarmi/client_base.hpp \
-    ../../../include/yarmi/formatters.hpp \
-    ../../../include/yarmi/message_gen.hpp \
     ../../../include/yarmi/formatters/decorators.hpp \
     ../../../include/yarmi/formatters/list.hpp \
     ../../../include/yarmi/formatters/map.hpp \

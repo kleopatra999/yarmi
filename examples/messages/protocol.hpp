@@ -33,44 +33,44 @@
 #define _yarmi__echo__protocol_hpp
 
 #include <yarmi/yarmi.hpp>
-#include <yarmi/message_gen.hpp>
-
-#include <yarmi/formatters.hpp>
 
 /***************************************************************************/
 
 YARMI_DECLARE_MESSAGE(
 	message1,
-	((a, (std::vector<int>)))
-	((b, (std::vector<std::string>)))
-	((c, (std::list<int>)))
-	((d, (std::list<std::string>)))
-	((e, (std::set<int>)))
-	((f, (std::unordered_set<int>)))
-	((g, (std::map<int, int>)))
-	((h, (std::map<std::string, std::string>)))
-	((i, (std::map<int, std::pair<int, int>>)))
-	((j, (std::map<int, std::map<int, int>>)))
-	((k, (std::unordered_map<int, int>)))
-	((l, (int)))
-	((m, (std::pair<int, std::string>)))
-	((n, (std::pair<std::string, int>)))
-	((o, (std::tuple<int, long, std::string, double, bool>)))
-	((idx, (std::size_t)))
-	((msg, (std::string)))
+	(a, (std::vector<int>))
+	(b, (std::vector<std::string>))
+	(c, (std::list<int>))
+	(d, (std::list<std::string>))
+	(e, (std::set<int>))
+	(f, (std::unordered_set<int>))
+	(g, (std::map<int, int>))
+	(h, (std::map<std::string, std::string>))
+	(i, (std::map<int, std::pair<int, int>>))
+	(j, (std::map<int, std::map<int, int>>))
+	(k, (std::unordered_map<int, int>))
+	(l, (int))
+	(m, (std::pair<int, std::string>))
+	(n, (std::pair<std::string, int>))
+	(o, (std::tuple<int, long, std::string, double, bool>))
+	(idx, (std::size_t))
+	(msg, (std::string))
+	,
+	const int& f0() const { return l; }
+	const std::string& f1() const { return msg; }
 )
 
 /***************************************************************************/
 
 YARMI_CONSTRUCT(
 	client_invoker, // name of the client invoker
-	((pong,
+	(pong,
 		((message1))
-	)),
+	),
 	server_invoker, // name of the server invoker
-	((ping,
+	(ping,
 		((message1))
-	))
+	)
 );
 
 /***************************************************************************/

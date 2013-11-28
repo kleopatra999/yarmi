@@ -73,8 +73,6 @@ HEADERS += \
     ../../../include/yarmi/formatters/unordered_map.hpp \
     ../../../include/yarmi/formatters/unordered_set.hpp \
     ../../../include/yarmi/formatters/vector.hpp \
-    ../../../include/yarmi/formatters.hpp \
     ../../../include/yarmi/handler_allocator.hpp \
     ../../../include/yarmi/make_preallocated_handler.hpp \
-    ../../../include/yarmi/message_gen.hpp \
     ../../../include/yarmi/preallocated_handler_invoker.hpp

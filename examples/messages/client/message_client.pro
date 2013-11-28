@@ -57,7 +57,6 @@ HEADERS += \
 	 ../../../include/yarmi/yarmi.hpp \
 	 ../../../include/yarmi/session_base.hpp \
 	 ../../../include/yarmi/global_context_base.hpp \
-	 ../../../include/yarmi/message_gen.hpp \
     ../../../include/yarmi/formatters/decorators.hpp \
     ../../../include/yarmi/formatters/list.hpp \
     ../../../include/yarmi/formatters/map.hpp \
@@ -67,5 +66,4 @@ HEADERS += \
     ../../../include/yarmi/formatters/unordered_map.hpp \
     ../../../include/yarmi/formatters/unordered_set.hpp \
     ../../../include/yarmi/formatters/vector.hpp \
-    ../../../include/yarmi/formatters/quoting.hpp \
-    ../../../include/yarmi/formatters.hpp
+    ../../../include/yarmi/formatters/quoting.hpp

@@ -36,13 +36,13 @@
 
 YARMI_CONSTRUCT(
 	client_invoker, // name of the client invoker
-	((pong,
+	(pong,
 		((std::string))
-	)),
+	),
 	server_invoker, // name of the server invoker
-	((ping,
+	(ping,
 		((std::string))
-	))
+	)
 );
 
 #endif // _yarmi__echo__protocol_hpp

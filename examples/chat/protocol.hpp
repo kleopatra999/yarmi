@@ -36,39 +36,39 @@
 
 YARMI_CONSTRUCT(
 	client_invoker, // name of the client invoker
-	((registration,
+	(registration,
 		((std::string, std::string)) // message : registration key
-	))
-	((activation,
+	)
+	(activation,
 		((std::string)) // message
-	))
-	((login,
+	)
+	(login,
 		((std::string)) // message
-	))
-	((logout,
+	)
+	(logout,
 		((std::string)) // message
-	))
-	((users_online,
+	)
+	(users_online,
 		((std::vector<std::string>)) // without args
-	))
+	)
 	,
 	server_invoker, // name of the server invoker
-	((registration,
+	(registration,
 		((std::string)) // username
-	))
-	((activation,
+	)
+	(activation,
 		((std::string, std::string, std::string)) // registration key : username : password
-	))
-	((login,
+	)
+	(login,
 		((std::string, std::string)) // username : password
-	))
-	((logout,
+	)
+	(logout,
 		(()) // without args
-	))
-	((users_online,
+	)
+	(users_online,
 		(()) // without args
 		((std::string)) // with nickname substring
-	))
+	)
 );
 
 #endif // _yarmi__chat__protocol_hpp

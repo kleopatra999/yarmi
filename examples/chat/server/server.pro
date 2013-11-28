@@ -65,10 +65,8 @@ HEADERS += \
 	 ../../../include/yarmi/global_context_base.hpp \
 	 ../../../include/yarmi/client.hpp \
     ../../../include/yarmi/client_base.hpp \
-    ../../../include/yarmi/formatters.hpp \
     ../../../include/yarmi/handler_allocator.hpp \
     ../../../include/yarmi/make_preallocated_handler.hpp \
-    ../../../include/yarmi/message_gen.hpp \
     ../../../include/yarmi/preallocated_handler_invoker.hpp \
     ../../../include/yarmi/formatters/decorators.hpp \
     ../../../include/yarmi/formatters/list.hpp \
