@@ -461,7 +461,7 @@
 
 /***************************************************************************/
 
-#define YARMI_DECLARE_ENUM_DECLARE_ENUM_MEMBERS(unused, idx, seq) \
+#define YARMI_DECLARE_ENUM_MEMBERS(unused, idx, seq) \
 	BOOST_PP_IF( \
 		 BOOST_PP_EQUAL(2 ,BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, seq))) \
 		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))=BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq)) /* member = value */ \
@@ -469,7 +469,7 @@
 	) /* BOOST_PP_IF */ \
 	BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
 
-#define YARMI_DECLARE_ENUM_DECLARE_ENUM_WRITE_CASES(unused, idx, tuple) \
+#define YARMI_DECLARE_ENUM_WRITE_CASES(unused, idx, tuple) \
 	case BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
 		 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))) \
 		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
@@ -489,7 +489,7 @@
 	enum class name: type { \
 		BOOST_PP_REPEAT( \
 			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_DECLARE_ENUM_DECLARE_ENUM_MEMBERS \
+			,YARMI_DECLARE_ENUM_MEMBERS \
 			,seq \
 		) \
 	}; \
@@ -498,10 +498,11 @@
 		switch (o) { \
 			BOOST_PP_REPEAT( \
 				BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_DECLARE_ENUM_DECLARE_ENUM_WRITE_CASES \
+				,YARMI_DECLARE_ENUM_WRITE_CASES \
 				,(name, seq) \
 			) \
 		} \
+		return #name "::unknown"; \
 	} \
 	\
 	spec std::ostream& operator<< (std::ostream &s, const name &o) { \
