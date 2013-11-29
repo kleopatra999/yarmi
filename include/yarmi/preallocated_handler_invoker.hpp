@@ -1,4 +1,3 @@
-
 // Copyright (c) 2013, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
@@ -57,7 +56,7 @@ struct preallocated_handler_invoker {
 	}
 
 	template <typename F>
-	friend void asio_handler_invoke(const F& function, this_type *context) {
+	friend void asio_handler_invoke(F& function, this_type *context) {
 		using boost::asio::asio_handler_invoke;
 		asio_handler_invoke(function, std::addressof(context->handler));
 	}
