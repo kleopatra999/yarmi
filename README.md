@@ -385,7 +385,213 @@ YARMI_CONSTRUCT(
 
 Как вы могли заметить, имена процедур на стороне сервера и клиента пересекаются. Да, в этом нет ничего необычного ;)
 
+### Сообщения
+Для таких случаев, когда процедура должна содержать множество аргументов(10,20,30) - был разработан концепт сообщений. Сообщение - это структура в терминах C++, содержащая все описанные члены-данные и методы для работы с ними. В данный момент, при генерации сообщений использованием макроса `YARMI_DECLARE_MESSAGE()`, помимо описанных членов-данных, так же генерируется метод `serialize(archive)`, и `operator<<(ostream, message_type)`. Метод `serialize(archive)` используется сериализатором([YAS](https://github.com/niXman/yas)) для сериализации/десериализации сообщения. `operator<<(ostream, message_type)` перегружен потому, что позволяет получить JSON представление сообщения.
 
+Из этой записи:
+```cpp
+YARMI_DECLARE_MESSAGE(
+        message1
+        ,
+        (a, (std::vector<int>))
+        (b, (std::vector<std::string>))
+        (c, (std::list<int>))
+        (d, (std::list<std::string>))
+        (e, (std::set<int>))
+        (f, (std::unordered_set<int>))
+        (g, (std::map<int, int>))
+        (h, (std::map<std::string, std::string>))
+        (i, (std::map<int, std::pair<int, int>>))
+        (j, (std::map<int, std::map<int, int>>))
+        (k, (std::unordered_map<int, int>))
+        (l, (int))
+        (m, (std::pair<int, std::string>))
+        (n, (std::pair<std::string, int>))
+        (o, (std::tuple<int, long, std::string, double, bool>))
+        (idx, (std::size_t))
+        (msg, (std::string))
+        ,
+        const int& f0() const { return l; }
+        const std::string& f1() const { return msg; }
+)
+```
+будет сгенерирован следующий код:
+```cpp
+struct message1 {
+private:
+	static constexpr const char* __meta_names[] = {
+		 "a"
+		,"b"
+		,"c"
+		,"d"
+		,"e"
+		,"f"
+		,"g"
+		,"h"
+		,"i"
+		,"j"
+		,"k"
+		,"l"
+		,"m"
+		,"n"
+		,"o"
+		,"idx"
+		,"msg"
+	};
+	static constexpr const char* __meta_types[] = {
+		 "(std::vector<int>)"
+		,"(std::vector<std::string>)"
+		,"(std::list<int>)"
+		,"(std::list<std::string>)"
+		,"(std::set<int>)"
+		,"(std::unordered_set<int>)"
+		,"(std::map<int, int>)"
+		,"(std::map<std::string, std::string>)"
+		,"(std::map<int, std::pair<int, int>>)"
+		,"(std::map<int, std::map<int, int>>)"
+		,"(std::unordered_map<int, int>)"
+		,"(int)"
+		,"(std::pair<int, std::string>)"
+		,"(std::pair<std::string, int>)"
+		,"(std::tuple<int, long, std::string, double, bool>)"
+		,"(std::size_t)"
+		,"(std::string)"
+	};
+public:
+	static constexpr const char* meta_name() { return "message1"; }
+	static constexpr std::size_t meta_count() { return 17; }
+	static constexpr const char* const* meta_members() { return __meta_names; }
+	static constexpr const char* meta_member(std::size_t idx) {
+		return (idx < sizeof(__meta_names)/sizeof(__meta_names[0]) ? __meta_names[idx] : 0);
+	}
+	static constexpr const char* const* meta_types() { return __meta_types; }
+	static constexpr const char* meta_type(std::size_t idx) {
+		return (idx < sizeof(__meta_types)/sizeof(__meta_types[0]) ? __meta_types[idx] : 0);
+	}
+	
+	const int& f0() const { return l; }
+	const std::string& f1() const { return msg; }
+	
+	boost::function_traits<void (std::vector<int>)>::arg1_type a;
+	boost::function_traits<void (std::vector<std::string>)>::arg1_type b;
+	boost::function_traits<void (std::list<int>)>::arg1_type c;
+	boost::function_traits<void (std::list<std::string>)>::arg1_type d;
+	boost::function_traits<void (std::set<int>)>::arg1_type e;
+	boost::function_traits<void (std::unordered_set<int>)>::arg1_type f;
+	boost::function_traits<void (std::map<int, int>)>::arg1_type g;
+	boost::function_traits<void (std::map<std::string, std::string>)>::arg1_type h;
+	boost::function_traits<void (std::map<int, std::pair<int, int>>)>::arg1_type i;
+	boost::function_traits<void (std::map<int, std::map<int, int>>)>::arg1_type j;
+	boost::function_traits<void (std::unordered_map<int, int>)>::arg1_type k;
+	boost::function_traits<void (int)>::arg1_type l;
+	boost::function_traits<void (std::pair<int, std::string>)>::arg1_type m;
+	boost::function_traits<void (std::pair<std::string, int>)>::arg1_type n;
+	boost::function_traits<void (std::tuple<int, long, std::string, double, bool>)>::arg1_type o;
+	boost::function_traits<void (std::size_t)>::arg1_type idx;
+	boost::function_traits<void (std::string)>::arg1_type msg;
+	
+	template<typename F>
+	void apply(F func_) const {
+		func_(a);
+		func_(b);
+		func_(c);
+		func_(d);
+		func_(e);
+		func_(f);
+		func_(g);
+		func_(h);
+		func_(i);
+		func_(j);
+		func_(k);
+		func_(l);
+		func_(m);
+		func_(n);
+		func_(o);
+		func_(idx);
+		func_(msg);
+	}
+	template<typename F>
+	void transform(F func_) {
+		func_(a);
+		func_(b);
+		func_(c);
+		func_(d);
+		func_(e);
+		func_(f);
+		func_(g);
+		func_(h);
+		func_(i);
+		func_(j);
+		func_(k);
+		func_(l);
+		func_(m);
+		func_(n);
+		func_(o);
+		func_(idx);
+		func_(msg);
+	}
+	
+	template<typename Archive>
+	void serialize(Archive &ar) {
+		ar & a
+			& b
+			& c
+			& d
+			& e
+			& f
+			& g
+			& h
+			& i
+			& j
+			& k
+			& l
+			& m
+			& n
+			& o
+			& idx
+			& msg;
+	}
+	friend std::ostream& operator<< (std::ostream &s, const message1 &o) {
+		s << '{'; s << "\"" "a" "\":";
+		quoting(s, o.a);
+		s << ", " "\"" "b" "\":";
+		quoting(s, o.b);
+		s << ", " "\"" "c" "\":";
+		quoting(s, o.c);
+		s << ", " "\"" "d" "\":";
+		quoting(s, o.d);
+		s << ", " "\"" "e" "\":";
+		quoting(s, o.e);
+		s << ", " "\"" "f" "\":";
+		quoting(s, o.f);
+		s << ", " "\"" "g" "\":";
+		quoting(s, o.g);
+		s << ", " "\"" "h" "\":";
+		quoting(s, o.h);
+		s << ", " "\"" "i" "\":";
+		quoting(s, o.i);
+		s << ", " "\"" "j" "\":";
+		quoting(s, o.j);
+		s << ", " "\"" "k" "\":";
+		quoting(s, o.k);
+		s << ", " "\"" "l" "\":";
+		quoting(s, o.l);
+		s << ", " "\"" "m" "\":";
+		quoting(s, o.m);
+		s << ", " "\"" "n" "\":";
+		quoting(s, o.n);
+		s << ", " "\"" "o" "\":";
+		quoting(s, o.o);
+		s << ", " "\"" "idx" "\":";
+		quoting(s, o.idx);
+		s << ", " "\"" "msg" "\":";
+		quoting(s, o.msg);
+		s << '}';
+		return s;
+	}
+};
+
+```
 
 TODO
 =========
