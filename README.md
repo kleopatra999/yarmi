@@ -23,13 +23,13 @@ RMI constructor using C++ preprocessor
 ```cpp
 YARMI_CONSTRUCT(
     client_invoker,
-    ((pong,
+    (pong,
         ((std::string))
-    )),
+    ),
     server_invoker,
-    ((ping,
+    (ping,
         ((std::string))
-    ))
+    )
 )
 ```
 Всю остальную работу, YARMI(`YARMI_CONSTRUCT()`) сделает за нас!
@@ -330,15 +330,15 @@ struct session: yarmi::session_base, yarmi::server_invoker<session> {
 ```cpp
 YARMI_CONSTRUCT(
     client_invoker,
-    ((pong,
+    (pong,
         ((std::string))
         ((std::string, std::string)) // это вторая версия процедуры 'pong()'
-    )),
+    ),
     server_invoker,
-    ((ping,
+    (ping,
         ((std::string))
         ((std::string, std::string)) // это вторая версия процедуры 'ping()'
-    ))
+    )
 )
 ```
 Таким образом, клинет может может вызывать как `ping("message")` так и `ping("message", "user name")`. И, соответственно, сервер может слать два типа ответа. И снова повторюсь: ничего руками делать не нужно! соответствие `ID`ов процедур и их версий - это забота yarmi!
@@ -347,38 +347,38 @@ YARMI_CONSTRUCT(
 ```cpp
 YARMI_CONSTRUCT(
 	client_invoker, // name of the client invoker
-	((registration,
+	(registration,
 		((std::string, std::string)) // message : registration key
-	))
-	((activation,
+	)
+	(activation,
 		((std::string)) // message
-	))
-	((login,
+	)
+	(login,
 		((std::string)) // message
-	))
-	((logout,
+	)
+	(logout,
 		((std::string)) // message
-	))
-	((users_online,
+	)
+	(users_online,
 		((std::vector<std::string>)) // without args
-	))
+	)
 	,
 	server_invoker, // name of the server invoker
-	((registration,
+	(registration,
 		((std::string)) // username
-	))
-	((activation,
+	)
+	(activation,
 		((std::string, std::string, std::string)) // registration key : username : password
-	))
-	((login,
+	)
+	(login,
 		((std::string, std::string)) // username : password
-	))
-	((logout,
+	)
+	(logout,
 		(()) // without args
-	))
-	((users_online,
+	)
+	(users_online,
 		(()) // without args
-	))
+	)
 );
 ```
 Результат [тут](https://github.com/niXman/yarmi/blob/master/examples/chat/protocol-preprocessed.hpp).
