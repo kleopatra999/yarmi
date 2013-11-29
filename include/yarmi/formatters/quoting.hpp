@@ -50,9 +50,14 @@ template<typename T>
 void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
 	s << (o ? "true" : "false");
 }
+// for enums
+template<typename T>
+void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_enum<T>::value>::type* = 0) {
+	s << '\"' << o << '\"';
+}
 // for other types
 template<typename T>
-void quoting(std::ostream& s, const T &o, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, bool>::value)>::type* = 0) {
+void quoting(std::ostream& s, const T &o, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, bool>::value || std::is_enum<T>::value)>::type* = 0) {
 	s << o;
 }
 

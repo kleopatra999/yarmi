@@ -37,7 +37,8 @@
 /***************************************************************************/
 
 YARMI_DECLARE_MESSAGE(
-	message1,
+	message1
+	,
 	(a, (std::vector<int>))
 	(b, (std::vector<std::string>))
 	(c, (std::list<int>))
