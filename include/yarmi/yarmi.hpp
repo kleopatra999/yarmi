@@ -519,6 +519,40 @@
 
 /***************************************************************************/
 
+#include <iostream>
+
+template<typename T>
+void read_value(std::istream &s, const char *name, T &o) {
+	if ( s.get() != '\"' )
+		throw std::runtime_error("bad JSON: expected '\"' before key name");
+	std::string key;
+	std::getline(s, key, '\"');
+	if ( key != name )
+		throw std::runtime_error("bad JSON: expected key \"" + std::string(name) + "\"");
+	//std::cout << "key:\"" << key << "\", expected:\"" << name << "\"" << std::endl;
+	if ( s.get() != ':' )
+		throw std::runtime_error("bad JSON: expected ':' before data-member");
+	s >> o;
+}
+
+#if 0
+if ( s.get() != '\"' ) \
+	throw std::runtime_error("bad JSON: expected '\"' before key name"); \
+std::string BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))); \
+std::getline(s, BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))), '\"'); \
+if ( \
+	BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))) != \
+	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
+) throw std::runtime_error( \
+	"bad JSON: expected key \"" \
+	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
+	"\"" \
+); \
+std::cout << "key:" << BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))) << std::endl; \
+if ( s.get() != ':' ) \
+	throw std::runtime_error("bad JSON: expected ':' before data-member");
+#endif
+
 #define YARMI_DECLARE_MESSAGE_DECLARE_MEMBER(unused, idx, seq) \
 	boost::function_traits<void BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))>::arg1_type \
 		BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq));
@@ -528,9 +562,17 @@
 		BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))
 
 #define YARMI_DECLARE_MESSAGE_ENUMERATE_OUTPUTED(unused, idx, seq) \
-	s << BOOST_PP_IF(BOOST_PP_EQUAL(idx, 0), , ", ") \
+	s << BOOST_PP_IF(BOOST_PP_EQUAL(idx, 0), , ",") \
 		"\"" BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) "\":"; \
-	quoting(s, o.BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))); \
+	quoting(s, o.BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)));
+
+#define YARMI_DECLARE_MESSAGE_ENUMERATE_INPUTED(unused, idx, seq) \
+	std::cout << idx << std::endl; \
+	read_value( \
+		 s \
+		,BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
+		,o.BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	);
 
 #define YARMI_DECLARE_MESSAGE_MEMBER_NAME(unused, idx, seq) \
 	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
@@ -621,6 +663,16 @@
 				,seq \
 			) \
 			s << '}'; \
+			return s; \
+		} \
+		friend std::istream& operator>> (std::istream &s, name &o) { \
+			if ( s.get() != '{' ) \
+				throw std::runtime_error("bad JSON: \'{\'"); \
+				BOOST_PP_REPEAT( \
+					 BOOST_PP_SEQ_SIZE(seq) \
+					,YARMI_DECLARE_MESSAGE_ENUMERATE_INPUTED \
+					,seq \
+				) \
 			return s; \
 		} \
 	};

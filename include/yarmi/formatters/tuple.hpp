@@ -40,7 +40,7 @@
 #	include <cstdlib>
 #endif
 
-#include <ostream>
+#include <iostream>
 #include <tuple>
 
 #include <yarmi/formatters/decorators.hpp>

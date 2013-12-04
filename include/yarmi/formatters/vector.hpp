@@ -32,8 +32,9 @@
 #ifndef _yarmi__formatters__vector_hpp
 #define _yarmi__formatters__vector_hpp
 
-#include <ostream>
+#include <iostream>
 #include <vector>
+#include <stdexcept>
 
 #include <yarmi/formatters/decorators.hpp>
 #include <yarmi/formatters/quoting.hpp>
@@ -51,6 +52,14 @@ std::ostream& operator<< (std::ostream &s, const std::vector<T, Allocator> &o) {
 			s << yarmi::decorators::default_delimiter;
 	}
 	return s << yarmi::decorators::array_close_symbol;
+}
+
+template<typename T, typename Allocator>
+std::istream& operator>> (std::istream &s, std::vector<T, Allocator> &o) {
+	if ( s.get() != yarmi::decorators::array_open_symbol )
+		throw std::runtime_error("array open symbol expected '['");
+
+	return s;
 }
 
 } // ns std

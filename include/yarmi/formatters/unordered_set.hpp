@@ -32,7 +32,7 @@
 #ifndef _yarmi__formatters__unordered_set_hpp
 #define _yarmi__formatters__unordered_set_hpp
 
-#include <ostream>
+#include <iostream>
 #include <unordered_set>
 
 #include <yarmi/formatters/decorators.hpp>

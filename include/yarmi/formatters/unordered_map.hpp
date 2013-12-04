@@ -32,7 +32,7 @@
 #ifndef _yarmi__formatters__unordered_map_hpp
 #define _yarmi__formatters__unordered_map_hpp
 
-#include <ostream>
+#include <iostream>
 #include <unordered_map>
 
 #include <yarmi/formatters/decorators.hpp>

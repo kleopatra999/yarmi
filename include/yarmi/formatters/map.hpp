@@ -32,7 +32,7 @@
 #ifndef _yarmi__formatters__map_hpp
 #define _yarmi__formatters__map_hpp
 
-#include <ostream>
+#include <iostream>
 #include <map>
 
 #include <yarmi/formatters/decorators.hpp>

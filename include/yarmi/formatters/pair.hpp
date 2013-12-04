@@ -32,7 +32,7 @@
 #ifndef _yarmi__formatters__pair_hpp
 #define _yarmi__formatters__pair_hpp
 
-#include <ostream>
+#include <iostream>
 #include <utility>
 
 #include <yarmi/formatters/decorators.hpp>

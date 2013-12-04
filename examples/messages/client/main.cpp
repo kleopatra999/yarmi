@@ -60,37 +60,48 @@ int main() {
 	static const char *ip = "127.0.0.1";
 	static const std::uint16_t port = 44550;
 
+	message1 msg = {
+		/* a */	 {1, 2, 3}
+		/* b */	,{"4", "5", "6"}
+		/* c */	,{7, 8, 9}
+		/* d */	,{"7", "8", "9"}
+		/* e */	,{7, 8, 9}
+		/* f */	,{7, 8, 9}
+		/* g */	,{{1, 2}, {3, 4}, {5, 6}}
+		/* h */	,{{"1", "2"}, {"3", "4"}, {"5", "6"}}
+		/* i */	,{{1, {2,3}}, {4, {5,6}}}
+		/* j */	,{{1, {{2,3}, {4,5}}}, {6, {{7,8}, {9,0}}}}
+		/* k */	,{{1, 2}, {3, 4}, {5, 6}}
+		/* l */	,33
+		/* m */	,{44, "55"}
+		/* n */	,{"11", 12}
+		/* o */	,std::make_tuple(66, 77, "88", 99.9, false)
+		/* idx */,0
+		/* msg */,"message string"
+	}, msg2;
+	std::stringstream ss1, ss2;
+	ss1 << msg;
+	ss1 >> msg2;
+	ss2 << msg2;
+
+	std::cout << "ss1:" << ss1.str() << std::endl;
+	std::cout << "ss2:" << ss2.str() << std::endl;
+
+	assert(ss2.str() == ss1.str());
+	return 0;
+
 	boost::asio::io_service ios;
 	client c(ios);
 	//c.connect(ip, port);
 	c.async_connect(
 		 ip
 		,port
-		,[&c](const boost::system::error_code &ec) {
+		,[&c, &msg](const boost::system::error_code &ec) {
 			if ( ec ) {
 				std::cout << "async_connect handler: " << ec.message() << std::endl;
 				return;
 			}
 			c.start();
-			message1 msg = {
-				/* a */	 {1, 2, 3}
-				/* b */	,{"4", "5", "6"}
-				/* c */	,{7, 8, 9}
-				/* d */	,{"7", "8", "9"}
-				/* e */	,{7, 8, 9}
-				/* f */	,{7, 8, 9}
-				/* g */	,{{1, 2}, {3, 4}, {5, 6}}
-				/* h */	,{{"1", "2"}, {"3", "4"}, {"5", "6"}}
-				/* i */	,{{1, {2,3}}, {4, {5,6}}}
-				/* j */	,{{1, {{2,3}, {4,5}}}, {6, {{7,8}, {9,0}}}}
-				/* k */	,{{1, 2}, {3, 4}, {5, 6}}
-				/* l */	,33
-				/* m */	,{44, "55"}
-				/* n */	,{"11", 12}
-				/* o */	,std::make_tuple(66, 77, "88", 99.9, false)
-				/* idx */	,0
-				/* msg */	,"message string"
-			};
 			c.ping(msg);
 		}
 	);

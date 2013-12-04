@@ -32,7 +32,7 @@
 #ifndef _yarmi__formatters__set_hpp
 #define _yarmi__formatters__set_hpp
 
-#include <ostream>
+#include <iostream>
 #include <set>
 
 #include <yarmi/formatters/decorators.hpp>

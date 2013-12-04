@@ -32,9 +32,12 @@
 #ifndef _yarmi__formatters__quoting_hpp
 #define _yarmi__formatters__quoting_hpp
 
-#include <ostream>
+#include <iostream>
 #include <string>
+#include <stdexcept>
 #include <type_traits>
+
+#include <cstring>
 
 /***************************************************************************/
 
@@ -45,10 +48,24 @@ template<typename T>
 void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
 	s << '\"' << o << '\"';
 }
+template<typename T>
+void quoting(std::istream& s, T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
+	std::getline(s, o, '\"');
+}
 // for bool
 template<typename T>
 void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
 	s << (o ? "true" : "false");
+}
+template<typename T>
+void quoting(std::istream& s, T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
+	char str[4] = "\0";
+	s.read(str, sizeof(str));
+	if ( std::strncmp(str, "true", sizeof(str)) == 0 ) {
+		o = true;
+		if ( s.get() != '\"' )
+			throw std::runtime_error();
+	}
 }
 // for enums
 template<typename T>
