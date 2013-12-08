@@ -1,4 +1,3 @@
-
 // Copyright (c) 2013, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
@@ -628,7 +627,7 @@ if ( s.get() != ':' ) \
 		) \
 		\
 		template<typename F> \
-		void apply(F func_) const { \
+		void apply(const F &func_) const { \
 			BOOST_PP_SEQ_FOR_EACH( \
 				 YARMI_DECLARE_MESSAGE_ENUMERATE_MEMBERS \
 				,func_ \
@@ -636,7 +635,7 @@ if ( s.get() != ':' ) \
 			) \
 		} \
 		template<typename F> \
-		void transform(F func_) { \
+		void transform(F &func_) { \
 			BOOST_PP_SEQ_FOR_EACH( \
 				 YARMI_DECLARE_MESSAGE_ENUMERATE_MEMBERS \
 				,func_ \
