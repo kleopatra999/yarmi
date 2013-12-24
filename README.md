@@ -491,7 +491,7 @@ public:
 	boost::function_traits<void (std::string)>::arg1_type msg;
 	
 	template<typename F>
-	void apply(F func_) const {
+	void apply(const F &func_) const {
 		func_(a);
 		func_(b);
 		func_(c);
@@ -511,7 +511,7 @@ public:
 		func_(msg);
 	}
 	template<typename F>
-	void transform(F func_) {
+	void transform(F &func_) {
 		func_(a);
 		func_(b);
 		func_(c);
