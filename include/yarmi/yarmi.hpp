@@ -58,16 +58,20 @@
 //# define YARMI_USE_TEXT_SERIALIZATION (1)
 #endif
 
+#include <yas/mem_streams.hpp>
+
 #if YARMI_USE_BINARY_SERIALIZATION
 #	include <yas/binary_iarchive.hpp>
 #	include <yas/binary_oarchive.hpp>
-#	define YARMI_IARCHIVE_TYPE yas::binary_mem_iarchive
-#	define YARMI_OARCHIVE_TYPE yas::binary_mem_oarchive
+#	define YARMI_ISTREAM_TYPE yas::mem_istream
+#	define YARMI_OSTREAM_TYPE yas::mem_ostream
+#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<yas::mem_istream>
+#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<yas::mem_ostream>
 #elif YARMI_USE_TEXT_SERIALIZATION
 #	include <yas/text_iarchive.hpp>
 #	include <yas/text_oarchive.hpp>
-#	define YARMI_IARCHIVE_TYPE yas::text_mem_iarchive
-#	define YARMI_OARCHIVE_TYPE yas::text_mem_oarchive
+#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<yas::mem_istream>
+#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<yas::mem_ostream>
 #endif
 
 #include <yas/serializers/std_types_serializers.hpp>
@@ -262,7 +266,8 @@
 			tuple \
 		) \
 	) { \
-		YARMI_OARCHIVE_TYPE oa(yas::no_header); \
+		YARMI_OSTREAM_TYPE os; \
+		YARMI_OARCHIVE_TYPE oa(os, yas::no_header); \
 		oa & static_cast<std::uint8_t>(idx) \
 			& static_cast<std::uint8_t>(version) \
 			BOOST_PP_REPEAT( \
@@ -271,9 +276,10 @@
 				,~ \
 			) \
 		; \
-		YARMI_OARCHIVE_TYPE pa; \
-		pa & oa.get_intrusive_buffer(); \
-		io.send(pa.get_shared_buffer()); \
+		YARMI_OSTREAM_TYPE os2; \
+		YARMI_OARCHIVE_TYPE pa(os2); \
+		pa & os.get_intrusive_buffer(); \
+		io.send(os2.get_shared_buffer()); \
 	}
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION(unused, idx, tuple) \
@@ -369,7 +375,8 @@
 			}; \
 			\
 			try { \
-				YARMI_IARCHIVE_TYPE ia(ptr, size, yas::no_header); \
+				YARMI_ISTREAM_TYPE is(ptr, size); \
+				YARMI_IARCHIVE_TYPE ia(is, yas::no_header); \
 				ia & call_id \
 					& call_version; \
 				\

@@ -70,7 +70,7 @@ struct session_base: std::enable_shared_from_this<session_base> {
 	virtual void on_disconnected() = 0;
 	virtual void on_received(const char *ptr, std::size_t size) = 0;
 
-	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg);
+	virtual void on_yarmi_error(std::uint8_t call_id, std::uint8_t version_id, const std::string &msg);
 
 	void set_on_destruction(bool flag);
 	bool get_on_destruction() const;

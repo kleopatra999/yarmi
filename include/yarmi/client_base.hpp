@@ -50,7 +50,7 @@ namespace yarmi {
 
 template<typename Invoker>
 struct client_base: private boost::noncopyable {
-	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::_header_size };
+	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::header_size() };
 
 	client_base(boost::asio::io_service &ios, Invoker &invoker)
 		:socket(ios)
@@ -113,7 +113,7 @@ struct client_base: private boost::noncopyable {
 		}
 	}
 
-	virtual void on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
+	virtual void on_yarmi_error(std::uint8_t call_id, std::uint8_t version_id, const std::string &msg) {
 		std::cerr << "client_base::on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): " << msg << std::endl;
 	}
 
@@ -122,7 +122,8 @@ private:
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-		YARMI_IARCHIVE_TYPE ia(header_buffer, header_size);
+		YARMI_ISTREAM_TYPE is(header_buffer, header_size);
+		YARMI_IARCHIVE_TYPE ia(is);
 		std::uint32_t body_length = 0;
 		ia & body_length;
 

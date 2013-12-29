@@ -54,6 +54,14 @@ std::ostream& operator<< (std::ostream &s, const std::unordered_map<Key, T, Hash
 	return s << yarmi::decorators::object_close_symbol;
 }
 
+template<typename Key, typename T, typename Hash, typename Comp, typename Allocator>
+std::istream& operator>> (std::istream &s, std::unordered_map<Key, T, Hash, Comp, Allocator> &o) {
+	if ( s.get() != yarmi::decorators::object_open_symbol )
+		throw std::runtime_error("object open symbol expected '{'");
+
+	return s;
+}
+
 } // ns std
 
 /***************************************************************************/

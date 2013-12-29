@@ -102,6 +102,14 @@ ostream& operator<<(ostream& s, const tuple<Args...>& o) {
 	return s << yarmi::decorators::object_close_symbol;
 }
 
+template<typename... Args>
+istream& operator>>(istream& s, tuple<Args...>& o) {
+	if ( s.get() != yarmi::decorators::object_open_symbol )
+		throw std::runtime_error("object open symbol expected '{'");
+
+	return s;
+}
+
 } // ns std
 
 /***************************************************************************/

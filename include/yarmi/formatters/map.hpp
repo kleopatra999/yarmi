@@ -43,7 +43,7 @@
 namespace std {
 
 template<typename Key, typename T, typename Comp, typename Allocator>
-std::ostream& operator<< (std::ostream &s, const std::map<Key, T, Comp, Allocator> &o) {
+ostream& operator<< (ostream &s, const std::map<Key, T, Comp, Allocator> &o) {
 	s << yarmi::decorators::object_open_symbol;
 	for ( auto cur = o.begin(), end = o.end(); cur != end; ++cur ) {
 		s << "\"" << cur->first << "\":";
@@ -52,6 +52,14 @@ std::ostream& operator<< (std::ostream &s, const std::map<Key, T, Comp, Allocato
 			s << yarmi::decorators::default_delimiter;
 	}
 	return s << yarmi::decorators::object_close_symbol;
+}
+
+template<typename Key, typename T, typename Comp, typename Allocator>
+istream& operator>> (istream &s, std::map<Key, T, Comp, Allocator> &o) {
+	if ( s.get() != yarmi::decorators::object_open_symbol )
+		throw std::runtime_error("object open symbol expected '{'");
+
+	return s;
 }
 
 } // ns std

@@ -43,12 +43,20 @@
 namespace std {
 
 template<typename T0, typename T1>
-std::ostream& operator<< (std::ostream &s, const std::pair<T0, T1> &o) {
+ostream& operator<< (ostream &s, const std::pair<T0, T1> &o) {
 	s << yarmi::decorators::object_open_symbol << "\"first\":";
 	quoting(s, o.first);
 	s << yarmi::decorators::default_delimiter << "\"second\":";
 	quoting(s, o.second);
 	return s << yarmi::decorators::object_close_symbol;
+}
+
+template<typename T0, typename T1>
+istream& operator>> (istream &s, std::pair<T0, T1> &o) {
+	if ( s.get() != yarmi::decorators::object_open_symbol )
+		throw std::runtime_error("object open symbol expected '{'");
+
+	return s;
 }
 
 } // ns std

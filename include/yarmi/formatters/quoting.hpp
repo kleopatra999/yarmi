@@ -45,36 +45,36 @@ namespace std {
 
 // for string
 template<typename T>
-void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
+void quoting(ostream& s, const T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
 	s << '\"' << o << '\"';
 }
 template<typename T>
-void quoting(std::istream& s, T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
+void quoting(istream& s, T &o, typename std::enable_if<std::is_same<T, std::string>::value>::type* = 0) {
 	std::getline(s, o, '\"');
 }
 // for bool
 template<typename T>
-void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
+void quoting(ostream& s, const T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
 	s << (o ? "true" : "false");
 }
 template<typename T>
-void quoting(std::istream& s, T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
+void quoting(istream& s, T &o, typename std::enable_if<std::is_same<T, bool>::value>::type* = 0) {
 	char str[4] = "\0";
 	s.read(str, sizeof(str));
 	if ( std::strncmp(str, "true", sizeof(str)) == 0 ) {
 		o = true;
 		if ( s.get() != '\"' )
-			throw std::runtime_error();
+			throw runtime_error();
 	}
 }
 // for enums
 template<typename T>
-void quoting(std::ostream& s, const T &o, typename std::enable_if<std::is_enum<T>::value>::type* = 0) {
+void quoting(ostream& s, const T &o, typename std::enable_if<std::is_enum<T>::value>::type* = 0) {
 	s << '\"' << o << '\"';
 }
 // for other types
 template<typename T>
-void quoting(std::ostream& s, const T &o, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, bool>::value || std::is_enum<T>::value)>::type* = 0) {
+void quoting(ostream& s, const T &o, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, bool>::value || std::is_enum<T>::value)>::type* = 0) {
 	s << o;
 }
 

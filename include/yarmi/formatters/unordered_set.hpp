@@ -53,6 +53,14 @@ std::ostream& operator<< (std::ostream &s, const std::unordered_set<Key, Hash, C
 	return s << yarmi::decorators::array_close_symbol;
 }
 
+template<typename Key, typename Hash, typename Comp, typename Allocator>
+std::istream& operator>> (std::istream &s, std::unordered_set<Key, Hash, Comp, Allocator> &o) {
+	if ( s.get() != yarmi::decorators::array_open_symbol )
+		throw std::runtime_error("array open symbol expected '['");
+
+	return s;
+}
+
 } // ns std
 
 /***************************************************************************/

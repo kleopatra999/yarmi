@@ -43,7 +43,7 @@
 namespace std {
 
 template<typename Key, typename Comp, typename Allocator>
-std::ostream& operator<< (std::ostream &s, const std::set<Key, Comp, Allocator> &o) {
+ostream& operator<< (ostream &s, const std::set<Key, Comp, Allocator> &o) {
 	s << yarmi::decorators::array_open_symbol;
 	for ( auto cur = o.begin(), end = o.end(); cur != end; ++cur ) {
 		quoting(s, *cur);
@@ -51,6 +51,14 @@ std::ostream& operator<< (std::ostream &s, const std::set<Key, Comp, Allocator> 
 			s << yarmi::decorators::default_delimiter;
 	}
 	return s << yarmi::decorators::array_close_symbol;
+}
+
+template<typename Key, typename Comp, typename Allocator>
+istream& operator>> (istream &s, std::set<Key, Comp, Allocator> &o) {
+	if ( s.get() != yarmi::decorators::array_open_symbol )
+		throw std::runtime_error("array open symbol expected '['");
+
+	return s;
 }
 
 } // ns std

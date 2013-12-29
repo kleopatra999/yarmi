@@ -33,6 +33,7 @@
 #define _yarmi__formatters__vector_hpp
 
 #include <iostream>
+#include <iterator>
 #include <vector>
 #include <stdexcept>
 

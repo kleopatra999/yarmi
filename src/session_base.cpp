@@ -46,7 +46,7 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session_base::impl {
-	enum { header_size = sizeof(yas::uint32_t)+YARMI_IARCHIVE_TYPE::_header_size };
+	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::header_size() };
 
 	impl(boost::asio::io_service &ios)
 		:socket(ios)
@@ -78,7 +78,8 @@ struct session_base::impl {
 			return;
 		}
 
-		YARMI_IARCHIVE_TYPE ia(header_buffer, header_size);
+		YARMI_ISTREAM_TYPE is(header_buffer, header_size);
+		YARMI_IARCHIVE_TYPE ia(is);
 		std::uint32_t body_length = 0;
 		ia & body_length;
 
@@ -214,7 +215,7 @@ void session_base::send(const yas::shared_buffer &buffer) {
 
 /***************************************************************************/
 
-void session_base::on_yarmi_error(yas::uint8_t call_id, yas::uint8_t version_id, const std::string &msg) {
+void session_base::on_yarmi_error(std::uint8_t call_id, std::uint8_t version_id, const std::string &msg) {
 	std::cerr << "YARMI: on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): \"" << msg << "\"" << std::endl << std::flush;
 }
 
