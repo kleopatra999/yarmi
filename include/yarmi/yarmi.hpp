@@ -47,6 +47,9 @@
 #include <yarmi/formatters/vector.hpp>
 
 #include <yarmi/declare_enum.hpp>
+#include <yarmi/declare_ns.hpp>
+#include <yarmi/declare_lazy_if.hpp>
+#include <yarmi/declare_tuple_is_empty.hpp>
 
 #include <cstdio>
 #include <cstdint>
@@ -83,93 +86,20 @@
 
 /***************************************************************************/
 
-#define YARMI_SYSTEM_ERROR_API_NAME \
-	yarmi_error
-
-#define YARMI_SYSTEM_ERROR_API_SIG \
-	(std::uint8_t, std::uint8_t, std::string)
-
-/***************************************************************************/
-
 #define YARMI_DECLARE_MESSAGE_WRAP_X(...) \
-	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
+		  ((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
 #define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
-	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
+		  ((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
 #define YARMI_DECLARE_MESSAGE_WRAP_X0
 #define YARMI_DECLARE_MESSAGE_WRAP_Y0
 
 /***************************************************************************/
 
-#define YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM(unused, data, elem) \
-	namespace elem {
+#define YARMI_SYSTEM_ERROR_API_NAME \
+	yarmi_error
 
-#define YARMI_CONSTRUCT_INVOKER_OPEN_NS(seq) \
-	BOOST_PP_SEQ_FOR_EACH( \
-		 YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM \
-		,~ \
-		,seq \
-	)
-
-#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM(unused1, unused2, data) \
-	data
-
-#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS(seq) \
-	BOOST_PP_REPEAT( \
-		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM \
-		,} \
-	)
-
-/***************************************************************************/
-
-#define YARMI_LAZY_IIF(bit, true_args, false_args, true_macro, false_macro) \
-	YARMI_LAZY_IIF_I(bit, true_args, false_args, true_macro, false_macro)
-
-#define YARMI_LAZY_IIF_I(bit, true_args, false_args, true_macro, false_macro) \
-	YARMI_LAZY_IIF_ ## bit(true_args, false_args, true_macro, false_macro)
-
-#define YARMI_LAZY_IIF_0(true_args, false_args, true_macro, false_macro) \
-	false_macro false_args
-
-#define YARMI_LAZY_IIF_1(true_args, false_args, true_macro, false_macro) \
-	true_macro true_args
-
-#define YARMI_LAZY_IF(cond, true_args, false_args, true_macro, false_macro) \
-	YARMI_LAZY_IIF(BOOST_PP_BOOL(cond), true_args, false_args, true_macro, false_macro)
-
-/***************************************************************************/
-// based on the: http://gustedt.wordpress.com/2010/06/08/detect-empty-macro-arguments
-
-#define YARMI_ARG16(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, ...) _15
-#define YARMI_HAS_COMMA(...) YARMI_ARG16(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-#define YARMI__TRIGGER_PARENTHESIS_(...) ,
-
-#define YARMI_ISEMPTY(...) \
-	YARMI__ISEMPTY( \
-		/* test if there is just one argument, eventually an empty one */ \
-		YARMI_HAS_COMMA(__VA_ARGS__), \
-		/* test if _TRIGGER_PARENTHESIS_ together with the argument adds a comma */ \
-		YARMI_HAS_COMMA(YARMI__TRIGGER_PARENTHESIS_ __VA_ARGS__),                 \
-		/* test if the argument together with a parenthesis adds a comma */ \
-		YARMI_HAS_COMMA(__VA_ARGS__ (/*empty*/)), \
-		/* test if placing it between _TRIGGER_PARENTHESIS_ and the parenthesis adds a comma */ \
-		YARMI_HAS_COMMA(YARMI__TRIGGER_PARENTHESIS_ __VA_ARGS__ (/*empty*/)) \
-	)
-
-#define YARMI_PASTE5(_0, _1, _2, _3, _4) \
-	_0 ## _1 ## _2 ## _3 ## _4
-
-#define YARMI__ISEMPTY(_0, _1, _2, _3) \
-	YARMI_HAS_COMMA(YARMI_PASTE5(YARMI__IS_EMPTY_CASE_, _0, _1, _2, _3))
-
-#define YARMI__IS_EMPTY_CASE_0001 \
-	,
-
-#define YARMI_TUPLE_TO_ARGS(...) \
-	__VA_ARGS__
-
-#define YARMI_TUPLE_IS_EMPTY(tuple) \
-	YARMI_ISEMPTY(YARMI_TUPLE_TO_ARGS tuple)
+#define YARMI_SYSTEM_ERROR_API_SIG \
+	(std::uint8_t, std::uint8_t, std::string)
 
 /***************************************************************************/
 

@@ -70,4 +70,7 @@ HEADERS += \
     ../../../include/yarmi/formatters/unordered_map.hpp \
     ../../../include/yarmi/formatters/unordered_set.hpp \
     ../../../include/yarmi/formatters/vector.hpp \
-    ../../../include/yarmi/declare_enum.hpp
+    ../../../include/yarmi/declare_enum.hpp \
+    ../../../include/yarmi/declare_ns.hpp \
+    ../../../include/yarmi/declare_lazy_if.hpp \
+    ../../../include/yarmi/declare_tuple_is_empty.hpp
