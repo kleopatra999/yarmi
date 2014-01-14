@@ -50,6 +50,7 @@
 #include <yarmi/declare_ns.hpp>
 #include <yarmi/declare_lazy_if.hpp>
 #include <yarmi/declare_tuple_is_empty.hpp>
+#include <yarmi/declare_ns_to_string.hpp>
 
 #include <cstdio>
 #include <cstdint>
@@ -412,6 +413,7 @@
 	server_apis_seq \
 ) \
 	YARMI_CONSTRUCT_INVOKER_OPEN_NS(client_invoker_ns) \
+		static const char str[] = YARMI_NS_TO_STRING(client_invoker_ns); \
 		YARMI_INVOKER( \
 			 client_invoker_name \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \

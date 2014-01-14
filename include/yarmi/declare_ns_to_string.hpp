@@ -29,23 +29,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__echo__protocol_hpp
-#define _yarmi__echo__protocol_hpp
+#ifndef _yarmi__declare_ns_to_string_hpp
+#define _yarmi__declare_ns_to_string_hpp
 
-#include <yarmi/yarmi.hpp>
+/***************************************************************************/
 
-YARMI_CONSTRUCT(
-	(yarmi)(1)(2)(3),
-	client_invoker, // name of the client invoker
-	(pong,
-		((std::string))
+#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
+	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+
+#define YARMI_NS_TO_STRING(seq) \
+	BOOST_PP_STRINGIZE( \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(seq) \
+			,YARMI_NS_TO_STRING_ITEM \
+			,seq \
+		) \
 	)
-	,
-	(yarmi),
-	server_invoker, // name of the server invoker
-	(ping,
-		((std::string))
-	)
-);
 
-#endif // _yarmi__echo__protocol_hpp
+/***************************************************************************/
+
+#endif // _yarmi__declare_ns_to_string_hpp
