@@ -35,7 +35,7 @@
 #include <yarmi/yarmi.hpp>
 
 YARMI_CONSTRUCT(
-	(yarmi)(1)(2)(3),
+	(yarmi),
 	client_invoker, // name of the client invoker
 	(pong,
 		((std::string))
