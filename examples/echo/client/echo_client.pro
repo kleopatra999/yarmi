@@ -69,4 +69,5 @@ HEADERS += \
     ../../../include/yarmi/formatters/tuple.hpp \
     ../../../include/yarmi/formatters/unordered_map.hpp \
     ../../../include/yarmi/formatters/unordered_set.hpp \
-    ../../../include/yarmi/formatters/vector.hpp
+    ../../../include/yarmi/formatters/vector.hpp \
+    ../../../include/yarmi/declare_enum.hpp

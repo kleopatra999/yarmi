@@ -1,4 +1,5 @@
-// Copyright (c) 2013, niXman (i dotty nixman doggy gmail dotty com)
+
+// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -31,6 +32,9 @@
 #ifndef _yarmi__yarmi_hpp
 #define _yarmi__yarmi_hpp
 
+#include <boost/preprocessor.hpp>
+#include <boost/type_traits/function_traits.hpp>
+
 #include <yarmi/formatters/decorators.hpp>
 #include <yarmi/formatters/quoting.hpp>
 #include <yarmi/formatters/list.hpp>
@@ -42,8 +46,7 @@
 #include <yarmi/formatters/unordered_set.hpp>
 #include <yarmi/formatters/vector.hpp>
 
-#include <boost/preprocessor.hpp>
-#include <boost/type_traits/function_traits.hpp>
+#include <yarmi/declare_enum.hpp>
 
 #include <cstdio>
 #include <cstdint>
@@ -65,13 +68,15 @@
 #	include <yas/binary_oarchive.hpp>
 #	define YARMI_ISTREAM_TYPE yas::mem_istream
 #	define YARMI_OSTREAM_TYPE yas::mem_ostream
-#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<yas::mem_istream>
-#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<yas::mem_ostream>
+#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<YARMI_ISTREAM_TYPE>
+#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<YARMI_OSTREAM_TYPE>
 #elif YARMI_USE_TEXT_SERIALIZATION
 #	include <yas/text_iarchive.hpp>
 #	include <yas/text_oarchive.hpp>
-#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<yas::mem_istream>
-#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<yas::mem_ostream>
+#	define YARMI_ISTREAM_TYPE yas::mem_istream
+#	define YARMI_OSTREAM_TYPE yas::mem_ostream
+#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<YARMI_ISTREAM_TYPE>
+#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
 #endif
 
 #include <yas/serializers/std_types_serializers.hpp>
@@ -92,6 +97,28 @@
 	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
 #define YARMI_DECLARE_MESSAGE_WRAP_X0
 #define YARMI_DECLARE_MESSAGE_WRAP_Y0
+
+/***************************************************************************/
+
+#define YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM(unused, data, elem) \
+	namespace elem {
+
+#define YARMI_CONSTRUCT_INVOKER_OPEN_NS(seq) \
+	BOOST_PP_SEQ_FOR_EACH( \
+		 YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM \
+		,~ \
+		,seq \
+	)
+
+#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM(unused1, unused2, data) \
+	data
+
+#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS(seq) \
+	BOOST_PP_REPEAT( \
+		 BOOST_PP_SEQ_SIZE(seq) \
+		,YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM \
+		,} \
+	)
 
 /***************************************************************************/
 
@@ -447,252 +474,28 @@
 /***************************************************************************/
 
 #define YARMI_CONSTRUCT( \
+	client_invoker_ns, \
 	client_invoker_name, \
 	client_apis_seq, \
+	server_invoker_ns, \
 	server_invoker_name, \
 	server_apis_seq \
 ) \
-	namespace yarmi { \
+	YARMI_CONSTRUCT_INVOKER_OPEN_NS(client_invoker_ns) \
 		YARMI_INVOKER( \
 			 client_invoker_name \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 		) \
+	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(client_invoker_ns) \
+	\
+	YARMI_CONSTRUCT_INVOKER_OPEN_NS(server_invoker_ns) \
 		YARMI_INVOKER( \
 			 server_invoker_name \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 		) \
-	} // ns yarmi
-
-/***************************************************************************/
-
-#define YARMI_DECLARE_ENUM_MEMBERS(unused, idx, seq) \
-	BOOST_PP_IF( \
-		 BOOST_PP_EQUAL(2 ,BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, seq))) \
-		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))=BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq)) /* member = value */ \
-		,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, seq)) /* member */ \
-	) /* BOOST_PP_IF */ \
-	BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
-
-#define YARMI_DECLARE_ENUM_WRITE_CASES(unused, idx, tuple) \
-	case BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
-		 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))) \
-		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-		,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-	) /* BOOST_PP_IF */ \
-	: \
-	return BOOST_PP_STRINGIZE( \
-		BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
-			 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))) \
-			,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-			,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-		) /* BOOST_PP_IF */ \
-	) \
-	;
-
-#define YARMI_DECLARE_ENUM_IMPL(name, type, spec, seq) \
-	enum class name: type { \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_DECLARE_ENUM_MEMBERS \
-			,seq \
-		) \
-	}; \
-	\
-	spec const char* enum_cast(const name &o) { \
-		switch (o) { \
-			BOOST_PP_REPEAT( \
-				BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_DECLARE_ENUM_WRITE_CASES \
-				,(name, seq) \
-			) \
-		} \
-		return #name "::unknown"; \
-	} \
-	\
-	spec std::ostream& operator<< (std::ostream &s, const name &o) { \
-		return s << enum_cast(o); \
-	}
-
-#define YARMI_DECLARE_ENUM(name, type, spec, seq) \
-	YARMI_DECLARE_ENUM_IMPL( \
-		 name \
-		,type \
-		,spec \
-		,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X seq, 0) \
-	)
-
-/***************************************************************************/
-
-#include <iostream>
-
-template<typename T>
-void read_value(std::istream &s, const char *name, T &o) {
-	if ( s.get() != '\"' )
-		throw std::runtime_error("bad JSON: expected '\"' before key name");
-	std::string key;
-	std::getline(s, key, '\"');
-	if ( key != name )
-		throw std::runtime_error("bad JSON: expected key \"" + std::string(name) + "\"");
-	//std::cout << "key:\"" << key << "\", expected:\"" << name << "\"" << std::endl;
-	if ( s.get() != ':' )
-		throw std::runtime_error("bad JSON: expected ':' before data-member");
-	s >> o;
-}
-
-#if 0
-if ( s.get() != '\"' ) \
-	throw std::runtime_error("bad JSON: expected '\"' before key name"); \
-std::string BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))); \
-std::getline(s, BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))), '\"'); \
-if ( \
-	BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))) != \
-	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
-) throw std::runtime_error( \
-	"bad JSON: expected key \"" \
-	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
-	"\"" \
-); \
-std::cout << "key:" << BOOST_PP_CAT(s, BOOST_PP_CAT(idx, BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)))) << std::endl; \
-if ( s.get() != ':' ) \
-	throw std::runtime_error("bad JSON: expected ':' before data-member");
-#endif
-
-#define YARMI_DECLARE_MESSAGE_DECLARE_MEMBER(unused, idx, seq) \
-	boost::function_traits<void BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))>::arg1_type \
-		BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq));
-
-#define YARMI_DECLARE_MESSAGE_ENUMERATE_SERIALIZED(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_LESS(idx, BOOST_PP_SEQ_SIZE(seq)), &, ) \
-		BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))
-
-#define YARMI_DECLARE_MESSAGE_ENUMERATE_OUTPUTED(unused, idx, seq) \
-	s << BOOST_PP_IF(BOOST_PP_EQUAL(idx, 0), , ",") \
-		"\"" BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) "\":"; \
-	quoting(s, o.BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)));
-
-#define YARMI_DECLARE_MESSAGE_ENUMERATE_INPUTED(unused, idx, seq) \
-	std::cout << idx << std::endl; \
-	read_value( \
-		 s \
-		,BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
-		,o.BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	);
-
-#define YARMI_DECLARE_MESSAGE_MEMBER_NAME(unused, idx, seq) \
-	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))) \
-		BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
-
-#define YARMI_DECLARE_MESSAGE_ENUMERATE_MEMBERS(unused, data, elem) \
-	data(BOOST_PP_TUPLE_ELEM(2, 0, elem));
-
-#define YARMI_DECLARE_MESSAGE_ENUMERATE_TYPES(unused, idx, seq) \
-	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq))) \
-		BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
-
-/***************************************************************************/
-
-#define YARMI_DECLARE_MESSAGE_IMPL(name, seq, ...) \
-	struct name { \
-	private: \
-		static constexpr const char* __meta_names[] = { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_DECLARE_MESSAGE_MEMBER_NAME \
-				,seq \
-			) \
-		}; \
-		static constexpr const char* __meta_types[] = { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				 ,YARMI_DECLARE_MESSAGE_ENUMERATE_TYPES \
-				,seq \
-			) \
-		}; \
-		\
-	public: \
-		static constexpr const char* meta_name() { return #name; } \
-		static constexpr std::size_t meta_count() { return BOOST_PP_SEQ_SIZE(seq); } \
-		\
-		static constexpr const char* const* meta_members() { return __meta_names; } \
-		static constexpr const char* meta_member(std::size_t idx) { \
-			return (idx < sizeof(__meta_names)/sizeof(__meta_names[0]) ? __meta_names[idx] : 0); \
-		} \
-		static constexpr const char* const* meta_types() { return __meta_types; } \
-		static constexpr const char* meta_type(std::size_t idx) { \
-			return (idx < sizeof(__meta_types)/sizeof(__meta_types[0]) ? __meta_types[idx] : 0); \
-		} \
-		\
-		/* some code expanded here */ \
-		__VA_ARGS__ \
-		\
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_DECLARE_MESSAGE_DECLARE_MEMBER \
-			,seq \
-		) \
-		\
-		template<typename F> \
-		void apply(const F &func_) const { \
-			BOOST_PP_SEQ_FOR_EACH( \
-				 YARMI_DECLARE_MESSAGE_ENUMERATE_MEMBERS \
-				,func_ \
-				,seq \
-			) \
-		} \
-		template<typename F> \
-		void transform(F &func_) { \
-			BOOST_PP_SEQ_FOR_EACH( \
-				 YARMI_DECLARE_MESSAGE_ENUMERATE_MEMBERS \
-				,func_ \
-				,seq \
-			) \
-		} \
-		\
-		template<typename Archive> \
-		void serialize(Archive &ar) { \
-			ar \
-				BOOST_PP_REPEAT( \
-					 BOOST_PP_SEQ_SIZE(seq) \
-					,YARMI_DECLARE_MESSAGE_ENUMERATE_SERIALIZED \
-					,seq \
-				) \
-			; \
-		} \
-		\
-		friend std::ostream& operator<< (std::ostream &s, const name &o) { \
-			s << '{'; \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_DECLARE_MESSAGE_ENUMERATE_OUTPUTED \
-				,seq \
-			) \
-			s << '}'; \
-			return s; \
-		} \
-		friend std::istream& operator>> (std::istream &s, name &o) { \
-			if ( s.get() != '{' ) \
-				throw std::runtime_error("bad JSON: \'{\'"); \
-				BOOST_PP_REPEAT( \
-					 BOOST_PP_SEQ_SIZE(seq) \
-					,YARMI_DECLARE_MESSAGE_ENUMERATE_INPUTED \
-					,seq \
-				) \
-			return s; \
-		} \
-	};
-
-#define YARMI_DECLARE_MESSAGE( \
-	 name /* type name */ \
-	,seq /* types sequence */ \
-	, ... /* some code */ \
-) \
-	YARMI_DECLARE_MESSAGE_IMPL( \
-		 name \
-		,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X seq, 0) \
-		,__VA_ARGS__ \
-	)
+	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(server_invoker_ns)
 
 /***************************************************************************/
 
