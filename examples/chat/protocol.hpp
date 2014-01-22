@@ -35,7 +35,9 @@
 #include <yarmi/yarmi.hpp>
 
 YARMI_CONSTRUCT(
-	client_invoker, // name of the client invoker
+	 (yarmi)
+	,client_invoker // name of the client invoker
+	,
 	(registration,
 		((std::string, std::string)) // message : registration key
 	)
@@ -52,7 +54,9 @@ YARMI_CONSTRUCT(
 		((std::vector<std::string>)) // without args
 	)
 	,
-	server_invoker, // name of the server invoker
+	 (yarmi)
+	,server_invoker // name of the server invoker
+	,
 	(registration,
 		((std::string)) // username
 	)

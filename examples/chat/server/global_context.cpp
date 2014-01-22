@@ -34,6 +34,7 @@
 
 #include <yas/binary_iarchive.hpp>
 #include <yas/binary_oarchive.hpp>
+#include <yas/file_streams.hpp>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/indexed_by.hpp>
@@ -105,30 +106,30 @@ struct global_context<user_context>::pimpl {
 
 	void load() {
 		if ( exists(users_db_name) ) {
-			std::ifstream file(users_db_name, std::ios::binary);
-			yas::binary_file_iarchive ia(file);
-			while ( file.good() ) {
+			yas::file_istream file(users_db_name);
+			yas::binary_iarchive<yas::file_istream> ia(file);
+			while ( !file.eof() ) {
 				session_wrapper sw;
 				ia & sw;
 				users_db.insert(sw);
 			}
 		}
 		if ( exists(messages_db_name) ) {
-			std::ifstream file(messages_db_name, std::ios::binary);
-			yas::binary_file_iarchive ia(file);
-//			while ( file.good() ) {
-//			}
+			yas::file_istream file(messages_db_name);
+			yas::binary_iarchive<yas::file_istream> ia(file);
+			while ( !file.eof() ) {
+			}
 		}
 	}
 	void save() {
-		{	std::ofstream file(users_db_name, std::ios::binary|std::ios::trunc);
-			yas::binary_file_oarchive oa(file);
+		{	yas::file_ostream file(users_db_name, yas::file_trunc);
+			yas::binary_oarchive<yas::file_ostream> oa(file);
 			for ( const auto &it: users_db ) {
 				oa & it;
 			}
 		}
-		{	std::ofstream file(messages_db_name, std::ios::binary|std::ios::trunc);
-			yas::binary_file_oarchive oa(file);
+		{	yas::file_ostream file(messages_db_name, yas::file_trunc);
+			yas::binary_oarchive<yas::file_ostream> oa(file);
 		}
 	}
 

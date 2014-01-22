@@ -35,17 +35,6 @@
 #include <boost/preprocessor.hpp>
 #include <boost/type_traits/function_traits.hpp>
 
-#include <yarmi/formatters/decorators.hpp>
-#include <yarmi/formatters/quoting.hpp>
-#include <yarmi/formatters/list.hpp>
-#include <yarmi/formatters/map.hpp>
-#include <yarmi/formatters/pair.hpp>
-#include <yarmi/formatters/set.hpp>
-#include <yarmi/formatters/tuple.hpp>
-#include <yarmi/formatters/unordered_map.hpp>
-#include <yarmi/formatters/unordered_set.hpp>
-#include <yarmi/formatters/vector.hpp>
-
 #include <yarmi/declare_enum.hpp>
 #include <yarmi/declare_ns.hpp>
 #include <yarmi/declare_lazy_if.hpp>
@@ -204,13 +193,15 @@
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(name, idx, version) \
 	void name() { \
-		YARMI_OARCHIVE_TYPE oa(yas::no_header); \
+		YARMI_OSTREAM_TYPE os; \
+		YARMI_OARCHIVE_TYPE oa(os, yas::no_header); \
 		oa & static_cast<std::uint8_t>(idx) \
 			& static_cast<std::uint8_t>(version) \
 		; \
-		YARMI_OARCHIVE_TYPE pa; \
-		pa & oa.get_intrusive_buffer(); \
-		io.send(pa.get_shared_buffer()); \
+		YARMI_OSTREAM_TYPE os2; \
+		YARMI_OARCHIVE_TYPE pa(os2); \
+		pa & os.get_intrusive_buffer(); \
+		io.send(os2.get_shared_buffer()); \
 	}
 
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
