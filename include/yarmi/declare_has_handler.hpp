@@ -29,37 +29,54 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "user_context.hpp"
-#include "global_context.hpp"
+#ifndef _yarmi__declare_has_handler_hpp
+#define _yarmi__declare_has_handler_hpp
 
 /***************************************************************************/
 
-user_context::user_context(boost::asio::io_service &ios, global_context<user_context> &gc)
-	:yarmi::session_base(ios)
-	,yarmi::server_invoker<user_context>(*this, *this)
-	,gc(gc)
-{}
+#define YARMI_GENERATE_HAS_HANDLER_GEN_PROC_NAME_proc(ns, cn, name, tuple) \
+	case fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)): return true;
+#define YARMI_GENERATE_HAS_HANDLER_GEN_PROC_NAME_code(ns, cn, ...)
+
+#define YARMI_GENERATE_HAS_HANDLER_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_HAS_HANDLER_GEN_PROC_NAME_proc
+#define YARMI_GENERATE_HAS_HANDLER_GET_PROC_NAME_code(...) \
+	YARMI_GENERATE_HAS_HANDLER_GEN_PROC_NAME_code
+
+#define YARMI_GENERATE_HAS_HANDLER_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_HAS_HANDLER_GET_PROC_NAME_, str)
+
+#define YARMI_GENERATE_HAS_HANDLER_GET_ARGS_NAME_proc(...) \
+	__VA_ARGS__
+#define YARMI_GENERATE_HAS_HANDLER_GET_ARGS_NAME_code(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_HAS_HANDLER_GET_ARGS_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_HAS_HANDLER_GET_ARGS_NAME_, str)
+
+#define YARMI_GENERATE_HAS_HANDLER_ONE_ITEM_IMPL(ns, cn, name, tuple) \
+	name(ns, cn, tuple)
+
+#define YARMI_GENERATE_HAS_HANDLER_ONE_ITEM(unused, idx, tuple) \
+	YARMI_GENERATE_HAS_HANDLER_ONE_ITEM_IMPL( \
+		 BOOST_PP_TUPLE_ELEM(0, tuple) \
+		,BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,YARMI_GENERATE_HAS_HANDLER_GET_PROC_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,YARMI_GENERATE_HAS_HANDLER_GET_ARGS_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+	)
+
+#define YARMI_GENERATE_HAS_HANDLER(ns, cn, seq) \
+	static bool yarmi_has_handler(const std::uint32_t call_id) { \
+		switch ( call_id ) { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_HAS_HANDLER_ONE_ITEM \
+				,(ns, cn, seq) \
+			) \
+			default: return false; \
+		} \
+	}
 
 /***************************************************************************/
 
-void user_context::on_connected() {
-	std::cout << "YARMI: on_connected(" << get_socket().remote_endpoint().address().to_string() << ") called" << std::endl;
-}
-
-void user_context::on_disconnected() {
-	std::cout << "YARMI: on_disconnected() called" << std::endl;
-}
-
-void user_context::on_received(const char *ptr, std::size_t size) {
-	invoke(ptr, size);
-}
-
-/***************************************************************************/
-
-void user_context::on_ping(const std::string &msg) {
-	//std::cout << "received: \"" << msg << "\"" << std::endl;
-	pong(msg);
-	//throw std::runtime_error("remote exception");
-}
-
-/***************************************************************************/
+#endif // _yarmi__declare_has_handler_hpp

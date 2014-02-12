@@ -106,7 +106,7 @@ struct global_context<user_context>::pimpl {
 
 	void load() {
 		if ( exists(users_db_name) ) {
-			yas::file_istream file(users_db_name);
+			yas::file_istream file(users_db_name.c_str());
 			yas::binary_iarchive<yas::file_istream> ia(file);
 			while ( !file.eof() ) {
 				session_wrapper sw;
@@ -115,20 +115,20 @@ struct global_context<user_context>::pimpl {
 			}
 		}
 		if ( exists(messages_db_name) ) {
-			yas::file_istream file(messages_db_name);
+			yas::file_istream file(messages_db_name.c_str());
 			yas::binary_iarchive<yas::file_istream> ia(file);
 			while ( !file.eof() ) {
 			}
 		}
 	}
 	void save() {
-		{	yas::file_ostream file(users_db_name, yas::file_trunc);
+		{	yas::file_ostream file(users_db_name.c_str(), yas::file_trunc);
 			yas::binary_oarchive<yas::file_ostream> oa(file);
 			for ( const auto &it: users_db ) {
 				oa & it;
 			}
 		}
-		{	yas::file_ostream file(messages_db_name, yas::file_trunc);
+		{	yas::file_ostream file(messages_db_name.c_str(), yas::file_trunc);
 			yas::binary_oarchive<yas::file_ostream> oa(file);
 		}
 	}

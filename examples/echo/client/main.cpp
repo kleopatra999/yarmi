@@ -45,8 +45,14 @@ struct client: yarmi::client_base<client>, yarmi::client_invoker<client> {
 	{}
 
 	void on_pong(const std::string &msg) {
-		std::cout << "received: \"" << msg << "\"" << std::endl;
+		//std::cout << "received: \"" << msg << "\"" << std::endl;
 		ping("my message "+std::to_string(++msg_index));
+
+		static std::size_t i = 0;
+		if ( ++i == 1024 ) {
+			i = 0;
+			std::cout << "received: \"" << msg << "\"" << std::endl;
+		}
 	}
 
 	std::size_t msg_index;

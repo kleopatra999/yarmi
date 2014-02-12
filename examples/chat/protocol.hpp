@@ -35,44 +35,22 @@
 #include <yarmi/yarmi.hpp>
 
 YARMI_CONSTRUCT(
-	 (yarmi)
-	,client_invoker // name of the client invoker
+	(yarmi),
+	client_invoker, // name of the client invoker
+	(proc(registration, (std::string))) // username
+	(proc(activation, (std::string, std::string, std::string))) // registration key : username : password
+	(proc(login, (std::string, std::string))) // username : password
+	(proc(logout, ())) // without args
+	(proc(users_online, ())) // without args
+	(proc(users_online, (std::string))) // without args
 	,
-	(registration,
-		((std::string, std::string)) // message : registration key
-	)
-	(activation,
-		((std::string)) // message
-	)
-	(login,
-		((std::string)) // message
-	)
-	(logout,
-		((std::string)) // message
-	)
-	(users_online,
-		((std::vector<std::string>)) // without args
-	)
-	,
-	 (yarmi)
-	,server_invoker // name of the server invoker
-	,
-	(registration,
-		((std::string)) // username
-	)
-	(activation,
-		((std::string, std::string, std::string)) // registration key : username : password
-	)
-	(login,
-		((std::string, std::string)) // username : password
-	)
-	(logout,
-		(()) // without args
-	)
-	(users_online,
-		(()) // without args
-		((std::string)) // with nickname substring
-	)
+	(yarmi),
+	server_invoker, // name of the server invoker
+	(proc(registration, (std::string, std::string))) // message : registration key
+	(proc(activation, (std::string))) // message
+	(proc(login, (std::string))) // message
+	(proc(logout, (std::string))) // message
+	(proc(users_online, (std::vector<std::string>))) // without args
 );
 
 #endif // _yarmi__chat__protocol_hpp
