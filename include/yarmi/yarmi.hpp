@@ -32,6 +32,9 @@
 #ifndef _yarmi__yarmi_hpp
 #define _yarmi__yarmi_hpp
 
+#include <yas/mem_streams.hpp>
+#include <yas/serializers/std_types_serializers.hpp>
+
 #include <boost/preprocessor.hpp>
 
 #include <yarmi/declare_enum.hpp>
@@ -44,10 +47,7 @@
 #include <yarmi/declare_callers.hpp>
 #include <yarmi/declare_has_handler.hpp>
 
-#include <cstdio>
 #include <cstdint>
-#include <string>
-#include <stdexcept>
 
 /***************************************************************************/
 
@@ -72,9 +72,6 @@
 #	define YARMI_IARCHIVE_TYPE yas::text_iarchive<YARMI_ISTREAM_TYPE>
 #	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
 #endif
-
-#include <yas/mem_streams.hpp>
-#include <yas/serializers/std_types_serializers.hpp>
 
 /***************************************************************************/
 

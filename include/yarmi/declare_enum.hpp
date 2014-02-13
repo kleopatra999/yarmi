@@ -40,7 +40,7 @@
 		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))=BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq)) /* member = value */ \
 		,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, seq)) /* member */ \
 	) /* BOOST_PP_IF */ \
-	BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
+	YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_SEQ_SIZE(seq), idx)
 
 #define YARMI_DECLARE_ENUM_WRITE_CASES(unused, idx, tuple) \
 	case BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
