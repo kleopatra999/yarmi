@@ -32,9 +32,6 @@
 #ifndef _yarmi__yarmi_hpp
 #define _yarmi__yarmi_hpp
 
-#include <yas/mem_streams.hpp>
-#include <yas/serializers/std_types_serializers.hpp>
-
 #include <boost/preprocessor.hpp>
 
 #include <yarmi/declare_enum.hpp>
@@ -42,10 +39,9 @@
 #include <yarmi/declare_lazy_if.hpp>
 #include <yarmi/declare_tuple_is_empty.hpp>
 #include <yarmi/declare_ns_to_string.hpp>
-#include <yarmi/declare_get_api_name.hpp>
 #include <yarmi/declare_invoker.hpp>
 #include <yarmi/declare_callers.hpp>
-#include <yarmi/declare_has_handler.hpp>
+#include <yarmi/declare_helpers.hpp>
 
 #include <cstdint>
 
@@ -73,6 +69,9 @@
 #	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
 #endif
 
+#include <yas/mem_streams.hpp>
+#include <yas/serializers/std_types_serializers.hpp>
+
 /***************************************************************************/
 
 #define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
@@ -95,8 +94,7 @@
 			,io(io) \
 		{} \
 		\
-		YARMI_GENERATE_GET_API_NAME(ns, cn, opposeq) \
-		YARMI_GENERATE_HAS_HANDLER(ns, cn, opposeq) \
+		YARMI_GENERATE_HELPERS(ns, cn, opposeq) \
 		\
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
 		\
