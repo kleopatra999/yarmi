@@ -35,7 +35,7 @@
 /***************************************************************************/
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS(name) \
-	impl.on_##name();
+	impl.name();
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
 	BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple) arg##idx;
@@ -56,51 +56,26 @@
 		,tuple \
 	) \
 	; \
-	impl.on_##name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
-
-#define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING(name, tuple) \
-	YARMI_LAZY_IF( \
-		 YARMI_TUPLE_IS_EMPTY(tuple) \
-		,(name) \
-		,(name, tuple) \
-		,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS \
-		,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS \
-	)
-
-
-#define YARMI_GENERATE_INVOKERS_GEN_proc(ns, cn, name, tuple) \
-	case fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)): { \
-		YARMI_GENERATE_INVOKERS_GENERATE_INVOKING(name, tuple) \
-		return true; \
-	}
-
-#define YARMI_GENERATE_INVOKERS_GEN_code(ns, cn, ...)
-
-#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME_proc(...) \
-	YARMI_GENERATE_INVOKERS_GEN_proc
-#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME_code(...) \
-	YARMI_GENERATE_INVOKERS_GEN_code
-
-#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_GET_PROC_NAME_, str)
-
-#define YARMI_GENERATE_INVOKERS_GET_ARGS_NAME_proc(...) \
-	__VA_ARGS__
-#define YARMI_GENERATE_INVOKERS_GET_ARGS_NAME_code(...) \
-	__VA_ARGS__
-
-#define YARMI_GENERATE_INVOKERS_GET_ARGS_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_GET_ARGS_NAME_, str)
+	impl.name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
 
 #define YARMI_GENERATE_INVOKERS_ONE_ITEM(ns, cn, name, tuple) \
-	name(ns, cn, tuple)
+	case ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)): { \
+		YARMI_LAZY_IF( \
+			 YARMI_TUPLE_IS_EMPTY(tuple) \
+			,(name) \
+			,(name, tuple) \
+			,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS \
+			,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS \
+		) \
+		return true; \
+	}
 
 #define YARMI_GENERATE_INVOKERS_IMPL(unused, idx, tuple) \
 	YARMI_GENERATE_INVOKERS_ONE_ITEM( \
 		 BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,YARMI_GENERATE_INVOKERS_GET_PROC_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
-		,YARMI_GENERATE_INVOKERS_GET_ARGS_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
 	)
 
 #define YARMI_GENERATE_INVOKERS(ns, cn, seq) \

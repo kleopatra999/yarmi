@@ -34,35 +34,22 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_HELPERS_GEN_PROC_NAME_proc(ns, cn, name, tuple) \
-	case fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)): return YARMI_NS_TO_STRING(ns, cn::name tuple);
-#define YARMI_GENERATE_HELPERS_GEN_PROC_NAME_code(ns, cn, ...)
-
-#define YARMI_GENERATE_HELPERS_GET_PROC_NAME_proc(...) \
-	YARMI_GENERATE_HELPERS_GEN_PROC_NAME_proc
-#define YARMI_GENERATE_HELPERS_GET_PROC_NAME_code(...) \
-	YARMI_GENERATE_HELPERS_GEN_PROC_NAME_code
-
-#define YARMI_GENERATE_HELPERS_GET_PROC_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_HELPERS_GET_PROC_NAME_, str)
-
-#define YARMI_GENERATE_HELPERS_GET_ARGS_NAME_proc(...) \
-	__VA_ARGS__
-#define YARMI_GENERATE_HELPERS_GET_ARGS_NAME_code(...) \
-	__VA_ARGS__
-
-#define YARMI_GENERATE_HELPERS_GET_ARGS_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_HELPERS_GET_ARGS_NAME_, str)
-
-#define YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL(ns, cn, name, tuple) \
-	name(ns, cn, tuple)
+#define YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL(ns, cn, tuple) \
+	case ::yarmi::detail::fnv1a_32( \
+		YARMI_NS_TO_STRING( \
+			 ns \
+			,cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple) \
+		) \
+	): return YARMI_NS_TO_STRING( \
+			 ns \
+			,cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple) \
+		);
 
 #define YARMI_GENERATE_HELPERS_ONE_ITEM(unused, idx, tuple) \
 	YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL( \
 		 BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,YARMI_GENERATE_HELPERS_GET_PROC_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
-		,YARMI_GENERATE_HELPERS_GET_ARGS_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
 	)
 
 #define YARMI_GENERATE_HELPERS(ns, cn, seq) \

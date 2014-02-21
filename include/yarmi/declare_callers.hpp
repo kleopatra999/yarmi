@@ -39,14 +39,12 @@
 		YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_TUPLE_SIZE(tuple), idx)
 
 
-#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(ns, cn, name) \
+#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(ns, cn, name, opponame) \
 	void name() { \
-		YARMI_OSTREAM_TYPE os; \
-		YARMI_OARCHIVE_TYPE oa(os, yas::no_header); \
-		constexpr std::uint32_t call_id = fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name ())); \
+		YARMI_OSTREAM_TYPE os, os2; \
+		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::opponame ())); \
 		oa & call_id; \
-		YARMI_OSTREAM_TYPE os2; \
-		YARMI_OARCHIVE_TYPE pa(os2); \
 		pa & os.get_intrusive_buffer(); \
 		io.send(os2.get_shared_buffer()); \
 	}
@@ -54,7 +52,7 @@
 #define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
 	& arg##idx
 
-#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY(ns, cn, name, tuple) \
+#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY(ns, cn, name, opponame, tuple) \
 	void name( \
 		BOOST_PP_REPEAT( \
 			BOOST_PP_TUPLE_SIZE(tuple), \
@@ -62,9 +60,9 @@
 			tuple \
 		) \
 	) { \
-		YARMI_OSTREAM_TYPE os; \
-		YARMI_OARCHIVE_TYPE oa(os, yas::no_header); \
-		constexpr std::uint32_t call_id = fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)); \
+		YARMI_OSTREAM_TYPE os, os2; \
+		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::opponame tuple)); \
 		oa & call_id \
 		\
 		BOOST_PP_REPEAT( \
@@ -73,49 +71,26 @@
 				,~ \
 			) \
 		; \
-		YARMI_OSTREAM_TYPE os2; \
-		YARMI_OARCHIVE_TYPE pa(os2); \
 		pa & os.get_intrusive_buffer(); \
 		io.send(os2.get_shared_buffer()); \
 	}
 
-#define YARMI_GENERATE_CALLERS_GEN_proc(ns, cn, name, tuple) \
+#define YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL(ns, cn, name, opponame, tuple) \
 	YARMI_LAZY_IF( \
 		YARMI_TUPLE_IS_EMPTY(tuple), \
-		(ns, cn, name), \
-		(ns, cn, name, tuple), \
+		(ns, cn, name, opponame), \
+		(ns, cn, name, opponame, tuple), \
 		YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY, \
 		YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY \
 	)
-
-#define YARMI_GENERATE_CALLERS_GEN_code(ns, ...) \
-	__VA_ARGS__
-
-#define YARMI_GENERATE_CALLERS_GET_PROC_NAME_proc(...) \
-	YARMI_GENERATE_CALLERS_GEN_proc
-#define YARMI_GENERATE_CALLERS_GET_PROC_NAME_code(...) \
-	YARMI_GENERATE_CALLERS_GEN_code
-
-#define YARMI_GENERATE_CALLERS_GET_PROC_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_CALLERS_GET_PROC_NAME_, str)
-
-#define YARMI_GENERATE_CALLERS_GET_ARGS_NAME_proc(...) \
-	__VA_ARGS__
-#define YARMI_GENERATE_CALLERS_GET_ARGS_NAME_code(...) \
-	__VA_ARGS__
-
-#define YARMI_GENERATE_CALLERS_GET_ARGS_NAME(str) \
-	BOOST_PP_CAT(YARMI_GENERATE_CALLERS_GET_ARGS_NAME_, str)
-
-#define YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL(ns, cn, name, args) \
-	name(ns, cn, args)
 
 #define YARMI_GENERATE_CALLERS_ONE_ITEM(unused, idx, tuple) \
 	YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL( \
 		 BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,YARMI_GENERATE_CALLERS_GET_PROC_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
-		,YARMI_GENERATE_CALLERS_GET_ARGS_NAME(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
+		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
 	)
 
 #define YARMI_GENERATE_CALLERS(ns, cn, seq) \

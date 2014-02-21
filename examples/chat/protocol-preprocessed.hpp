@@ -6,188 +6,154 @@ struct client_invoker {
 		:impl(impl)
 		,io(io)
 	{}
+
+private:
+	static const char* yarmi_handler_name_impl(const std::uint32_t call_id) {
+		switch ( call_id ) {
+			case ::yarmi::detail::fnv1a_32( "yarmi ::client_invoker::on_registration (std::string, std::string)" ):
+				return "yarmi ::client_invoker::on_registration (std::string, std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::client_invoker::on_activation (std::string)" ):
+				return "yarmi ::client_invoker::on_activation (std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::client_invoker::on_login (std::string)" ):
+				return "yarmi ::client_invoker::on_login (std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::client_invoker::on_logout (std::string)" ):
+				return "yarmi ::client_invoker::on_logout (std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::client_invoker::on_users_online (std::vector<std::string>)" ):
+				return "yarmi ::client_invoker::on_users_online (std::vector<std::string>)";
+			default:
+				return 0;
+		}
+	}
+
+public:
+	static const char* yarmi_handler_name(const std::uint32_t call_id) {
+		const char *str = yarmi_handler_name_impl(call_id);
+		return (str ? str : "unknown");
+	}
+	static bool yarmi_has_handler(const std::uint32_t call_id) {
+		return yarmi_handler_name_impl(call_id) != 0;
+	}
 	
-	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(0)
-			& static_cast<std::uint8_t>(0)
-			& arg0
-			& arg1
-			& arg2;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
-	}
-	void registration(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(1)
-			& static_cast<std::uint8_t>(0)
+	void registration( const std::string &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_registration (std::string)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void activation(const std::string &arg0, const std::string &arg1, const std::string &arg2) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(2)
-			& static_cast<std::uint8_t>(0)
+	void activation( const std::string &arg0 , const std::string &arg1 , const std::string &arg2 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_activation (std::string, std::string, std::string)");
+		oa & call_id
 			& arg0
 			& arg1
 			& arg2;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void login(const std::string &arg0, const std::string &arg1) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(3)
-			& static_cast<std::uint8_t>(0)
+	void login( const std::string &arg0 , const std::string &arg1 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_login (std::string, std::string)");
+		oa & call_id
 			& arg0
 			& arg1;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
 	void logout() {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(4)
-			& static_cast<std::uint8_t>(0);
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_logout ()");
+		oa & call_id;
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
 	void users_online() {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(5)
-			& static_cast<std::uint8_t>(0);
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_users_online ()");
+		oa & call_id;
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void users_online(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(5)
-			& static_cast<std::uint8_t>(1)
+	void users_online( const std::string &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_users_online (std::string)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void invoke(const char *ptr, std::size_t size) {
-		std::uint8_t call_id, call_version;
-		static const char* names[] = {
-			 "yarmi_error"
-			,"registration"
-			,"activation"
-			,"login"
-			,"logout"
-			,"users_online"
-		};
-		static const std::uint8_t versions[] = { 0, 0, 0, 0, 0, 0 };
-		
-		try {
-			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
-			ia & call_id
-				& call_version;
-			if ( call_id < 0 || call_id > 5 ) {
-				char errstr[1024] = {0};
-				std::snprintf(
-					 errstr
-					,sizeof(errstr)
-					,"%s::%s(): bad call_id %d"
-					,"client_invoker"
-					,__FUNCTION__
-					,static_cast<int>(call_id)
-				);
-				throw std::runtime_error(errstr);
+	bool invoke(const std::uint32_t call_id, yas::binary_iarchive<yas::mem_istream> &ia) {
+		switch ( call_id ) {
+			case ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_registration (std::string, std::string)"): {
+				std::string arg0;
+				std::string arg1;
+				ia & arg0
+					& arg1;
+				impl.on_registration(arg0, arg1);
+				return true;
 			}
-			if ( call_version > versions[call_id] ) {
-				char errstr[1024] = {0};
-				std::snprintf(
-					 errstr
-					,sizeof(errstr)
-					,"%s::%s(): bad call_version %d for call_id %d(%s::%s())"
-					,"client_invoker"
-					,__FUNCTION__
-					,static_cast<int>(call_version)
-					,static_cast<int>(call_id)
-					,"client_invoker"
-					,names[call_id]
-				);
-				throw std::runtime_error(errstr);
+			case ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_activation (std::string)"): {
+				std::string arg0;
+				ia & arg0;
+				impl.on_activation(arg0);
+				return true;
 			}
-			
-			switch ( call_id ) {
-				case 0: {
-					std::uint8_t arg0;
-					std::uint8_t arg1;
-					std::string arg2;
-					ia & arg0
-						& arg1
-						& arg2;
-					impl.on_yarmi_error( arg0 , arg1 , arg2);
-				};
-				break;
-				case 1: {
-					std::string arg0;
-					std::string arg1;
-					ia & arg0
-						& arg1;
-					impl.on_registration(arg0, arg1);
-				};
-				break;
-				case 2: {
-					std::string arg0;
-					ia & arg0;
-					impl.on_activation(arg0);
-				};
-				break;
-				case 3: {
-					std::string arg0;
-					ia & arg0;
-					impl.on_login(arg0);
-				};
-				break;
-				case 4: {
-					std::string arg0;
-					ia & arg0;
-					impl.on_logout(arg0);
-				};
-				break;
-				case 5: {
-					std::vector<std::string> arg0;
-					ia & arg0;
-					impl.on_users_online(arg0);
-				};
-				break;
+			case ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_login (std::string)"): {
+				std::string arg0;
+				ia & arg0;
+				impl.on_login(arg0);
+				return true;
 			}
-		} catch (const std::exception &ex) {
-			char errstr[1024] = {0};
-			std::snprintf(
-				 errstr
-				,sizeof(errstr)
-				,"std::exception is thrown when %s::%s() is called: '%s'"
-				,"client_invoker"
-				,names[call_id]
-				,ex.what()
-			);
-			yarmi_error(call_id, call_version, errstr);
-		} catch (...) {
-			char errstr[1024] = {0}; std::snprintf(
-				 errstr
-				,sizeof(errstr)
-				,"unknown exception is thrown when %s::%s() is called"
-				,"client_invoker"
-				,names[call_id]
-			);
-			yarmi_error(call_id, call_version, errstr);
+			case ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_logout (std::string)"): {
+				std::string arg0;
+				ia & arg0;
+				impl.on_logout(arg0);
+				return true;
+			}
+			case ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_users_online (std::vector<std::string>)"): {
+				std::vector<std::string> arg0;
+				ia & arg0;
+				impl.on_users_online(arg0);
+				return true;
+			}
+			default:
+				return false;
 		}
+	}
+	bool invoke(const char *ptr, const std::size_t size) {
+		std::uint32_t call_id;
+		yas::mem_istream is(ptr, size);
+		yas::binary_iarchive<yas::mem_istream> ia(is, yas::no_header);
+		ia & call_id;
+		return invoke(call_id, ia);
 	}
 
 private:
 	Impl &impl;
 	IO &io;
 }; // struct client_invoker
+} // ns yarmi
+
+namespace yarmi {
 
 template<typename Impl, typename IO = Impl>
 struct server_invoker {
@@ -195,191 +161,147 @@ struct server_invoker {
 		:impl(impl)
 		,io(io)
 	{}
-	
-	void yarmi_error(const std::uint8_t &arg0, const std::uint8_t &arg1, const std::string &arg2) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(0)
-			& static_cast<std::uint8_t>(0)
-			& arg0
-			& arg1
-			& arg2;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+
+private:
+	static const char* yarmi_handler_name_impl(const std::uint32_t call_id) {
+		switch ( call_id ) {
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_registration (std::string)" ):
+				return "yarmi ::server_invoker::on_registration (std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_activation (std::string, std::string, std::string)" ):
+				return "yarmi ::server_invoker::on_activation (std::string, std::string, std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_login (std::string, std::string)" ):
+				return "yarmi ::server_invoker::on_login (std::string, std::string)";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_logout ()" ):
+				return "yarmi ::server_invoker::on_logout ()";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_users_online ()" ):
+				return "yarmi ::server_invoker::on_users_online ()";
+			case ::yarmi::detail::fnv1a_32( "yarmi ::server_invoker::on_users_online (std::string)" ):
+				return "yarmi ::server_invoker::on_users_online (std::string)";
+			default:
+				return 0;
+		}
 	}
-	void registration(const std::string &arg0, const std::string &arg1) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(1)
-			& static_cast<std::uint8_t>(0)
+
+public:
+	static const char* yarmi_handler_name(const std::uint32_t call_id) {
+		const char *str = yarmi_handler_name_impl(call_id);
+		return (str ? str : "unknown");
+	}
+	static bool yarmi_has_handler(const std::uint32_t call_id) {
+		return yarmi_handler_name_impl(call_id) != 0;
+	}
+	
+	void registration( const std::string &arg0 , const std::string &arg1 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_registration (std::string, std::string)");
+		oa & call_id
 			& arg0
 			& arg1;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void activation(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(2)
-			& static_cast<std::uint8_t>(0)
+	void activation( const std::string &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_activation (std::string)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void login(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(3)
-			& static_cast<std::uint8_t>(0)
+	void login( const std::string &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_login (std::string)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void logout(const std::string &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(4)
-			& static_cast<std::uint8_t>(0)
+	void logout( const std::string &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_logout (std::string)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
-	void users_online(const std::vector<std::string> &arg0) {
-		yas::binary_mem_oarchive oa(yas::no_header);
-		oa & static_cast<std::uint8_t>(5)
-			& static_cast<std::uint8_t>(0)
+	void users_online( const std::vector<std::string> &arg0 ) {
+		yas::mem_ostream os;
+		yas::binary_oarchive<yas::mem_ostream> oa(os, yas::no_header);
+		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32("yarmi ::client_invoker::on_users_online (std::vector<std::string>)");
+		oa & call_id
 			& arg0;
-		yas::binary_mem_oarchive pa;
-		pa & oa.get_intrusive_buffer();
-		io.send(pa.get_shared_buffer());
+		yas::mem_ostream os2;
+		yas::binary_oarchive<yas::mem_ostream> pa(os2);
+		pa & os.get_intrusive_buffer();
+		io.send(os2.get_shared_buffer());
 	}
 	
-	void invoke(const char *ptr, std::size_t size) {
-		std::uint8_t call_id, call_version;
-		static const char* names[] = {
-			 "yarmi_error"
-			,"registration"
-			,"activation"
-			,"login"
-			,"logout"
-			,"users_online"
-		};
-		static const std::uint8_t versions[] = { 0, 0, 0, 0, 0, 1 };
-		
-		try {
-			yas::binary_mem_iarchive ia(ptr, size, yas::no_header);
-			ia & call_id
-				& call_version;
-			if ( call_id < 0 || call_id > 5 ) {
-				char errstr[1024] = {0};
-				std::snprintf(
-					 errstr
-					,sizeof(errstr)
-					,"%s::%s(): bad call_id %d"
-					,"server_invoker"
-					,__FUNCTION__
-					,static_cast<int>(call_id)
-				);
-				throw std::runtime_error(errstr);
+	bool invoke(const std::uint32_t call_id, yas::binary_iarchive<yas::mem_istream> &ia) {
+		switch ( call_id ) {
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_registration (std::string)"): {
+				std::string arg0;
+				ia & arg0;
+				impl.on_registration(arg0);
+				return true;
 			}
-			if ( call_version > versions[call_id] ) {
-				char errstr[1024] = {0};
-				std::snprintf(
-					 errstr
-					,sizeof(errstr)
-					,"%s::%s(): bad call_version %d for call_id %d(%s::%s())"
-					,"server_invoker"
-					,__FUNCTION__
-					,static_cast<int>(call_version)
-					,static_cast<int>(call_id)
-					,"server_invoker"
-					,names[call_id]
-				);
-				throw std::runtime_error(errstr);
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_activation (std::string, std::string, std::string)"): {
+				std::string arg0;
+				std::string arg1;
+				std::string arg2;
+				ia & arg0
+					& arg1
+					& arg2;
+				impl.on_activation(arg0, arg1, arg2);
+				return true;
 			}
-			
-			switch ( call_id ) {
-				case 0: {
-					std::uint8_t arg0;
-					std::uint8_t arg1;
-					std::string arg2;
-					ia & arg0
-						& arg1
-						& arg2;
-					impl.on_yarmi_error(arg0, arg1, arg2);
-				};
-				break;
-				case 1: {
-					std::string arg0;
-					ia & arg0;
-					impl.on_registration(arg0);
-				};
-				break;
-				case 2: {
-					std::string arg0;
-					std::string arg1;
-					std::string arg2;
-					ia & arg0
-						& arg1
-						& arg2;
-					impl.on_activation(arg0, arg1, arg2);
-				};
-				break;
-				case 3: {
-					std::string arg0;
-					std::string arg1;
-					ia & arg0
-						& arg1;
-					impl.on_login(arg0, arg1);
-				};
-				break;
-				case 4: {
-					impl.on_logout();
-				};
-				break;
-				case 5: {
-					switch ( call_version ) {
-						case 0: {
-							impl.on_users_online();
-						};
-						break;
-						case 1: {
-							std::string arg0;
-							ia & arg0;
-							impl.on_users_online(arg0);
-						};
-						break;
-					}
-				};
-				break;
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_login (std::string, std::string)"): {
+				std::string arg0;
+				std::string arg1;
+				ia & arg0
+					& arg1;
+				impl.on_login(arg0, arg1);
+				return true;
 			}
-		} catch (const std::exception &ex) {
-			char errstr[1024] = {0};
-			std::snprintf(
-				 errstr
-				,sizeof(errstr)
-				,"std::exception is thrown when %s::%s() is called: '%s'"
-				,"server_invoker"
-				,names[call_id]
-				,ex.what()
-			);
-			yarmi_error(call_id, call_version, errstr);
-		} catch (...) {
-			char errstr[1024] = {0};
-			std::snprintf(
-				 errstr
-				,sizeof(errstr)
-				,"unknown exception is thrown when %s::%s() is called"
-				,"server_invoker"
-				,names[call_id]
-			);
-			yarmi_error(call_id, call_version, errstr);
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_logout ()"): {
+				impl.on_logout();
+				return true;
+			}
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_users_online ()"): {
+				impl.on_users_online();
+				return true;
+			}
+			case ::yarmi::detail::fnv1a_32("yarmi ::server_invoker::on_users_online (std::string)"): {
+				std::string arg0;
+				ia & arg0;
+				impl.on_users_online(arg0);
+				return true;
+			}
+			default:
+				return false;
 		}
+	}
+	bool invoke(const char *ptr, const std::size_t size) {
+		std::uint32_t call_id;
+		yas::mem_istream is(ptr, size);
+		yas::binary_iarchive<yas::mem_istream> ia(is, yas::no_header);
+		ia & call_id;
+		return invoke(call_id, ia);
 	}
 
 private:
 	Impl &impl;
 	IO &io;
 }; // struct server_invoker
-
 } // ns yarmi

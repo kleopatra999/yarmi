@@ -29,28 +29,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__chat__protocol_hpp
-#define _yarmi__chat__protocol_hpp
+#ifndef _yarmi__fnv1a_hpp
+#define _yarmi__fnv1a_hpp
 
-#include <yarmi/yarmi.hpp>
+#include <cstdint>
 
-YARMI_CONSTRUCT(
-	(yarmi),
-	client_invoker, // name of the client invoker
-	(registration, on_registration, (std::string)) // username
-	(activation, on_activation, (std::string, std::string, std::string)) // registration key : username : password
-	(login, on_login, (std::string, std::string)) // username : password
-	(logout, on_logout, ()) // without args
-	(users_online, on_users_online, ()) // without args
-	(users_online, on_users_online, (std::string)) // substring of username
-	,
-	(yarmi),
-	server_invoker, // name of the server invoker
-	(registration, on_registration, (std::string, std::string)) // message : registration key
-	(activation, on_activation, (std::string)) // message
-	(login, on_login, (std::string)) // message
-	(logout, on_logout, (std::string)) // message
-	(users_online, on_users_online, (std::vector<std::string>)) // vector of usernames
-);
+namespace yarmi {
+namespace detail {
 
-#endif // _yarmi__chat__protocol_hpp
+template<std::uint32_t N>
+constexpr std::uint32_t fnv1a_32(const char(&s)[N], std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
+	return (i==N-1)?h:fnv1a_32(s, i+1, ((h^s[i])*0x01000193));
+}
+
+} // ns detail
+} // ns yarmi
+
+#endif // _yarmi__fnv1a_hpp

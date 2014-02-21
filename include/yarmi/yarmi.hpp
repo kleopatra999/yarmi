@@ -34,6 +34,7 @@
 
 #include <boost/preprocessor.hpp>
 
+#include <yarmi/fnv1a.hpp>
 #include <yarmi/declare_enum.hpp>
 #include <yarmi/declare_ns.hpp>
 #include <yarmi/declare_lazy_if.hpp>
@@ -42,8 +43,6 @@
 #include <yarmi/declare_invoker.hpp>
 #include <yarmi/declare_callers.hpp>
 #include <yarmi/declare_helpers.hpp>
-
-#include <cstdint>
 
 /***************************************************************************/
 
@@ -73,7 +72,13 @@
 #include <yas/serializers/std_types_serializers.hpp>
 
 /***************************************************************************/
-
+#define YARMI_DECLARE_MESSAGE_WRAP_X(...) \
+	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
+#define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
+	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
+#define YARMI_DECLARE_MESSAGE_WRAP_X0
+#define YARMI_DECLARE_MESSAGE_WRAP_Y0
+ 
 #define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
 	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(idx, BOOST_PP_SUB(size, 1)))
 
@@ -82,13 +87,6 @@
 #define YARMI_CONSTRUCT_INVOKER(ns, cn, oppocn, seq, opposeq) \
 	template<typename Impl, typename IO = Impl> \
 	struct cn { \
-		private: \
-			template<std::uint32_t N> \
-			static constexpr std::uint32_t fnv1a_32(const char(&s)[N], std::uint32_t i=0, std::uint32_t h=0x811c9dc5) { \
-				return (i==N-1)?h:fnv1a_32(s, i+1, ((h^s[i])*0x01000193)); \
-			} \
-		public: \
-		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
@@ -120,8 +118,8 @@
 			 client_invoker_ns \
 			,client_invoker_name \
 			,server_invoker_name \
-			,client_apis_seq \
-			,server_apis_seq \
+			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 		) \
 	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(client_invoker_ns) \
 	\
@@ -130,8 +128,8 @@
 			 server_invoker_ns \
 			,server_invoker_name \
 			,client_invoker_name \
-			,server_apis_seq \
-			,client_apis_seq \
+			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 		) \
 	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(server_invoker_ns)
 

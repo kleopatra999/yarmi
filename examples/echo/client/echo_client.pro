@@ -74,4 +74,5 @@ HEADERS += \
     ../../../include/yarmi/declare_ns.hpp \
     ../../../include/yarmi/declare_lazy_if.hpp \
     ../../../include/yarmi/declare_tuple_is_empty.hpp \
-    ../../../include/yarmi/declare_ns_to_string.hpp
+    ../../../include/yarmi/declare_ns_to_string.hpp \
+    ../../../include/yarmi/fnv1a.hpp
