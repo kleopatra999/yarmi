@@ -36,10 +36,9 @@ YARMI_CONSTRUCT(
 [Ну вот же](https://github.com/niXman/yarmi/blob/master/examples/echo/protocol-preprocessed.hpp):
 
 1. Метод `client_invoker::ping()` соответствует описанному нами в макросе `YARMI_CONSTRUCT()`
-2. Метод `client_invoker::yarmi_error()` - это системный метод, используется для сообщения противоположной стороне о том, что при попытке произвести вызов произошла ошибка. Посмотрите внимательно, в `client_invoker::invoke()`, десериализация и вызов обернуты в `try{}catch()` блок, а в `catch()` блоках производится вызов `yarmi_error()`. Таким образом, если при десериализации или вызове процедуры возникнет исключение - оно будет успешно перехвачено `catch()` блоком, и информация об исключении будет отправлена вызывающей стороне. То же самое будет происходить и в противоположном направлении. Т.е. если сервер вызвал у клиента процедуру, в ходе вызова которой возникло исключение - клиент отправит серверу информацию об ошибке, так же дополнительно сообщив ID и версию вызова, в котором возникло исключение. Но использовать `yarmi_error()` вы можете и сами, ничто этого не запрещает. Пример: `yarmi_error(call_id, version_id, "message");`
-3. В методе `server_invoker::invoke()`, в `switch`е, производится десериализация аргументов, подставновка их в вызов, и, собственно, вызов `on_ping()`. Помните, что мы со стороны клиента производим вызов `ping()`? Так вот, реализация этого метода на стороне сервера зовется `on_ping()`. Т.е. к имени каждой вызываемой процедуры на стороне ее реализации, добавляется префикс `on_`.
-4. В методе `client_invoker::invoke()`, в `switch`е, происходит тоже самое с тем лишь отличием, что проиходит вызов метода `on_pong()`. Сервер пошлет ответ клиенту, вызвав этот метод. Т.е. порядок вызовов такой: `client_invoker::ping()` -> `server_invoker::on_ping()` -> `server_invoker::pong()` -> `client_invoker::on_pong()`.
-5. Вам не нужно более заботиться ни о соответствии сигнатур, ни о идентификаторах, ни о сериализаторах/десериализаторах.
+2. В методе `server_invoker::invoke()`, в `switch`е, производится десериализация аргументов, подставновка их в вызов, и, собственно, вызов `client_invoker::on_pong()`.
+3. В методе `server_invoker::invoke()`, в `switch`е, происходит тоже самое с тем лишь отличием, что проиходит вызов метода `server_invoker::on_ping()`. Сервер пошлет ответ клиенту, вызвав этот метод. Т.е. порядок вызовов такой: `client_invoker::ping()` -> `server_invoker::on_ping()` -> `server_invoker::pong()` -> `client_invoker::on_pong()`.
+4. Вам не нужно более заботиться ни о соответствии сигнатур, ни о идентификаторах, ни о сериализаторах/десериализаторах.
 
 В добавок ко всему этому, одним немаловажным плюсом является и то, что сейчас невероятно сложно допустить ошибку. И, даже если мы ее допустим - узнаем мы об этом во время собрки проекта.
 
@@ -85,22 +84,18 @@ struct session: yarmi::session_base, yarmi::server_invoker<session> {
 };
 ```
 
-Ну как ты, Шарапов, впечатлен? ;)
-
-Еще одна, немаловажная для интернет-сервисов плюшка - версионность процедур. Это позволит нам создавать новые версии API нашего сервиса, и при этом, не требуя обновления наших клиентов.
+Еще одна, немаловажная для интернет-сервисов плюшка - возможность перегрузки процедур. Это позволит нам создавать новые версии API нашего сервиса, и при этом, не требуя обновления наших клиентов.
 т.е., к примеру, мы может сделать такое:
 ```cpp
 YARMI_CONSTRUCT(
+    (yarmi),
     client_invoker,
-    (pong,
-        ((std::string))
-        ((std::string, std::string)) // это вторая версия процедуры 'pong()'
-    ),
+    (ping, on_ping, (std::string)),
+    (ping, on_ping, (std::string, std::string)),
+    (yarmi),
     server_invoker,
-    (ping,
-        ((std::string))
-        ((std::string, std::string)) // это вторая версия процедуры 'ping()'
-    )
+    (pong, on_pong, (std::string))
+    (pong, on_pong, (std::string, std::string))
 )
 ```
 Таким образом, клинет может может вызывать как `ping("message")` так и `ping("message", "user name")`. И, соответственно, сервер может слать два типа ответа. И снова повторюсь: ничего руками делать не нужно! соответствие `ID`ов процедур и их версий - это забота yarmi!
@@ -108,40 +103,22 @@ YARMI_CONSTRUCT(
 ### Более сложный пример
 ```cpp
 YARMI_CONSTRUCT(
+	(yarmi),
 	client_invoker, // name of the client invoker
-	(registration,
-		((std::string, std::string)) // message : registration key
-	)
-	(activation,
-		((std::string)) // message
-	)
-	(login,
-		((std::string)) // message
-	)
-	(logout,
-		((std::string)) // message
-	)
-	(users_online,
-		((std::vector<std::string>)) // without args
-	)
+	(registration, on_registration, (std::string)) // username
+	(activation, on_activation, (std::string, std::string, std::string)) // registration key : username : password
+	(login, on_login, (std::string, std::string)) // username : password
+	(logout, on_logout, ()) // without args
+	(users_online, on_users_online, ()) // without args
+	(users_online, on_users_online, (std::string)) // substring of username
 	,
+	(yarmi),
 	server_invoker, // name of the server invoker
-	(registration,
-		((std::string)) // username
-	)
-	(activation,
-		((std::string, std::string, std::string)) // registration key : username : password
-	)
-	(login,
-		((std::string, std::string)) // username : password
-	)
-	(logout,
-		(()) // without args
-	)
-	(users_online,
-		(()) // without args
-		((std::string)) // with nickname substring
-	)
+	(registration, on_registration, (std::string, std::string)) // message : registration key
+	(activation, on_activation, (std::string)) // message
+	(login, on_login, (std::string)) // message
+	(logout, on_logout, (std::string)) // message
+	(users_online, on_users_online, (std::vector<std::string>)) // vector of usernames
 );
 ```
 Результат [тут](https://github.com/niXman/yarmi/blob/master/examples/chat/protocol-preprocessed.hpp).
@@ -152,8 +129,7 @@ YARMI_CONSTRUCT(
 TODO
 =========
 
-1. Генерация нескольких интерфейсов
-2. Описать спецификацию (хоть она и проста больше некуда)
-3. Возможность использовать собственный алокатор
-4. Добавить возможность выбора протокола (tcp/udp)
-5. Добавить возможность использовать Unix domain socket
+1. Описать спецификацию (хоть она и проста больше некуда)
+2. Возможность использовать собственный алокатор
+3. Добавить возможность выбора протокола (tcp/udp)
+4. Добавить возможность использовать Unix domain socket
