@@ -1,4 +1,3 @@
-
 // Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
@@ -38,6 +37,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
+#include <cassert>
 #include <memory>
 #include <functional>
 
@@ -50,8 +50,14 @@ struct session_base: std::enable_shared_from_this<session_base> {
 
 	template<typename Impl, template<typename> class GC, typename D>
 	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {
-		session_ptr ptr(new Impl(ios, gc), del);
-		return ptr;
+		Impl *impl = new Impl(ios, gc);
+		try {
+			session_ptr ptr(impl, del);
+			return ptr;
+		} catch(...) {
+			delete impl;
+			assert(0);
+		}
 	}
 
 	session_base(boost::asio::io_service &ios);
