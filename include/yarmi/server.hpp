@@ -42,32 +42,36 @@
 #include <string>
 #include <sstream>
 
+/***************************************************************************/
+
 namespace yarmi {
+namespace detail {
+
+static bool default_on_connected_predicate(const boost::asio::ip::tcp::endpoint &) {
+	return true;
+}
+static void default_error_handler(const std::string &msg) {
+	std::cerr << "YARMI: server: \"" << msg << "\"" << std::endl << std::flush;
+}
+
+} // ns detail
 
 /***************************************************************************/
 
-template<typename UC, template<typename> class GC>
+template<
+	 typename UC
+	,template<typename UC> class GC
+	,typename CP=bool(*)(const boost::asio::ip::tcp::endpoint &)
+	,typename EH=void(*)(const std::string &)
+>
 struct server: private boost::noncopyable {
-private:
-	static bool default_on_connected_predicate(const boost::asio::ip::tcp::endpoint &) {
-		return true;
-	}
-	static void default_error_handler(const std::string &msg) {
-		std::cerr << "YARMI: server: \"" << msg << "\"" << std::endl << std::flush;
-	}
-
-public:
-	template<
-		 typename CP = decltype(&default_on_connected_predicate)
-		,typename EH = decltype(&default_error_handler)
-	>
 	server(
 		 const std::string &ip
 		,std::uint16_t port
 		,boost::asio::io_service &ios
 		,GC<UC> &gc
-		,CP cp = &default_on_connected_predicate
-		,EH eh = &default_error_handler
+		,CP cp = &detail::default_on_connected_predicate
+		,EH eh = &detail::default_error_handler
 	)
 		:acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(ip), port))
 		,allocator()
@@ -159,8 +163,8 @@ private:
 	yarmi::handler_allocator<512> allocator;
 	GC<UC> &gc;
 
-	std::function<bool(const boost::asio::ip::tcp::endpoint &)> cp;
-	std::function<void(const std::string &)> eh;
+	CP cp;
+	EH eh;
 };
 
 /***************************************************************************/

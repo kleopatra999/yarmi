@@ -215,12 +215,6 @@ void session_base::send(const yas::shared_buffer &buffer) {
 
 /***************************************************************************/
 
-void session_base::on_yarmi_error(std::uint8_t call_id, std::uint8_t version_id, const std::string &msg) {
-	std::cerr << "YARMI: on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): \"" << msg << "\"" << std::endl << std::flush;
-}
-
-/***************************************************************************/
-
 void session_base::set_on_destruction(bool flag) { pimpl->on_destruction = flag; }
 bool session_base::get_on_destruction() const { return pimpl->on_destruction; }
 

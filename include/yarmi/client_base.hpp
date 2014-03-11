@@ -113,10 +113,6 @@ struct client_base: private boost::noncopyable {
 		}
 	}
 
-	virtual void on_yarmi_error(std::uint8_t call_id, std::uint8_t version_id, const std::string &msg) {
-		std::cerr << "client_base::on_yarmi_error(" << (int)call_id << ", " << (int)version_id << "): " << msg << std::endl;
-	}
-
 private:
 	void on_header_readed(const boost::system::error_code &ec, std::size_t rd) {
 		if ( ec || rd != header_size )

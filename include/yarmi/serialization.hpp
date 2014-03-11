@@ -29,64 +29,36 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__session_base_hpp
-#define _yarmi__session_base_hpp
-
-#include <yarmi/yarmi.hpp>
-#include <yarmi/global_context_base.hpp>
-
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
-#include <cassert>
-#include <memory>
-#include <functional>
-
-namespace yarmi {
+#ifndef _yarmi__serialization_hpp
+#define _yarmi__serialization_hpp
 
 /***************************************************************************/
 
-struct session_base: std::enable_shared_from_this<session_base> {
-	typedef std::shared_ptr<session_base> session_ptr;
+#if !defined(YARMI_USE_BINARY_SERIALIZATION) && \
+	 !defined(YARMI_USE_TEXT_SERIALIZATION)
+# define YARMI_USE_BINARY_SERIALIZATION (1)
+//# define YARMI_USE_TEXT_SERIALIZATION (1)
+#endif
 
-	template<typename Impl, template<typename> class GC, typename D>
-	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {
-		Impl *impl = new Impl(ios, gc);
-		try {
-			session_ptr ptr(impl, del);
-			return ptr;
-		} catch(...) {
-			delete impl;
-			assert(0);
-		}
-	}
+#if YARMI_USE_BINARY_SERIALIZATION
+#	include <yas/binary_iarchive.hpp>
+#	include <yas/binary_oarchive.hpp>
+#	define YARMI_ISTREAM_TYPE yas::mem_istream
+#	define YARMI_OSTREAM_TYPE yas::mem_ostream
+#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<YARMI_ISTREAM_TYPE>
+#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<YARMI_OSTREAM_TYPE>
+#elif YARMI_USE_TEXT_SERIALIZATION
+#	include <yas/text_iarchive.hpp>
+#	include <yas/text_oarchive.hpp>
+#	define YARMI_ISTREAM_TYPE yas::mem_istream
+#	define YARMI_OSTREAM_TYPE yas::mem_ostream
+#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<YARMI_ISTREAM_TYPE>
+#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
+#endif
 
-	session_base(boost::asio::io_service &ios);
-	virtual ~session_base();
-
-	boost::asio::ip::tcp::socket&
-	get_socket();
-
-	void start();
-	void stop();
-	void close();
-
-	void send(const yas::shared_buffer &buffer);
-
-	virtual void on_connected() = 0;
-	virtual void on_disconnected() = 0;
-	virtual void on_received(const char *ptr, std::size_t size) = 0;
-
-	void set_on_destruction(bool flag);
-	bool get_on_destruction() const;
-
-private:
-	struct impl;
-	impl *pimpl;
-};
+#include <yas/mem_streams.hpp>
+#include <yas/serializers/std_types_serializers.hpp>
 
 /***************************************************************************/
 
-} // ns yarmi
-
-#endif // _yarmi__session_base_hpp
+#endif // _yarmi__serialization_hpp

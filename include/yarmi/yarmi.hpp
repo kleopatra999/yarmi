@@ -35,6 +35,7 @@
 #include <boost/preprocessor.hpp>
 
 #include <yarmi/fnv1a.hpp>
+#include <yarmi/serialization.hpp>
 #include <yarmi/declare_enum.hpp>
 #include <yarmi/declare_ns.hpp>
 #include <yarmi/declare_lazy_if.hpp>
@@ -46,39 +47,13 @@
 
 /***************************************************************************/
 
-#if !defined(YARMI_USE_BINARY_SERIALIZATION) && \
-	 !defined(YARMI_USE_TEXT_SERIALIZATION)
-# define YARMI_USE_BINARY_SERIALIZATION (1)
-//# define YARMI_USE_TEXT_SERIALIZATION (1)
-#endif
-
-#if YARMI_USE_BINARY_SERIALIZATION
-#	include <yas/binary_iarchive.hpp>
-#	include <yas/binary_oarchive.hpp>
-#	define YARMI_ISTREAM_TYPE yas::mem_istream
-#	define YARMI_OSTREAM_TYPE yas::mem_ostream
-#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<YARMI_ISTREAM_TYPE>
-#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<YARMI_OSTREAM_TYPE>
-#elif YARMI_USE_TEXT_SERIALIZATION
-#	include <yas/text_iarchive.hpp>
-#	include <yas/text_oarchive.hpp>
-#	define YARMI_ISTREAM_TYPE yas::mem_istream
-#	define YARMI_OSTREAM_TYPE yas::mem_ostream
-#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<YARMI_ISTREAM_TYPE>
-#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
-#endif
-
-#include <yas/mem_streams.hpp>
-#include <yas/serializers/std_types_serializers.hpp>
-
-/***************************************************************************/
 #define YARMI_DECLARE_MESSAGE_WRAP_X(...) \
 	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
 #define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
 	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
 #define YARMI_DECLARE_MESSAGE_WRAP_X0
 #define YARMI_DECLARE_MESSAGE_WRAP_Y0
- 
+
 #define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
 	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(idx, BOOST_PP_SUB(size, 1)))
 
