@@ -78,4 +78,5 @@ HEADERS += \
     ../../../include/yarmi/fnv1a.hpp \
     ../../../include/yarmi/declare_callers.hpp \
     ../../../include/yarmi/declare_helpers.hpp \
-    ../../../include/yarmi/declare_invoker.hpp
+    ../../../include/yarmi/declare_invoker.hpp \
+    ../../../include/yarmi/serialization.hpp
