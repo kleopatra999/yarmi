@@ -52,14 +52,9 @@ void user_context::on_disconnected() {
 
 void user_context::on_received(const char *ptr, std::size_t size) {
 	try {
-		YARMI_ISTREAM_TYPE is(ptr, size);
-		YARMI_IARCHIVE_TYPE ia(is, yas::no_header);
-		std::uint32_t call_id = 0;
-		ia & call_id;
-
-		const bool invoked = invoke(call_id, ia);
-		if ( !invoked ) {
-			std::cerr << "no hendler for call_id=" << call_id << std::endl;
+		std::size_t call_id = 0;
+		if ( !invoke(ptr, size, &call_id) ) {
+			std::cerr << "no handler for call_id=" << call_id << std::endl;
 		}
 	} catch (const std::exception &ex) {
 		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;

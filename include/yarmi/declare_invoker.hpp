@@ -90,11 +90,14 @@
 		} \
 	} \
 	\
-	bool invoke(const char *ptr, const std::size_t size) { \
+	bool invoke(const char *ptr, const std::size_t size, std::size_t *cid = 0) { \
 		std::uint32_t call_id; \
 		YARMI_ISTREAM_TYPE is(ptr, size); \
 		YARMI_IARCHIVE_TYPE ia(is, yas::no_header); \
 		ia & call_id; \
+		\
+		if ( cid ) \
+			*cid = call_id; \
 		\
 		return invoke(call_id, ia); \
 	} \

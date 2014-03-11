@@ -40,7 +40,6 @@
 
 #include <cassert>
 #include <memory>
-#include <functional>
 
 namespace yarmi {
 
