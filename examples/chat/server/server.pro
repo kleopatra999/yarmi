@@ -77,4 +77,14 @@ HEADERS += \
     ../../../include/yarmi/formatters/tuple.hpp \
     ../../../include/yarmi/formatters/unordered_map.hpp \
     ../../../include/yarmi/formatters/unordered_set.hpp \
-    ../../../include/yarmi/formatters/vector.hpp
+    ../../../include/yarmi/formatters/vector.hpp \
+    ../../../include/yarmi/declare_callers.hpp \
+    ../../../include/yarmi/declare_enum.hpp \
+    ../../../include/yarmi/declare_helpers.hpp \
+    ../../../include/yarmi/declare_invoker.hpp \
+    ../../../include/yarmi/declare_lazy_if.hpp \
+    ../../../include/yarmi/declare_ns.hpp \
+    ../../../include/yarmi/declare_ns_to_string.hpp \
+    ../../../include/yarmi/declare_tuple_is_empty.hpp \
+    ../../../include/yarmi/fnv1a.hpp \
+    ../../../include/yarmi/serialization.hpp

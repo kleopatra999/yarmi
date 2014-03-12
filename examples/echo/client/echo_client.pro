@@ -42,7 +42,9 @@ INCLUDEPATH += \
 	../../../include
 
 SOURCES += \
-	main.cpp
+	main.cpp \
+    ../../../src/global_context_base.cpp \
+    ../../../src/session_base.cpp
 
 LIBS += \
 	-lboost_system
