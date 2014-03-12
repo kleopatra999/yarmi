@@ -58,8 +58,8 @@
 	; \
 	impl.name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
 
-#define YARMI_GENERATE_INVOKERS_ONE_ITEM(ns, cn, name, tuple) \
-	case ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::name tuple)): { \
+#define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, ns, cn, name, tuple) \
+	case static_cast<id_type>(_yarmi_handlers::BOOST_PP_CAT(name, _##idx)): { \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY(tuple) \
 			,(name) \
@@ -72,14 +72,15 @@
 
 #define YARMI_GENERATE_INVOKERS_IMPL(unused, idx, tuple) \
 	YARMI_GENERATE_INVOKERS_ONE_ITEM( \
-		 BOOST_PP_TUPLE_ELEM(0, tuple) \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
 		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple))) \
 	)
 
 #define YARMI_GENERATE_INVOKERS(ns, cn, seq) \
-	bool invoke(const std::uint32_t call_id, YARMI_IARCHIVE_TYPE &ia) { \
+	bool invoke(const id_type call_id, YARMI_IARCHIVE_TYPE &ia) { \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
@@ -90,8 +91,8 @@
 		} \
 	} \
 	\
-	bool invoke(const char *ptr, const std::size_t size, std::size_t *cid = 0) { \
-		std::uint32_t call_id; \
+	bool invoke(const char *ptr, const std::size_t size, id_type *cid = 0) { \
+		id_type call_id = 0; \
 		YARMI_ISTREAM_TYPE is(ptr, size); \
 		YARMI_IARCHIVE_TYPE ia(is, yas::no_header); \
 		ia & call_id; \

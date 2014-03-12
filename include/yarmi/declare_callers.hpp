@@ -62,7 +62,7 @@
 	) { \
 		YARMI_OSTREAM_TYPE os, os2; \
 		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
-		constexpr std::uint32_t call_id = ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::opponame tuple)); \
+		constexpr id_type call_id = ::yarmi::detail::fnv1a_32(YARMI_NS_TO_STRING(ns, cn::opponame tuple)); \
 		oa & call_id \
 		\
 		BOOST_PP_REPEAT( \

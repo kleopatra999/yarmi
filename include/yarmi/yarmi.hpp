@@ -41,9 +41,10 @@
 #include <yarmi/declare_lazy_if.hpp>
 #include <yarmi/declare_tuple_is_empty.hpp>
 #include <yarmi/declare_ns_to_string.hpp>
-#include <yarmi/declare_invoker.hpp>
-#include <yarmi/declare_callers.hpp>
+#include <yarmi/declare_metacode.hpp>
 #include <yarmi/declare_helpers.hpp>
+#include <yarmi/declare_callers.hpp>
+#include <yarmi/declare_invoker.hpp>
 
 /***************************************************************************/
 
@@ -62,10 +63,15 @@
 #define YARMI_CONSTRUCT_INVOKER(ns, cn, oppocn, seq, opposeq) \
 	template<typename Impl, typename IO = Impl> \
 	struct cn { \
+		\
+		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
+		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
+		\
+		YARMI_GENERATE_METACODE(ns, cn, opposeq) \
 		\
 		YARMI_GENERATE_HELPERS(ns, cn, opposeq) \
 		\
