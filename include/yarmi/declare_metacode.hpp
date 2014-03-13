@@ -56,13 +56,20 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE(ns, cn, seq) \
+#define YARMI_GENERATE_METACODE(ns, cn, opposeq, seq) \
 	private: \
-		enum class _yarmi_handlers: std::uint32_t { \
+		enum class _yarmi_handlers: id_type { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
 				,YARMI_GENERATE_METACODE_AUX \
 				,(ns, cn, seq) \
+			) \
+		}; \
+		enum class _yarmi_requests: id_type { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(opposeq) \
+				,YARMI_GENERATE_METACODE_AUX \
+				,(ns, cn, opposeq) \
 			) \
 		}; \
 	public:

@@ -71,7 +71,7 @@
 			,io(io) \
 		{} \
 		\
-		YARMI_GENERATE_METACODE(ns, cn, opposeq) \
+		YARMI_GENERATE_METACODE(ns, cn, opposeq, seq) \
 		\
 		YARMI_GENERATE_HELPERS(ns, cn, opposeq) \
 		\
