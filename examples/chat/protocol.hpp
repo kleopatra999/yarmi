@@ -41,7 +41,6 @@ YARMI_CONSTRUCT(
 	(activation   , on_activation  , (std::string, std::string, std::string) ) // registration key : username : password
 	(login        , on_login       , (std::string, std::string)              ) // username : password
 	(logout       , on_logout      , ()                                      ) // without args
-	(logout       , on_logout      , ()                                      ) // without args
 	(users_online , on_users_online, ()                                      ) // without args
 	(users_online , on_users_online, (std::string)                           ) // substring of username
 	,
