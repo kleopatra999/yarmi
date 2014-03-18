@@ -35,22 +35,23 @@
 #include <yarmi/yarmi.hpp>
 
 YARMI_CONSTRUCT(
-	(yarmi),
+	(yarmi),        // client invoker namespace
 	client_invoker, // name of the client invoker
-	(registration, on_registration, (std::string)) // username
-	(activation, on_activation, (std::string, std::string, std::string)) // registration key : username : password
-	(login, on_login, (std::string, std::string)) // username : password
-	(logout, on_logout, ()) // without args
-	(users_online, on_users_online, ()) // without args
-	(users_online, on_users_online, (std::string)) // substring of username
+	(registration , on_registration, (std::string)                           ) // username
+	(activation   , on_activation  , (std::string, std::string, std::string) ) // registration key : username : password
+	(login        , on_login       , (std::string, std::string)              ) // username : password
+	(logout       , on_logout      , ()                                      ) // without args
+	(logout       , on_logout      , ()                                      ) // without args
+	(users_online , on_users_online, ()                                      ) // without args
+	(users_online , on_users_online, (std::string)                           ) // substring of username
 	,
-	(yarmi),
+	(yarmi),        // server invoker namespace
 	server_invoker, // name of the server invoker
-	(registration, on_registration, (std::string, std::string)) // message : registration key
-	(activation, on_activation, (std::string)) // message
-	(login, on_login, (std::string)) // message
-	(logout, on_logout, (std::string)) // message
-	(users_online, on_users_online, (std::vector<std::string>)) // vector of usernames
+	(registration , on_registration, (std::string, std::string)              ) // message : registration key
+	(activation   , on_activation  , (std::string)                           ) // message
+	(login        , on_login       , (std::string)                           ) // message
+	(logout       , on_logout      , (std::string)                           ) // message
+	(users_online , on_users_online, (std::vector<std::string>)              ) // vector of usernames
 );
 
 #endif // _yarmi__chat__protocol_hpp

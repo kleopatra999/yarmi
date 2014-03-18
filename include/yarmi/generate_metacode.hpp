@@ -37,42 +37,130 @@
 #define YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple) \
 	BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(1, tuple), _##idx)
 
-#define YARMI_GENERATE_METACODE_IMPL(idx, ns, cn, tuple) \
-	YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple) = \
-		::yarmi::detail::fnv1a_32( \
-			YARMI_NS_TO_STRING( \
-				 ns \
-				,cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple) \
-			) \
-		),
+#define YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL(idx, name) \
+	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a_32(_meta_requests_names[idx]) \
+	,
 
-#define YARMI_GENERATE_METACODE_AUX(unused, idx, tuple) \
-	YARMI_GENERATE_METACODE_IMPL( \
+#define YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL( \
 		 idx \
-		,BOOST_PP_TUPLE_ELEM(0, tuple) \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+#define YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL(idx, name) \
+	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a_32(_meta_handlers_names[idx]) \
+	,
+
+#define YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_METACODE_HANDLERS_NAMES_IMPL(ns, cn, tuple) \
+	YARMI_NS_TO_STRING(ns, cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple)) \
+	,
+
+#define YARMI_GENERATE_METACODE_HANDLERS_NAMES_AUX(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_HANDLERS_NAMES_IMPL( \
+		 BOOST_PP_TUPLE_ELEM(0, tuple) \
+		,BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
+	)
+
+#define YARMI_GENERATE_METACODE_REQUESTS_NAMES_IMPL(ns, cn, tuple) \
+	YARMI_NS_TO_STRING(ns, cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple)) \
+	,
+
+#define YARMI_GENERATE_METACODE_REQUESTS_NAMES_AUX(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_REQUESTS_NAMES_IMPL( \
+		 BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
 		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
 	)
 
 /***************************************************************************/
+#if 0
+#define YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL(idx, tuple) \
+	case static_cast<id_type>(_meta_handlers_ids::YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple)): \
+		return _meta_handlers_names[idx];
 
-#define YARMI_GENERATE_METACODE(ns, cn, opposeq, seq) \
+#define YARMI_GENERATE_HELPERS_ONE_ITEM(unused, idx, seq) \
+	YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL( \
+		 idx \
+		,BOOST_PP_SEQ_ELEM(idx, seq) \
+	)
+#endif
+/***************************************************************************/
+
+#define YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL(idx, name) \
+	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
+		? _meta_handlers_names[idx]
+
+#define YARMI_GENERATE_METACODE_HAS_HANDLER_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
 	private: \
-		enum class _yarmi_handlers: id_type { \
+		static constexpr const char *_meta_requests_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_METACODE_AUX \
-				,(ns, cn, seq) \
+				,YARMI_GENERATE_METACODE_REQUESTS_NAMES_AUX \
+				,(oppons, oppocn, seq) \
+			) \
+			0 \
+		};\
+		enum class _meta_requests_ids: id_type { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX \
+				,seq \
 			) \
 		}; \
-		enum class _yarmi_requests: id_type { \
+		\
+		static constexpr const char *_meta_handlers_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
-				,YARMI_GENERATE_METACODE_AUX \
+				,YARMI_GENERATE_METACODE_HANDLERS_NAMES_AUX \
 				,(ns, cn, opposeq) \
 			) \
+			0 \
 		}; \
-	public:
+		enum class _meta_handlers_ids: id_type { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(opposeq) \
+				,YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX \
+				,opposeq \
+			) \
+		}; \
+		\
+	public: \
+		static constexpr const char** meta_requests() { return _meta_requests_names; } \
+		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
+		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
+		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
+		\
+		static constexpr const char* meta_handler_name(const id_type call_id) { \
+			return ( \
+				BOOST_PP_REPEAT( \
+					 BOOST_PP_SEQ_SIZE(opposeq) \
+					,YARMI_GENERATE_METACODE_HAS_HANDLER_AUX \
+					,opposeq \
+				) \
+				: 0 \
+			); \
+		} \
+		static constexpr bool meta_has_handler(const id_type call_id) { \
+			return meta_handler_name(call_id) != 0; \
+		}
 
+/***************************************************************************/
 
 #endif // _yarmi__declare_metacode_hpp

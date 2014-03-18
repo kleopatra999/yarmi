@@ -36,15 +36,15 @@
 
 #include <yarmi/fnv1a.hpp>
 #include <yarmi/serialization.hpp>
-#include <yarmi/declare_enum.hpp>
-#include <yarmi/declare_ns.hpp>
-#include <yarmi/declare_lazy_if.hpp>
-#include <yarmi/declare_tuple_is_empty.hpp>
-#include <yarmi/declare_ns_to_string.hpp>
-#include <yarmi/declare_metacode.hpp>
-#include <yarmi/declare_helpers.hpp>
-#include <yarmi/declare_callers.hpp>
-#include <yarmi/declare_invoker.hpp>
+#include <yarmi/object_constructor.hpp>
+#include <yarmi/generate_enum.hpp>
+#include <yarmi/generate_ns.hpp>
+#include <yarmi/generate_lazy_if.hpp>
+#include <yarmi/generate_tuple_is_empty.hpp>
+#include <yarmi/generate_ns_to_string.hpp>
+#include <yarmi/generate_metacode.hpp>
+#include <yarmi/generate_callers.hpp>
+#include <yarmi/generate_invoker.hpp>
 
 /***************************************************************************/
 
@@ -60,28 +60,30 @@
 
 /***************************************************************************/
 
-#define YARMI_CONSTRUCT_INVOKER(ns, cn, oppocn, seq, opposeq) \
-	template<typename Impl, typename IO = Impl> \
+#define YARMI_CONSTRUCT_INVOKER(ns, cn, oppons, oppocn, seq, opposeq) \
+	template< \
+		 typename Impl \
+		,typename IO = Impl \
+		,typename Alloc = std::allocator<char> \
+	> \
 	struct cn { \
+		cn(Impl &impl, IO &io, const Alloc &alloc = Alloc()) \
+			:impl(impl) \
+			,io(io) \
+			,alloc(alloc) \
+		{} \
 		\
 		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
 		\
-		cn(Impl &impl, IO &io) \
-			:impl(impl) \
-			,io(io) \
-		{} \
-		\
-		YARMI_GENERATE_METACODE(ns, cn, opposeq, seq) \
-		\
-		YARMI_GENERATE_HELPERS(ns, cn, opposeq) \
+		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
 		\
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
-		\
 		YARMI_GENERATE_INVOKERS(ns, cn, opposeq) \
 		\
 	private: \
 		Impl &impl; \
 		IO &io; \
+		const Alloc &alloc; \
 	};
 
 /***************************************************************************/
@@ -98,6 +100,7 @@
 		YARMI_CONSTRUCT_INVOKER( \
 			 client_invoker_ns \
 			,client_invoker_name \
+			,server_invoker_ns \
 			,server_invoker_name \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
@@ -108,6 +111,7 @@
 		YARMI_CONSTRUCT_INVOKER( \
 			 server_invoker_ns \
 			,server_invoker_name \
+			,client_invoker_ns \
 			,client_invoker_name \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \

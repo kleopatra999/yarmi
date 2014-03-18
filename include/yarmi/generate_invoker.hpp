@@ -38,10 +38,13 @@
 	impl.name();
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
-	BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple) arg##idx;
+	::yarmi::detail::object_constructor<BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple)> arg##idx(alloc);
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS_DESERIALIZER(unused, idx, tuple) \
-	& arg##idx
+	& arg##idx.v
+
+#define YARMI_GENERATE_INVOKERS_GENERATE_ARGS_FOR_INVOKING(unused, idx, size) \
+	arg##idx.v YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS(name, tuple) \
 	BOOST_PP_REPEAT( \
@@ -56,10 +59,16 @@
 		,tuple \
 	) \
 	; \
-	impl.name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
+	impl.name( \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_TUPLE_SIZE(tuple) \
+			,YARMI_GENERATE_INVOKERS_GENERATE_ARGS_FOR_INVOKING \
+			,BOOST_PP_TUPLE_SIZE(tuple) \
+		) \
+	);
 
 #define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, ns, cn, name, tuple) \
-	case static_cast<id_type>(_yarmi_handlers::BOOST_PP_CAT(name, _##idx)): { \
+	case static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY(tuple) \
 			,(name) \

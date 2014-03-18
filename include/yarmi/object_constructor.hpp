@@ -29,49 +29,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_helpers_hpp
-#define _yarmi__declare_helpers_hpp
+#ifndef _yarmi__object_constructor_hpp
+#define _yarmi__object_constructor_hpp
 
-/***************************************************************************/
+#include <type_traits>
 
-#define YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL(idx, ns, cn, tuple) \
-	case static_cast<id_type>(_yarmi_handlers::YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple)): \
-		return YARMI_NS_TO_STRING( \
-			 ns \
-			,cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple) \
-		);
+namespace yarmi {
+namespace detail {
 
-#define YARMI_GENERATE_HELPERS_ONE_ITEM(unused, idx, tuple) \
-	YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(0, tuple) \
-		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
-	)
+template<typename T>
+struct object_constructor {
+private:
+	struct unspecified_type;
 
-/***************************************************************************/
+public:
+	T v;
 
-#define YARMI_GENERATE_HELPERS(ns, cn, seq) \
-	private: \
-		static const char* yarmi_handler_name_impl(const id_type call_id) { \
-			switch ( call_id ) { \
-				BOOST_PP_REPEAT( \
-					 BOOST_PP_SEQ_SIZE(seq) \
-					,YARMI_GENERATE_HELPERS_ONE_ITEM \
-					,(ns, cn, seq) \
-				) \
-				default: return 0; \
-			} \
-		} \
-	public: \
-		static const char* yarmi_handler_name(const id_type call_id) { \
-			const char *str = yarmi_handler_name_impl(call_id); \
-			return (str ? str : "unknown"); \
-		} \
-		static bool yarmi_has_handler(const id_type call_id) { \
-			return yarmi_handler_name_impl(call_id) != 0; \
-		}
+	template<typename A>
+	explicit object_constructor(A &a, typename std::enable_if<std::is_constructible<T, A&>::value, unspecified_type>::type* = 0)
+		:v(a)
+	{}
 
-/***************************************************************************/
+	template<typename A>
+	explicit object_constructor(A &, typename std::enable_if<!std::is_constructible<T, A&>::value, unspecified_type>::type* = 0)
+		:v()
+	{}
 
-#endif // _yarmi__declare_helpers_hpp
+}; // object_constructor
+
+} // ns detail
+} // ns yarmi
+
+#endif // _yarmi__object_constructor_hpp
