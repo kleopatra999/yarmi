@@ -65,12 +65,12 @@
 		,typename IO = Impl \
 	> \
 	struct cn { \
+		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
+		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
-		\
-		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
 		\
 		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
 		\
