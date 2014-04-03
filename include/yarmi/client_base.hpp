@@ -59,6 +59,11 @@ struct client_base: private boost::noncopyable {
 		,in_process(false)
 	{}
 
+	boost::asio::ip::tcp::socket&		get_socket() { return socket; }
+	const boost::asio::ip::tcp::socket& get_socket() const { return socket; }
+
+	boost::asio::io_service&			get_io_service() { return socket.get_io_service(); }
+
 	void connect(const std::string &ip, const std::uint16_t port) {
 		boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address::from_string(ip), port);
 		boost::system::error_code ec;

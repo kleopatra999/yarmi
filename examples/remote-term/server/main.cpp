@@ -29,63 +29,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__session_base_hpp
-#define _yarmi__session_base_hpp
+#include "user_context.hpp"
+#include "global_context.hpp"
 
-#include <yarmi/yarmi.hpp>
-#include <yarmi/global_context_base.hpp>
+#include <yarmi/server.hpp>
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
-#include <cassert>
-#include <memory>
-
-namespace yarmi {
+#include <iostream>
 
 /***************************************************************************/
 
-struct session_base: std::enable_shared_from_this<session_base> {
-	typedef std::shared_ptr<session_base> session_ptr;
+int main() {
+	static const char *ip = "127.0.0.1";
+	static const std::uint16_t port = 44550;
 
-	template<typename Impl, template<typename> class GC, typename D>
-	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {
-		Impl *impl = new Impl(ios, gc);
-		session_ptr ptr;
-		try {
-			ptr.reset(impl, del);
-		} catch(...) {
-			delete impl;
-		}
-		return ptr;
-	}
+	boost::asio::io_service ios;
+	global_context<user_context> gc;
 
-	session_base(boost::asio::io_service &ios);
-	virtual ~session_base();
+	yarmi::server<user_context, global_context> server(
+		 ip
+		,port
+		,ios
+		,gc
+	);
+	server.start();
 
-	boost::asio::ip::tcp::socket&
-	get_socket();
-
-	void start();
-	void stop();
-	void close();
-
-	void send(const yas::shared_buffer &buffer);
-
-	virtual void on_connected() {}
-	virtual void on_disconnected() {}
-	virtual void on_received(const char *ptr, std::size_t size) = 0;
-
-	void set_on_destruction(bool flag);
-	bool get_on_destruction() const;
-
-private:
-	struct impl;
-	impl *pimpl;
-};
+	ios.run();
+}
 
 /***************************************************************************/
-
-} // ns yarmi
-
-#endif // _yarmi__session_base_hpp

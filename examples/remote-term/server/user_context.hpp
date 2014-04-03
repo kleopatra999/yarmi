@@ -29,35 +29,38 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__object_constructor_hpp
-#define _yarmi__object_constructor_hpp
+#ifndef __yarmi__remote_fs__user_context_hpp
+#define __yarmi__remote_fs__user_context_hpp
 
-#include <type_traits>
+#include "protocol.hpp"
 
-namespace yarmi {
-namespace detail {
+#include <yarmi/session_base.hpp>
 
-template<typename T>
-struct object_constructor {
+/***************************************************************************/
+
+template<typename>
+struct global_context;
+
+struct user_context: yarmi::session_base, yarmi::server_side<user_context> {
+	user_context(boost::asio::io_service &ios, global_context<user_context> &);
+	virtual ~user_context();
+
+	void on_connected();
+	void on_disconnected();
+	void on_received(const char *ptr, std::size_t size);
+
+	void on_pwd();
+	void on_mkdir(const std::string &);
+	void on_touch(const std::string &);
+	void on_rm(const std::string &);
+	void on_ls(const std::string &);
+	void on_cd(const std::string &);
+
 private:
-	struct unspecified_type;
+	struct impl;
+	impl *pimpl;
+};
 
-public:
-	T v;
+/***************************************************************************/
 
-	template<typename A>
-	explicit object_constructor(A &a, typename std::enable_if<std::is_constructible<T, A&>::value, unspecified_type>::type* = 0)
-		:v(a)
-	{}
-
-	template<typename A>
-	explicit object_constructor(A &, typename std::enable_if<!std::is_constructible<T, A&>::value, unspecified_type>::type* = 0)
-		:v()
-	{}
-
-}; // object_constructor
-
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__object_constructor_hpp
+#endif // __yarmi__remote_fs__user_context_hpp

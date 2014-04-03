@@ -29,63 +29,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__session_base_hpp
-#define _yarmi__session_base_hpp
+#ifndef __yarmi__remote_fs__global_context_hpp
+#define __yarmi__remote_fs__global_context_hpp
 
-#include <yarmi/yarmi.hpp>
 #include <yarmi/global_context_base.hpp>
-
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
-#include <cassert>
-#include <memory>
-
-namespace yarmi {
 
 /***************************************************************************/
 
-struct session_base: std::enable_shared_from_this<session_base> {
-	typedef std::shared_ptr<session_base> session_ptr;
-
-	template<typename Impl, template<typename> class GC, typename D>
-	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {
-		Impl *impl = new Impl(ios, gc);
-		session_ptr ptr;
-		try {
-			ptr.reset(impl, del);
-		} catch(...) {
-			delete impl;
-		}
-		return ptr;
-	}
-
-	session_base(boost::asio::io_service &ios);
-	virtual ~session_base();
-
-	boost::asio::ip::tcp::socket&
-	get_socket();
-
-	void start();
-	void stop();
-	void close();
-
-	void send(const yas::shared_buffer &buffer);
-
-	virtual void on_connected() {}
-	virtual void on_disconnected() {}
-	virtual void on_received(const char *ptr, std::size_t size) = 0;
-
-	void set_on_destruction(bool flag);
-	bool get_on_destruction() const;
-
-private:
-	struct impl;
-	impl *pimpl;
+template<typename UC>
+struct global_context: yarmi::global_context_base {
+	const std::string& root() const { static const std::string r = "/tmp"; return r; }
 };
 
 /***************************************************************************/
 
-} // ns yarmi
-
-#endif // _yarmi__session_base_hpp
+#endif // __yarmi__remote_fs__global_context_hpp

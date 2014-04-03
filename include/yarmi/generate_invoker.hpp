@@ -38,13 +38,13 @@
 	impl.name();
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
-	::yarmi::detail::object_constructor<BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple)> arg##idx(alloc);
+	BOOST_PP_TUPLE_ELEM(idx, tuple) arg##idx;
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS_DESERIALIZER(unused, idx, tuple) \
-	& arg##idx.v
+	& arg##idx
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_ARGS_FOR_INVOKING(unused, idx, size) \
-	arg##idx.v YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+	arg##idx YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS(name, tuple) \
 	BOOST_PP_REPEAT( \

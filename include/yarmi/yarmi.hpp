@@ -36,7 +36,6 @@
 
 #include <yarmi/fnv1a.hpp>
 #include <yarmi/serialization.hpp>
-#include <yarmi/object_constructor.hpp>
 #include <yarmi/generate_enum.hpp>
 #include <yarmi/generate_ns.hpp>
 #include <yarmi/generate_lazy_if.hpp>
@@ -64,13 +63,11 @@
 	template< \
 		 typename Impl \
 		,typename IO = Impl \
-		,typename Alloc = std::allocator<char> \
 	> \
 	struct cn { \
-		cn(Impl &impl, IO &io, const Alloc &alloc = Alloc()) \
+		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
-			,alloc(alloc) \
 		{} \
 		\
 		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
@@ -83,7 +80,6 @@
 	private: \
 		Impl &impl; \
 		IO &io; \
-		const Alloc &alloc; \
 	};
 
 /***************************************************************************/
