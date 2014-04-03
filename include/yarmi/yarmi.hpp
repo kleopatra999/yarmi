@@ -60,10 +60,7 @@
 /***************************************************************************/
 
 #define YARMI_CONSTRUCT_INVOKER(ns, cn, oppons, oppocn, seq, opposeq) \
-	template< \
-		 typename Impl \
-		,typename IO = Impl \
-	> \
+	template<typename Impl, typename IO = Impl> \
 	struct cn { \
 		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
 		\
