@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __yarmi__remote_fs__protocol_hpp
-#define __yarmi__remote_fs__protocol_hpp
+#ifndef __yarmi__remote_term__protocol_hpp
+#define __yarmi__remote_term__protocol_hpp
 
 #include <yarmi/yarmi.hpp>
 
@@ -42,20 +42,20 @@ YARMI_CONSTRUCT(
 	(pwd	, on_pwd	, ())
 	(mkdir	, on_mkdir	, (std::string)) /* dir name */
 	(touch	, on_touch	, (std::string)) /* file name */
-	(rm		, on_rm		, (std::string)) /* file name */
-	(ls		, on_ls		, (std::string)) /* dir name */
-	(cd		, on_cd		, (std::string)) /* dir name */
+	(rm	, on_rm		, (std::string)) /* file name */
+	(ls	, on_ls		, (std::string)) /* dir name */
+	(cd	, on_cd		, (std::string)) /* dir name */
 	,
 	(yarmi),
 	server_side,
 	(pwd	, on_pwd	, (int, std::string, std::string)) /* error code, error message, cmd output */
 	(mkdir	, on_mkdir	, (int, std::string, std::string)) /* error code, error message, cmd output */
 	(touch	, on_touch	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(rm		, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(ls		, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(cd		, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
+	(rm	, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
+	(ls	, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
+	(cd	, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
 )
 
 /***************************************************************************/
 
-#endif // __yarmi__remote_fs__protocol_hpp
+#endif // __yarmi__remote_term__protocol_hpp
