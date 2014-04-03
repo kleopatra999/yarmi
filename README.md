@@ -52,7 +52,7 @@ YARMI_CONSTRUCT(
 struct client: yarmi::client_base, yarmi::client_invoker<client> {
     client(boost::asio::io_service &ios)
         :yarmi::client_base(ios)
-        ,yarmi::client_invoker<client>(this, this)
+        ,yarmi::client_invoker<client>(*this, *this)
     {
         // запрос к серверу
         ping("Hello, server!");
@@ -70,7 +70,7 @@ struct client: yarmi::client_base, yarmi::client_invoker<client> {
 struct session: yarmi::session_base, yarmi::server_invoker<session> {
     session(boost::asio::io_service &ios)
         :yarmi::session_base(ios)
-        ,yarmi::server_invoker<session>(this, this)
+        ,yarmi::server_invoker<session>(*this, *this)
     {}
     
     // вызывается при запросе клиента
