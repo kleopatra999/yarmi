@@ -83,6 +83,18 @@
 
 /***************************************************************************/
 
+#define YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL(idx, name) \
+	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+		? _meta_requests_names[idx]
+
+#define YARMI_GENERATE_METACODE_HAS_REQUEST_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+/***************************************************************************/
+
 #define YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL(idx, name) \
 	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
 		? _meta_handlers_names[idx]
@@ -131,13 +143,22 @@
 		\
 	public: \
 		static constexpr const char** meta_requests() { return _meta_requests_names; } \
-		static constexpr std::size_t  meta_requests_count() \
-			{ return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
-		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
-		static constexpr std::size_t  meta_handlers_count() \
-			{ return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
+		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
+		static constexpr const char*  meta_request_name(const id_type call_id) { \
+			return ( \
+				BOOST_PP_REPEAT( \
+					 BOOST_PP_SEQ_SIZE(seq) \
+					,YARMI_GENERATE_METACODE_HAS_REQUEST_AUX \
+					,seq \
+				) \
+				: 0 \
+			); \
+		} \
+		static constexpr bool meta_has_request(const id_type call_id) { return meta_request_name(call_id) != 0; } \
 		\
-		static constexpr const char* meta_handler_name(const id_type call_id) { \
+		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
+		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
+		static constexpr const char*  meta_handler_name(const id_type call_id) { \
 			return ( \
 				BOOST_PP_REPEAT( \
 					 BOOST_PP_SEQ_SIZE(opposeq) \
@@ -147,9 +168,7 @@
 				: 0 \
 			); \
 		} \
-		static constexpr bool meta_has_handler(const id_type call_id) { \
-			return meta_handler_name(call_id) != 0; \
-		}
+		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; }
 
 /***************************************************************************/
 
