@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_tuple_is_empty_hpp
-#define _yarmi__declare_tuple_is_empty_hpp
+#ifndef _yarmi__generate_tuple_is_empty_hpp
+#define _yarmi__generate_tuple_is_empty_hpp
 
 /***************************************************************************/
 // based on the: http://gustedt.wordpress.com/2010/06/08/detect-empty-macro-arguments
@@ -68,4 +68,4 @@
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_tuple_is_empty_hpp
+#endif // _yarmi__generate_tuple_is_empty_hpp

@@ -89,7 +89,7 @@
 	,server_invoker_name \
 	,server_apis_seq \
 ) \
-	YARMI_CONSTRUCT_INVOKER_OPEN_NS(client_invoker_ns) \
+	YARMI_OPEN_NS(client_invoker_ns) \
 		YARMI_CONSTRUCT_INVOKER( \
 			 client_invoker_ns \
 			,client_invoker_name \
@@ -98,9 +98,9 @@
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 		) \
-	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(client_invoker_ns) \
+	YARMI_CLOSE_NS(client_invoker_ns) \
 	\
-	YARMI_CONSTRUCT_INVOKER_OPEN_NS(server_invoker_ns) \
+	YARMI_OPEN_NS(server_invoker_ns) \
 		YARMI_CONSTRUCT_INVOKER( \
 			 server_invoker_ns \
 			,server_invoker_name \
@@ -109,7 +109,7 @@
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
 		) \
-	YARMI_CONSTRUCT_INVOKER_CLOSE_NS(server_invoker_ns)
+	YARMI_CLOSE_NS(server_invoker_ns)
 
 /***************************************************************************/
 

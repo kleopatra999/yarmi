@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_lazy_if_hpp
-#define _yarmi__declare_lazy_if_hpp
+#ifndef _yarmi__generate_lazy_if_hpp
+#define _yarmi__generate_lazy_if_hpp
 
 
 /***************************************************************************/
@@ -52,4 +52,4 @@
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_lazy_if_hpp
+#endif // _yarmi__generate_lazy_if_hpp

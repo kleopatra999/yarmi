@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_metacode_hpp
-#define _yarmi__declare_metacode_hpp
+#ifndef _yarmi__generate_metacode_hpp
+#define _yarmi__generate_metacode_hpp
 
 /***************************************************************************/
 
@@ -82,18 +82,6 @@
 	)
 
 /***************************************************************************/
-#if 0
-#define YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL(idx, tuple) \
-	case static_cast<id_type>(_meta_handlers_ids::YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple)): \
-		return _meta_handlers_names[idx];
-
-#define YARMI_GENERATE_HELPERS_ONE_ITEM(unused, idx, seq) \
-	YARMI_GENERATE_HELPERS_ONE_ITEM_IMPL( \
-		 idx \
-		,BOOST_PP_SEQ_ELEM(idx, seq) \
-	)
-#endif
-/***************************************************************************/
 
 #define YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL(idx, name) \
 	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
@@ -143,9 +131,11 @@
 		\
 	public: \
 		static constexpr const char** meta_requests() { return _meta_requests_names; } \
-		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
+		static constexpr std::size_t  meta_requests_count() \
+			{ return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
 		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
-		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
+		static constexpr std::size_t  meta_handlers_count() \
+			{ return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
 		\
 		static constexpr const char* meta_handler_name(const id_type call_id) { \
 			return ( \
@@ -163,4 +153,4 @@
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_metacode_hpp
+#endif // _yarmi__generate_metacode_hpp

@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_invoker_hpp
-#define _yarmi__declare_invoker_hpp
+#ifndef _yarmi__generate_invoker_hpp
+#define _yarmi__generate_invoker_hpp
 
 /***************************************************************************/
 
@@ -114,4 +114,4 @@
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_invoker_hpp
+#endif // _yarmi__generate_invoker_hpp

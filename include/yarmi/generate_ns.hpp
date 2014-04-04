@@ -29,31 +29,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_ns_hpp
-#define _yarmi__declare_ns_hpp
+#ifndef _yarmi__generate_ns_hpp
+#define _yarmi__generate_ns_hpp
 
 /***************************************************************************/
 
-#define YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM(unused, data, elem) \
+#define YARMI_OPEN_NS_ITEM(unused, data, elem) \
 	namespace elem {
 
-#define YARMI_CONSTRUCT_INVOKER_OPEN_NS(seq) \
+#define YARMI_OPEN_NS(seq) \
 	BOOST_PP_SEQ_FOR_EACH( \
-		 YARMI_CONSTRUCT_INVOKER_OPEN_NS_ITEM \
+		 YARMI_OPEN_NS_ITEM \
 		,~ \
 		,seq \
 	)
 
-#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM(unused1, unused2, data) \
+#define YARMI_CLOSE_NS_ITEM(unused1, unused2, data) \
 	data
 
-#define YARMI_CONSTRUCT_INVOKER_CLOSE_NS(seq) \
+#define YARMI_CLOSE_NS(seq) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_CONSTRUCT_INVOKER_CLOSE_NS_ITEM \
+		,YARMI_CLOSE_NS_ITEM \
 		,} \
 	)
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_ns_hpp
+#endif // _yarmi__generate_ns_hpp

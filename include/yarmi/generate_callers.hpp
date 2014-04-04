@@ -29,17 +29,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__declare_callers_hpp
-#define _yarmi__declare_callers_hpp
+#ifndef _yarmi__generate_callers_hpp
+#define _yarmi__geberate_callers_hpp
 
 /***************************************************************************/
 
-#define YARMI_DECLARE_REMOTE_CALL_PARAMS(unused, idx, tuple) \
+#define YARMI_GENERATE_REMOTE_CALL_PARAMS(unused, idx, tuple) \
 	const BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple) &arg##idx \
 		YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_TUPLE_SIZE(tuple), idx)
 
 
-#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(idx, name, opponame) \
+#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(idx, name, opponame) \
 	void name() { \
 		YARMI_OSTREAM_TYPE os, os2; \
 		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
@@ -48,14 +48,14 @@
 		io.send(os2.get_shared_buffer()); \
 	}
 
-#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
+#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
 	& arg##idx
 
-#define YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY(idx, name, opponame, tuple) \
+#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY(idx, name, opponame, tuple) \
 	void name( \
 		BOOST_PP_REPEAT( \
 			BOOST_PP_TUPLE_SIZE(tuple), \
-			YARMI_DECLARE_REMOTE_CALL_PARAMS, \
+			YARMI_GENERATE_REMOTE_CALL_PARAMS, \
 			tuple \
 		) \
 	) { \
@@ -65,7 +65,7 @@
 		\
 		BOOST_PP_REPEAT( \
 				 BOOST_PP_TUPLE_SIZE(tuple) \
-				,YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE \
+				,YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE \
 				,~ \
 			) \
 		; \
@@ -78,8 +78,8 @@
 		YARMI_TUPLE_IS_EMPTY(tuple), \
 		(idx, name, opponame), \
 		(idx, name, opponame, tuple), \
-		YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY, \
-		YARMI_DECLARE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY \
+		YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY, \
+		YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY \
 	)
 
 #define YARMI_GENERATE_CALLERS_ONE_ITEM(unused, idx, seq) \
@@ -99,4 +99,4 @@
 
 /***************************************************************************/
 
-#endif // _yarmi__declare_callers_hpp
+#endif // _yarmi__generate_callers_hpp
