@@ -168,7 +168,8 @@
 				: 0 \
 			); \
 		} \
-		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; }
+		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; } \
+		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a_32(str)); }
 
 /***************************************************************************/
 
