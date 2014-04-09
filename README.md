@@ -36,7 +36,7 @@ YARMI_CONSTRUCT(
 [Ну вот же](https://github.com/niXman/yarmi/blob/master/examples/echo/protocol-preprocessed.hpp):
 
 1. Метод `client_invoker::ping()` соответствует описанному нами в макросе `YARMI_CONSTRUCT()`
-2. В методе `server_invoker::invoke()`, в `switch`е, производится десериализация аргументов, подставновка их в вызов, и, собственно, вызов `client_invoker::on_pong()`.
+2. В методе `client_invoker::invoke()`, в `switch`е, производится десериализация аргументов, подставновка их в вызов, и, собственно, вызов `client_invoker::on_pong()`.
 3. В методе `server_invoker::invoke()`, в `switch`е, происходит тоже самое с тем лишь отличием, что проиходит вызов метода `server_invoker::on_ping()`. Сервер пошлет ответ клиенту, вызвав этот метод. Т.е. порядок вызовов такой: `client_invoker::ping()` -> `server_invoker::on_ping()` -> `server_invoker::pong()` -> `client_invoker::on_pong()`.
 4. Вам не нужно более заботиться ни о соответствии сигнатур, ни о идентификаторах, ни о сериализаторах/десериализаторах.
 
