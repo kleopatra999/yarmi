@@ -155,6 +155,7 @@
 			); \
 		} \
 		static constexpr bool meta_has_request(const id_type call_id) { return meta_request_name(call_id) != 0; } \
+		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a_32(str)); } \
 		\
 		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
 		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
