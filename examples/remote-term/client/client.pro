@@ -13,7 +13,10 @@ INCLUDEPATH += \
 LIBS += \
 	-lboost_system
 
+win32:LIBS += \
+	-lws2_32
+
 SOURCES += main.cpp
 
 HEADERS += \
-    ../protocol.hpp
+	 ../protocol.hpp

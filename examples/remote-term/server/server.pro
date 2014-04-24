@@ -11,6 +11,9 @@ LIBS += \
 	-lboost_system \
 	-lboost_filesystem
 
+win32:LIBS += \
+	-lws2_32
+
 INCLUDEPATH += \
 	.. \
 	../../../include
