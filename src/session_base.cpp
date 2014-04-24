@@ -29,9 +29,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <yarmi/serialization.hpp>
 #include <yarmi/session_base.hpp>
 #include <yarmi/handler_allocator.hpp>
 #include <yarmi/make_preallocated_handler.hpp>
+
+#include <yas/buffers.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>

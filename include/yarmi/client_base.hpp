@@ -32,7 +32,7 @@
 #ifndef _yarmi__client_base_hpp
 #define _yarmi__client_base_hpp
 
-#include <yas/detail/tools/buffers.hpp>
+#include <yas/buffers.hpp>
 
 #include <boost/noncopyable.hpp>
 #include <boost/asio/ip/tcp.hpp>

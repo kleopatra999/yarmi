@@ -32,14 +32,14 @@
 #ifndef _yarmi__session_base_hpp
 #define _yarmi__session_base_hpp
 
-#include <yarmi/yarmi.hpp>
-#include <yarmi/global_context_base.hpp>
+#include <yarmi/serialization.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
-#include <cassert>
 #include <memory>
+
+namespace yas { struct shared_buffer; } // ns yas
 
 namespace yarmi {
 

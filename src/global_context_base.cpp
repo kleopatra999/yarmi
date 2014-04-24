@@ -29,8 +29,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yas/detail/tools/buffers.hpp>
-
 #include <yarmi/global_context_base.hpp>
 #include <yarmi/session_base.hpp>
 
