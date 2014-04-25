@@ -52,9 +52,10 @@ void user_context::on_disconnected() {
 
 void user_context::on_received(const char *ptr, std::size_t size) {
 	try {
-		id_type call_id = 0;
-		if ( !invoke(ptr, size, &call_id) ) {
-			std::cerr << "no handler for call_id=" << call_id << std::endl;
+		yarmi::id_type call_id = 0;
+		const bool ok = invoke(ptr, size, &call_id);
+		if ( ! ok ) {
+			std::cerr << "user_context::on_received(): no handler for call_id=" << call_id << std::endl;
 		}
 	} catch (const std::exception &ex) {
 		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;

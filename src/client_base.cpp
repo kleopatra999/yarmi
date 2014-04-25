@@ -44,9 +44,9 @@ namespace yarmi {
 /***************************************************************************/
 
 struct client_base::impl {
-	impl(boost::asio::io_service &ios, yarmi::invoker_base *invoker)
+	impl(boost::asio::io_service &ios, yarmi::client_base *self)
 		:socket(ios)
-		,invoker(invoker)
+		,self(self)
 		,buffers()
 		,in_process(false)
 	{}
@@ -122,7 +122,7 @@ struct client_base::impl {
 		if ( ec || rd != body_length )
 			throw std::runtime_error("on_body_readed(): "+ec.message());
 
-		invoker->invoke(body_buffer.get(), body_length);
+		self->invoke(body_buffer.get(), body_length);
 
 		start();
 	}
@@ -142,7 +142,7 @@ struct client_base::impl {
 	}
 
 	boost::asio::ip::tcp::socket socket;
-	yarmi::invoker_base *invoker;
+	yarmi::client_base *self;
 
 	std::list<yas::shared_buffer> buffers;
 	bool in_process;
@@ -153,8 +153,8 @@ struct client_base::impl {
 
 /***************************************************************************/
 
-client_base::client_base(boost::asio::io_service &ios, yarmi::invoker_base *invoker)
-	:pimpl(new impl(ios, invoker))
+client_base::client_base(boost::asio::io_service &ios)
+	:pimpl(new impl(ios, this))
 {}
 
 client_base::~client_base()

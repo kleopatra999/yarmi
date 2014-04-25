@@ -44,7 +44,6 @@
 #include <yarmi/generate_metacode.hpp>
 #include <yarmi/generate_callers.hpp>
 #include <yarmi/generate_invoker.hpp>
-#include <yarmi/invoker_base.hpp>
 
 /***************************************************************************/
 
@@ -52,17 +51,26 @@
 	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
 #define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
 	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
+
 #define YARMI_DECLARE_MESSAGE_WRAP_X0
 #define YARMI_DECLARE_MESSAGE_WRAP_Y0
+
+/***************************************************************************/
 
 #define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
 	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(idx, BOOST_PP_SUB(size, 1)))
 
 /***************************************************************************/
 
+namespace yarmi {
+using id_type = decltype(::yarmi::detail::fnv1a_32(""));
+} // ns yarmi
+
+/***************************************************************************/
+
 #define YARMI_CONSTRUCT_INVOKER(ns, cn, oppons, oppocn, seq, opposeq) \
 	template<typename Impl, typename IO = Impl> \
-	struct cn: ::yarmi::invoker_base { \
+	struct cn { \
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \

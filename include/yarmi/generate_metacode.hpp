@@ -116,7 +116,7 @@
 				,(oppons, oppocn, seq) \
 			) \
 			0 \
-		};\
+		}; \
 		enum class _meta_requests_ids: id_type { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \

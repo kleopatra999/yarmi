@@ -32,8 +32,6 @@
 #ifndef _yarmi__client_base_hpp
 #define _yarmi__client_base_hpp
 
-#include <yarmi/invoker_base.hpp>
-
 #include <boost/noncopyable.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -48,14 +46,14 @@ namespace yarmi {
 /***************************************************************************/
 
 struct client_base: private boost::noncopyable {
-	client_base(boost::asio::io_service &ios, yarmi::invoker_base *invoker);
+	client_base(boost::asio::io_service &ios);
 	virtual ~client_base();
 
 	boost::asio::ip::tcp::socket& get_socket();
 	const boost::asio::ip::tcp::socket& get_socket() const;
 	boost::asio::io_service& get_io_service();
 
-	void connect(const std::string &ip, const std::uint16_t port);
+	void connect(const std::string &ip, const std::uint16_t port); // may throw if connection error
 	void connect(const std::string &ip, const std::uint16_t port, boost::system::error_code &ec);
 
 	template<typename F>
@@ -67,6 +65,8 @@ struct client_base: private boost::noncopyable {
 	void start();
 	void disconnect();
 	void send(const yas::shared_buffer &buffer);
+
+	virtual void invoke(const char *ptr, const std::size_t size) = 0;
 
 private:
 	struct impl;
