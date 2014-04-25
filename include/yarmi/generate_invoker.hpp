@@ -59,13 +59,7 @@
 		,tuple \
 	) \
 	; \
-	impl.name( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_TUPLE_SIZE(tuple) \
-			,YARMI_GENERATE_INVOKERS_GENERATE_ARGS_FOR_INVOKING \
-			,BOOST_PP_TUPLE_SIZE(tuple) \
-		) \
-	);
+	impl.name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg));
 
 #define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, ns, cn, name, tuple) \
 	case static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \

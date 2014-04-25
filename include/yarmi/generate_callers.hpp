@@ -39,7 +39,7 @@
 		YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_TUPLE_SIZE(tuple), idx)
 
 
-#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY(idx, name, opponame) \
+#define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
 	void name() { \
 		YARMI_OSTREAM_TYPE os, os2; \
 		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
@@ -48,10 +48,10 @@
 		io.send(os2.get_shared_buffer()); \
 	}
 
-#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE(unused, idx, data) \
+#define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE(unused, idx, data) \
 	& arg##idx
 
-#define YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY(idx, name, opponame, tuple) \
+#define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS(idx, name, opponame, tuple) \
 	void name( \
 		BOOST_PP_REPEAT( \
 			BOOST_PP_TUPLE_SIZE(tuple), \
@@ -65,7 +65,7 @@
 		\
 		BOOST_PP_REPEAT( \
 				 BOOST_PP_TUPLE_SIZE(tuple) \
-				,YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY_SERIALIZE \
+				,YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE \
 				,~ \
 			) \
 		; \
@@ -78,8 +78,8 @@
 		YARMI_TUPLE_IS_EMPTY(tuple), \
 		(idx, name, opponame), \
 		(idx, name, opponame, tuple), \
-		YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_EMPTY, \
-		YARMI_GENERATE_REMOTE_CALL_FOR_ONE_VERSION_NONEMPTY \
+		YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS, \
+		YARMI_GENERATE_REMOTE_CALL_WITH_ARGS \
 	)
 
 #define YARMI_GENERATE_CALLERS_ONE_ITEM(unused, idx, seq) \
