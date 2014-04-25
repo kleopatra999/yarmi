@@ -44,6 +44,7 @@
 #include <yarmi/generate_metacode.hpp>
 #include <yarmi/generate_callers.hpp>
 #include <yarmi/generate_invoker.hpp>
+#include <yarmi/invoker_base.hpp>
 
 /***************************************************************************/
 
@@ -61,9 +62,7 @@
 
 #define YARMI_CONSTRUCT_INVOKER(ns, cn, oppons, oppocn, seq, opposeq) \
 	template<typename Impl, typename IO = Impl> \
-	struct cn { \
-		using id_type = decltype(::yarmi::detail::fnv1a_32("")); \
-		\
+	struct cn: ::yarmi::invoker_base { \
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \

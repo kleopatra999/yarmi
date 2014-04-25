@@ -29,60 +29,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__invoker_base_hpp
+#define _yarmi__invoker_base_hpp
 
-#include <yarmi/client_base.hpp>
+#include <yarmi/fnv1a.hpp>
 
-#include <iostream>
+namespace yarmi {
 
-/***************************************************************************/
+struct invoker_base {
+	using id_type = decltype(::yarmi::detail::fnv1a_32(""));
 
-struct client: yarmi::client_base, yarmi::client_invoker<client> {
-	client(boost::asio::io_service &ios)
-		:yarmi::client_base(ios, this)
-		,yarmi::client_invoker<client>(*this, *this)
-		,msg_index(0)
-	{}
-
-	void on_pong(const std::string &msg) {
-		//std::cout << "received: \"" << msg << "\"" << std::endl;
-		ping("my message "+std::to_string(++msg_index));
-
-		static std::size_t i = 0;
-		if ( ++i == 1024 ) {
-			i = 0;
-			std::cout << "received: \"" << msg << "\"" << std::endl;
-		}
-	}
-
-	std::size_t msg_index;
+	virtual bool invoke(const char *ptr, const std::size_t size, id_type *cid = 0) = 0;
 };
 
-/***************************************************************************/
+} // ns yarmi
 
-int main() {
-	static const char *ip = "127.0.0.1";
-	static const std::uint16_t port = 44550;
-
-	boost::asio::io_service ios;
-	client c(ios);
-	//c.connect(ip, port);
-	c.async_connect(
-		 ip
-		,port
-		,[&c](const boost::system::error_code &ec) {
-			if ( ec ) {
-				std::cout << "async_connect handler: " << ec.message() << std::endl;
-				return;
-			}
-			c.start();
-			c.ping("message");
-		}
-	);
-
-	ios.run();
-
-	return 0;
-}
-
-/***************************************************************************/
+#endif // _yarmi__invoker_base_hpp

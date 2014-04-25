@@ -44,7 +44,8 @@ INCLUDEPATH += \
 SOURCES += \
 	main.cpp \
 	 ../../../src/global_context_base.cpp \
-	 ../../../src/session_base.cpp
+	 ../../../src/session_base.cpp \
+    ../../../src/client_base.cpp
 
 LIBS += \
 	-lboost_system
@@ -89,4 +90,5 @@ HEADERS += \
 	 ../../../include/yarmi/generate_metacode.hpp \
 	 ../../../include/yarmi/generate_ns.hpp \
 	 ../../../include/yarmi/generate_ns_to_string.hpp \
-	 ../../../include/yarmi/generate_tuple_is_empty.hpp
+	 ../../../include/yarmi/generate_tuple_is_empty.hpp \
+    ../../../include/yarmi/invoker_base.hpp
