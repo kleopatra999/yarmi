@@ -164,6 +164,7 @@ int main() {
 		boost::asio::io_service ios;
 		client c(ios);
 		c.connect(ip, port);
+		c.start();
 
 		ios.post([&c]() {c.read_cmd();});
 
