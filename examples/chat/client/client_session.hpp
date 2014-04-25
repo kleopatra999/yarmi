@@ -39,7 +39,7 @@
 
 /***************************************************************************/
 
-struct client_session: yarmi::client_base<client_session>, yarmi::client_invoker<client_session> {
+struct client_session: yarmi::client_base, yarmi::client_invoker<client_session> {
 	client_session(boost::asio::io_service &ios);
 
 	void on_registration(const std::string &msg, const std::string &regkey);

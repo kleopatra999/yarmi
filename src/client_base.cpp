@@ -168,14 +168,16 @@ const boost::asio::ip::tcp::socket& client_base::get_socket() const { return pim
 boost::asio::io_service& client_base::get_io_service() { return pimpl->socket.get_io_service(); }
 
 void client_base::connect(const std::string &ip, const std::uint16_t port) {
-	boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address::from_string(ip), port);
 	boost::system::error_code ec;
-	pimpl->socket.connect(ep, ec);
+	connect(ip, port, ec);
 
 	if ( ec )
 		throw std::runtime_error("client_base::on_connect(): "+ec.message());
-	else
-		start();
+}
+
+void client_base::connect(const std::string &ip, const std::uint16_t port, boost::system::error_code &ec) {
+	boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address::from_string(ip), port);
+	pimpl->socket.connect(ep, ec);
 }
 
 void client_base::start() {

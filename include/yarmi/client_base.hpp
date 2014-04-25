@@ -56,6 +56,7 @@ struct client_base: private boost::noncopyable {
 	boost::asio::io_service& get_io_service();
 
 	void connect(const std::string &ip, const std::uint16_t port);
+	void connect(const std::string &ip, const std::uint16_t port, boost::system::error_code &ec);
 
 	template<typename F>
 	void async_connect(const std::string &ip, const std::uint16_t port, F f) {

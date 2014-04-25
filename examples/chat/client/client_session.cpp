@@ -34,7 +34,7 @@
 /***************************************************************************/
 
 client_session::client_session(boost::asio::io_service &ios)
-	:yarmi::client_base<client_session>(ios, *this)
+	:yarmi::client_base(ios, this)
 	,yarmi::client_invoker<client_session>(*this, *this)
 {}
 

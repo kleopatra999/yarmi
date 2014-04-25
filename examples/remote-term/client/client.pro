@@ -16,7 +16,8 @@ LIBS += \
 win32:LIBS += \
 	-lws2_32
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../../../src/client_base.cpp
 
 HEADERS += \
 	 ../protocol.hpp

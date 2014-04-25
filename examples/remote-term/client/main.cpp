@@ -39,9 +39,9 @@
 
 /***************************************************************************/
 
-struct client: yarmi::client_base<client>, yarmi::client_side<client> {
+struct client: yarmi::client_base, yarmi::client_side<client> {
 	client(boost::asio::io_service &ios)
-		:yarmi::client_base<client>(ios, *this)
+		:yarmi::client_base(ios, this)
 		,yarmi::client_side<client>(*this, *this)
 		,cmds{
 			 std::make_pair("pwd"	, [this](const std::string & ){pwd();})

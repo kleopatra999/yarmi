@@ -52,7 +52,8 @@ win32:LIBS += \
 SOURCES += \
 	main.cpp \
 	 command_processor.cpp \
-	 client_session.cpp
+	 client_session.cpp \
+    ../../../src/client_base.cpp
 
 HEADERS += \
 	 ../protocol.hpp \
