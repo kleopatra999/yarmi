@@ -41,17 +41,28 @@
 
 struct client: yarmi::client_base, yarmi::client_side<client> {
 	client(boost::asio::io_service &ios)
-		:yarmi::client_base(ios, this)
+		:yarmi::client_base(ios)
 		,yarmi::client_side<client>(*this, *this)
 		,cmds{
-			 std::make_pair("pwd"	, [this](const std::string & ){pwd();})
-			,std::make_pair("mkdir"	, [this](const std::string &a){mkdir(a);})
-			,std::make_pair("touch"	, [this](const std::string &a){touch(a);})
-			,std::make_pair("rm"	, [this](const std::string &a){rm(a);})
-			,std::make_pair("ls"	, [this](const std::string &a){ls(a);})
-			,std::make_pair("cd"	, [this](const std::string &a){cd(a);})
+			 std::make_pair("pwd"   , [this](const std::string & ){pwd();})
+			,std::make_pair("mkdir" , [this](const std::string &a){mkdir(a);})
+			,std::make_pair("touch" , [this](const std::string &a){touch(a);})
+			,std::make_pair("rm"    , [this](const std::string &a){rm(a);})
+			,std::make_pair("ls"    , [this](const std::string &a){ls(a);})
+			,std::make_pair("cd"    , [this](const std::string &a){cd(a);})
 		}
 	{}
+
+	void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) {
+		try {
+			const bool ok = static_cast<yarmi::client_side<client>*>(this)->invoke(call_id, archive);
+			if ( ! ok ) {
+				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
+			}
+		} catch (const std::exception &ex) {
+			std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
+		}
+	}
 
 	void read_cmd() {
 		std::string line, cmd, args;

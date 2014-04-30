@@ -55,10 +55,9 @@ struct client: yarmi::client_base, yarmi::client_invoker<client> {
 		}
 	}
 
-	void invoke(const char *ptr, const std::size_t size) {
-		yarmi::id_type call_id = 0;
+	void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) {
 		try {
-			const bool ok = static_cast<yarmi::client_invoker<client>*>(this)->invoke(ptr, size, &call_id);
+			const bool ok = static_cast<yarmi::client_invoker<client>*>(this)->invoke(call_id, archive);
 			if ( ! ok ) {
 				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
 			}

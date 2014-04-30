@@ -83,7 +83,7 @@
 	)
 
 #define YARMI_GENERATE_INVOKERS(ns, cn, seq) \
-	bool invoke(const id_type call_id, YARMI_IARCHIVE_TYPE &ia) { \
+	bool invoke(const id_type call_id, ::yarmi::iarchive_type &ia) { \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
@@ -96,8 +96,8 @@
 	\
 	bool invoke(const char *ptr, const std::size_t size, id_type *cid = 0) { \
 		id_type call_id = 0; \
-		YARMI_ISTREAM_TYPE is(ptr, size); \
-		YARMI_IARCHIVE_TYPE ia(is, yas::no_header); \
+		::yarmi::istream_type is(ptr, size); \
+		::yarmi::iarchive_type ia(is, yas::no_header); \
 		ia & call_id; \
 		\
 		if ( cid ) \

@@ -29,7 +29,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/serialization.hpp>
 #include <yarmi/client_base.hpp>
 
 #include <yas/buffers.hpp>
@@ -93,8 +92,8 @@ struct client_base::impl {
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-		YARMI_ISTREAM_TYPE is(header_buffer, header_size);
-		YARMI_IARCHIVE_TYPE ia(is);
+		::yarmi::istream_type is(header_buffer, header_size);
+		::yarmi::iarchive_type ia(is);
 		std::uint32_t body_length = 0;
 		ia & body_length;
 
@@ -122,7 +121,12 @@ struct client_base::impl {
 		if ( ec || rd != body_length )
 			throw std::runtime_error("on_body_readed(): "+ec.message());
 
-		self->invoke(body_buffer.get(), body_length);
+		yarmi::id_type call_id = 0;
+		::yarmi::istream_type istream(body_buffer.get(), body_length);
+		::yarmi::iarchive_type iarchive(istream, yas::no_header);
+		iarchive & call_id;
+
+		self->invoke(call_id, iarchive);
 
 		start();
 	}
@@ -147,7 +151,7 @@ struct client_base::impl {
 	std::list<yas::shared_buffer> buffers;
 	bool in_process;
 
-	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::header_size() };
+	enum { header_size = sizeof(std::uint32_t)+::yarmi::iarchive_type::header_size() };
 	char header_buffer[header_size];
 };
 

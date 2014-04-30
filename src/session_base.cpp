@@ -41,7 +41,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#include <list>
+#include <queue>
 #include <functional>
 
 namespace yarmi {
@@ -49,7 +49,7 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session_base::impl {
-	enum { header_size = sizeof(std::uint32_t)+YARMI_IARCHIVE_TYPE::header_size() };
+	enum { header_size = sizeof(std::uint32_t)+::yarmi::iarchive_type::header_size() };
 
 	impl(boost::asio::io_service &ios)
 		:socket(ios)
@@ -81,8 +81,8 @@ struct session_base::impl {
 			return;
 		}
 
-		YARMI_ISTREAM_TYPE is(header_buffer, header_size);
-		YARMI_IARCHIVE_TYPE ia(is);
+		::yarmi::istream_type is(header_buffer, header_size);
+		::yarmi::iarchive_type ia(is);
 		std::uint32_t body_length = 0;
 		ia & body_length;
 
@@ -130,7 +130,7 @@ struct session_base::impl {
 			in_process = true;
 
 			yas::shared_buffer buffer = buffers.front();
-			buffers.pop_front();
+			buffers.pop();
 
 			boost::asio::async_write(
 				 socket
@@ -171,7 +171,7 @@ struct session_base::impl {
 	boost::asio::ip::tcp::socket socket;
 
 	/** buffers list */
-	std::list<yas::shared_buffer> buffers;
+	std::queue<yas::shared_buffer> buffers;
 	bool in_process;
 	bool on_destruction;
 
@@ -211,7 +211,7 @@ void session_base::send(const yas::shared_buffer &buffer) {
 		return;
 	}
 
-	pimpl->buffers.push_back(buffer);
+	pimpl->buffers.push(buffer);
 
 	pimpl->send(shared_from_this());
 }

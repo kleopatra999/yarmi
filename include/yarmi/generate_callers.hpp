@@ -41,8 +41,8 @@
 
 #define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
 	void name() { \
-		YARMI_OSTREAM_TYPE os, os2; \
-		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
+		::yarmi::ostream_type os, os2; \
+		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
 		oa & static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)); \
 		pa & os.get_intrusive_buffer(); \
 		io.send(os2.get_shared_buffer()); \
@@ -59,8 +59,8 @@
 			tuple \
 		) \
 	) { \
-		YARMI_OSTREAM_TYPE os, os2; \
-		YARMI_OARCHIVE_TYPE oa(os, yas::no_header), pa(os2); \
+		::yarmi::ostream_type os, os2; \
+		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
 		oa & static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
 		\
 		BOOST_PP_REPEAT( \

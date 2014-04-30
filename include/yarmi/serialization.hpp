@@ -40,23 +40,40 @@
 //# define YARMI_USE_TEXT_SERIALIZATION (1)
 #endif
 
+/***************************************************************************/
+
+#include <yas/mem_streams.hpp>
+
 #if YARMI_USE_BINARY_SERIALIZATION
 #	include <yas/binary_iarchive.hpp>
 #	include <yas/binary_oarchive.hpp>
-#	define YARMI_ISTREAM_TYPE yas::mem_istream
-#	define YARMI_OSTREAM_TYPE yas::mem_ostream
-#	define YARMI_IARCHIVE_TYPE yas::binary_iarchive<YARMI_ISTREAM_TYPE>
-#	define YARMI_OARCHIVE_TYPE yas::binary_oarchive<YARMI_OSTREAM_TYPE>
+
+namespace yarmi {
+
+using istream_type = yas::mem_istream;
+using ostream_type = yas::mem_ostream;
+using iarchive_type= yas::binary_iarchive<istream_type>;
+using oarchive_type= yas::binary_oarchive<ostream_type>;
+
+} // ns yarmi
+
 #elif YARMI_USE_TEXT_SERIALIZATION
 #	include <yas/text_iarchive.hpp>
 #	include <yas/text_oarchive.hpp>
-#	define YARMI_ISTREAM_TYPE yas::mem_istream
-#	define YARMI_OSTREAM_TYPE yas::mem_ostream
-#	define YARMI_IARCHIVE_TYPE yas::text_iarchive<YARMI_ISTREAM_TYPE>
-#	define YARMI_OARCHIVE_TYPE yas::text_oarchive<YARMI_OSTREAM_TYPE>
-#endif
 
-#include <yas/mem_streams.hpp>
+namespace yarmi {
+
+using istream_type = yas::mem_istream;
+using ostream_type = yas::mem_ostream;
+using iarchive_type= yas::text_iarchive<istream_type>;
+using oarchive_type= yas::text_oarchive<ostream_type>;
+
+} // ns yarmi
+
+#endif // YARMI_USE_BINARY_SERIALIZATION
+
+/***************************************************************************/
+
 #include <yas/serializers/std_types_serializers.hpp>
 
 /***************************************************************************/

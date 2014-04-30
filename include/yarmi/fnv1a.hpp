@@ -37,11 +37,14 @@
 namespace yarmi {
 namespace detail {
 
-constexpr std::uint32_t fnv1a_32(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a_32(s, i+1, ((h^s[i])*0x01000193));
+constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
+	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
 }
 
 } // ns detail
+
+using id_type = decltype(::yarmi::detail::fnv1a(""));
+
 } // ns yarmi
 
 #endif // _yarmi__fnv1a_hpp

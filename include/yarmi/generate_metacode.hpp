@@ -38,7 +38,7 @@
 	BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(1, tuple), _##idx)
 
 #define YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL(idx, name) \
-	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a_32(_meta_requests_names[idx]) \
+	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a(_meta_requests_names[idx]) \
 	,
 
 #define YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX(unused, idx, seq) \
@@ -48,7 +48,7 @@
 	)
 
 #define YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL(idx, name) \
-	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a_32(_meta_handlers_names[idx]) \
+	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a(_meta_handlers_names[idx]) \
 	,
 
 #define YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX(unused, idx, seq) \
@@ -155,7 +155,7 @@
 			); \
 		} \
 		static constexpr bool meta_has_request(const id_type call_id) { return meta_request_name(call_id) != 0; } \
-		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a_32(str)); } \
+		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a(str)); } \
 		\
 		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
 		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
@@ -170,7 +170,7 @@
 			); \
 		} \
 		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; } \
-		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a_32(str)); }
+		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a(str)); }
 
 /***************************************************************************/
 

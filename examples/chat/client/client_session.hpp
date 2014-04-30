@@ -42,6 +42,8 @@
 struct client_session: yarmi::client_base, yarmi::client_invoker<client_session> {
 	client_session(boost::asio::io_service &ios);
 
+	void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive);
+
 	void on_registration(const std::string &msg, const std::string &regkey);
 	void on_activation(const std::string &msg);
 	void on_login(const std::string &msg);
