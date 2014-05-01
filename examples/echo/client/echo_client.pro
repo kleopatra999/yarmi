@@ -90,4 +90,5 @@ HEADERS += \
 	 ../../../include/yarmi/generate_metacode.hpp \
 	 ../../../include/yarmi/generate_ns.hpp \
 	 ../../../include/yarmi/generate_ns_to_string.hpp \
-	 ../../../include/yarmi/generate_tuple_is_empty.hpp
+	 ../../../include/yarmi/generate_tuple_is_empty.hpp \
+    ../../../include/yarmi/invoker.hpp

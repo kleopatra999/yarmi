@@ -44,6 +44,7 @@
 #include <yarmi/generate_metacode.hpp>
 #include <yarmi/generate_callers.hpp>
 #include <yarmi/generate_invoker.hpp>
+#include <yarmi/invoker.hpp>
 
 /***************************************************************************/
 

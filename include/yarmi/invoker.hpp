@@ -29,79 +29,47 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__invoker_hpp
+#define _yarmi__invoker_hpp
 
-#include <yarmi/client_base.hpp>
+#include <boost/preprocessor.hpp>
 
-#include <iostream>
+namespace yarmi {
 
 /***************************************************************************/
 
-struct client_impl: yarmi::client_invoker<client_impl, yarmi::client_base> {
-	client_impl(yarmi::client_base &base)
-		:yarmi::client_invoker<client_impl, yarmi::client_base>(*this, base)
-		,msg_index(0)
-	{}
+#define YARMI_GENERATE_ONE_INVOKE_REPEATED_OR(unused1, idx, size) \
+	inv##idx.invoke(call_id, archive) BOOST_PP_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), size), ||, )
 
-	void on_pong(const std::string &msg) {
-		//std::cout << "received: \"" << msg << "\"" << std::endl;
-		this->ping("my message "+std::to_string(++msg_index));
-
-		static std::size_t i = 0;
-		if ( ++i == 1024 ) {
-			i = 0;
-			std::cout << "received: \"" << msg << "\"" << std::endl;
-		}
+#define YARMI_GENERATE_ONE_INVOKE(unused1, idx, unused2) \
+	template<BOOST_PP_ENUM_PARAMS(idx, typename Inv)> \
+	bool invoke(id_type call_id, iarchive_type &archive, BOOST_PP_ENUM_BINARY_PARAMS(idx, Inv, &inv)) { \
+		return ( \
+			BOOST_PP_REPEAT( \
+				 idx \
+				,YARMI_GENERATE_ONE_INVOKE_REPEATED_OR \
+				,idx \
+			) \
+		); \
 	}
 
-	std::size_t msg_index;
-};
+#define YARMI_GENERATE_INVOKE(num) \
+	template<typename Inv0> \
+	bool invoke(id_type call_id, iarchive_type &archive, Inv0 &inv0) { \
+		return inv0.invoke(call_id, archive); \
+	} \
+	\
+	BOOST_PP_REPEAT_FROM_TO( \
+		 2 \
+		,BOOST_PP_ADD(num, 1) \
+		,YARMI_GENERATE_ONE_INVOKE \
+		,~ \
+	)
 
-struct client: yarmi::client_base {
-	client(boost::asio::io_service &ios)
-		:yarmi::client_base(ios)
-		,invoker(*this)
-	{}
-
-	void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) {
-		try {
-			const bool ok = yarmi::invoke(call_id, archive, invoker);
-			if ( ! ok ) {
-				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
-			}
-		} catch (const std::exception &ex) {
-			std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
-		}
-	}
-
-	client_impl invoker;
-};
+YARMI_GENERATE_INVOKE(10)
 
 /***************************************************************************/
 
-int main() {
-	static const char *ip = "127.0.0.1";
-	static const std::uint16_t port = 44550;
+} // ns yarmi
 
-	boost::asio::io_service ios;
-	client c(ios);
-	//c.connect(ip, port);
-	c.async_connect(
-		 ip
-		,port
-		,[&c](const boost::system::error_code &ec) {
-			if ( ec ) {
-				std::cout << "async_connect handler: " << ec.message() << std::endl;
-				return;
-			}
-			c.start();
-			c.invoker.ping("message");
-		}
-	);
-
-	ios.run();
-
-	return 0;
-}
-
-/***************************************************************************/
+#endif // _yarmi__invoker_hpp
