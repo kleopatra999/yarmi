@@ -39,11 +39,16 @@ namespace yarmi {
 /***************************************************************************/
 
 #define YARMI_GENERATE_ONE_INVOKE_REPEATED_OR(unused1, idx, size) \
-	inv##idx.invoke(call_id, archive) BOOST_PP_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), size), ||, )
+	inv##idx.invoke(call_id, iarchive) BOOST_PP_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), size), ||, )
 
 #define YARMI_GENERATE_ONE_INVOKE(unused1, idx, unused2) \
 	template<BOOST_PP_ENUM_PARAMS(idx, typename Inv)> \
-	bool invoke(id_type call_id, iarchive_type &archive, BOOST_PP_ENUM_BINARY_PARAMS(idx, Inv, &inv)) { \
+	bool invoke(const char *ptr, const std::size_t size, id_type *cid, BOOST_PP_ENUM_BINARY_PARAMS(idx, Inv, &inv)) { \
+		istream_type istream(ptr, size); \
+		iarchive_type iarchive(istream, yas::no_header); \
+		id_type call_id = 0; \
+		iarchive & call_id; \
+		if ( cid ) *cid = call_id; \
 		return ( \
 			BOOST_PP_REPEAT( \
 				 idx \
@@ -55,8 +60,13 @@ namespace yarmi {
 
 #define YARMI_GENERATE_INVOKE(num) \
 	template<typename Inv0> \
-	bool invoke(id_type call_id, iarchive_type &archive, Inv0 &inv0) { \
-		return inv0.invoke(call_id, archive); \
+	bool invoke(const char *ptr, const std::size_t size, id_type *cid, Inv0 &inv0) { \
+		istream_type istream(ptr, size); \
+		iarchive_type iarchive(istream, yas::no_header); \
+		id_type call_id = 0; \
+		iarchive & call_id; \
+		if ( cid ) *cid = call_id; \
+		return inv0.invoke(call_id, iarchive); \
 	} \
 	\
 	BOOST_PP_REPEAT_FROM_TO( \

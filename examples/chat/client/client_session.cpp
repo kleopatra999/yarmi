@@ -40,11 +40,12 @@ client_session::client_session(boost::asio::io_service &ios)
 
 /***************************************************************************/
 
-void client_session::invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) {
+void client_session::on_received(const char *ptr, const std::size_t size) {
+	yarmi::id_type call_id = 0;
 	try {
-		const bool ok = static_cast<yarmi::client_invoker<client_session>*>(this)->invoke(call_id, archive);
+		const bool ok = yarmi::invoke(ptr, size, &call_id, *this);
 		if ( ! ok ) {
-			std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
+			std::cerr << "client::invoke(): no proc for call_id=" << ptr << std::endl;
 		}
 	} catch (const std::exception &ex) {
 		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;

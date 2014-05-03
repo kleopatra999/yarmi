@@ -57,15 +57,18 @@ struct client_impl: yarmi::client_invoker<client_impl, yarmi::client_base> {
 	std::size_t msg_index;
 };
 
+/***************************************************************************/
+
 struct client: yarmi::client_base {
 	client(boost::asio::io_service &ios)
 		:yarmi::client_base(ios)
 		,invoker(*this)
 	{}
 
-	void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) {
+	void on_received(const char *ptr, const std::size_t size) {
+		yarmi::id_type call_id = 0;
 		try {
-			const bool ok = yarmi::invoke(call_id, archive, invoker);
+			const bool ok = yarmi::invoke(ptr, size, &call_id, invoker);
 			if ( ! ok ) {
 				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
 			}

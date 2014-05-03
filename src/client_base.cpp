@@ -121,12 +121,7 @@ struct client_base::impl {
 		if ( ec || rd != body_length )
 			throw std::runtime_error("on_body_readed(): "+ec.message());
 
-		yarmi::id_type call_id = 0;
-		::yarmi::istream_type istream(body_buffer.get(), body_length);
-		::yarmi::iarchive_type iarchive(istream, yas::no_header);
-		iarchive & call_id;
-
-		self->invoke(call_id, iarchive);
+		self->on_received(body_buffer.get(), body_length);
 
 		start();
 	}

@@ -69,7 +69,7 @@ struct client_base: private boost::noncopyable {
 	void disconnect();
 	void send(const yas::shared_buffer &buffer);
 
-	virtual void invoke(const yarmi::id_type call_id, yarmi::iarchive_type &archive) = 0;
+	virtual void on_received(const char *ptr, const std::size_t size) = 0;
 
 private:
 	struct impl;

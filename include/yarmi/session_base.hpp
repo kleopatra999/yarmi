@@ -72,7 +72,7 @@ struct session_base: std::enable_shared_from_this<session_base> {
 
 	virtual void on_connected() {}
 	virtual void on_disconnected() {}
-	virtual void on_received(const char *ptr, std::size_t size) = 0;
+	virtual void on_received(const char *ptr, const std::size_t size) = 0;
 
 	void set_on_destruction(bool flag);
 	bool get_on_destruction() const;
