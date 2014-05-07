@@ -47,51 +47,27 @@
 
 /***************************************************************************/
 
-#ifndef YARMI_GENERATE_INVOKE_NUM_INVOKERS
-#	define YARMI_GENERATE_INVOKE_NUM_INVOKERS 10
-#endif // YARMI_GENERATE_INVOKE_NUM_INVOKERS
-
 namespace yarmi {
 
-#define YARMI_GENERATE_ONE_INVOKE_REPEATED_OR(unused1, idx, size) \
-	inv##idx.invoke(call_id, iarchive) BOOST_PP_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), size), ||, )
+template<typename... R>
+void unpack(R...) {}
 
-#define YARMI_GENERATE_ONE_INVOKE(unused1, idx, unused2) \
-	template<BOOST_PP_ENUM_PARAMS(idx, typename Inv)> \
-	bool invoke(const char *ptr, const std::size_t size, id_type *cid, BOOST_PP_ENUM_BINARY_PARAMS(idx, Inv, &inv)) { \
-		istream_type istream(ptr, size); \
-		iarchive_type iarchive(istream, yas::no_header); \
-		id_type call_id = 0; \
-		iarchive & call_id; \
-		if ( cid ) *cid = call_id; \
-		return ( \
-			BOOST_PP_REPEAT( \
-				 idx \
-				,YARMI_GENERATE_ONE_INVOKE_REPEATED_OR \
-				,idx \
-			) \
-		); \
-	}
+template<typename Invoker, typename... Invokers>
+bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head, Invokers&... tail) {
+	istream_type istream(ptr, size);
+	iarchive_type iarchive(istream, yas::no_header);
+	id_type call_id = 0;
+	iarchive & call_id;
+	if ( cid ) *cid = call_id;
 
-#define YARMI_GENERATE_INVOKE(num) \
-	template<typename Inv0> \
-	bool invoke(const char *ptr, const std::size_t size, id_type *cid, Inv0 &inv0) { \
-		istream_type istream(ptr, size); \
-		iarchive_type iarchive(istream, yas::no_header); \
-		id_type call_id = 0; \
-		iarchive & call_id; \
-		if ( cid ) *cid = call_id; \
-		return inv0.invoke(call_id, iarchive); \
-	} \
-	\
-	BOOST_PP_REPEAT_FROM_TO( \
-		 2 \
-		,BOOST_PP_ADD(num, 1) \
-		,YARMI_GENERATE_ONE_INVOKE \
-		,~ \
-	)
+	bool result = false;
+	auto o = [&result](const id_type call_id, iarchive_type &iarchive, Invoker &invoker)->bool {
+		return result = result || invoker.invoke(call_id, iarchive);
+	};
+	unpack(o(call_id, iarchive, head), o(call_id, iarchive, tail)...);
 
-YARMI_GENERATE_INVOKE(YARMI_GENERATE_INVOKE_NUM_INVOKERS)
+	return result;
+}
 
 } // ns yarmi
 
