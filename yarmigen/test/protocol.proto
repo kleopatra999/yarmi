@@ -21,7 +21,3 @@ proto(api) {
    [logout       , on_logout      , (std::string)                           ] // message
    [users_online , on_users_online, (std::vector<std::string>)              ] // vector of usernames
 };
-
-proto(api) {
-	[ns]
-};

@@ -38,6 +38,8 @@
 
 namespace yarmigen {
 
+using iterator = std::string::const_iterator;
+
 /***************************************************************************/
 
 struct diag {
@@ -62,7 +64,7 @@ struct diag {
 
 /***************************************************************************/
 
-char nextch(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+char nextch(iterator &it, iterator end, diag &d) {
 	if ( it == end )
 		throw std::runtime_error("end of file exceeded in " + d.format());
 
@@ -71,7 +73,7 @@ char nextch(std::string::const_iterator &it, std::string::const_iterator end, di
 	return *it++;
 }
 
-void check_next(std::string::const_iterator &it, std::string::const_iterator end, const char ch, diag &d) {
+void check_next(iterator &it, iterator end, const char ch, diag &d) {
 	const char ch2 = nextch(it, end, d);
 	if ( ch != ch2 ) {
 		std::ostringstream os;
@@ -80,7 +82,7 @@ void check_next(std::string::const_iterator &it, std::string::const_iterator end
 	}
 }
 
-void skip_whitespace(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+void skip_whitespace(iterator &it, iterator end, diag &d) {
 	for ( ;; ) {
 		char ch = nextch(it, end, d);
 		switch ( ch ) {
@@ -108,7 +110,7 @@ void skip_whitespace(std::string::const_iterator &it, std::string::const_iterato
 /***************************************************************************/
 
 template<std::size_t N>
-void check_substring(const char(&str)[N], std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+void check_substring(const char(&str)[N], iterator &it, iterator end, diag &d) {
 	static_assert(N > 2, "N > 2");
 	for ( std::size_t idx = 0; idx < N-1; ++idx ) {
 		const char ch = nextch(it, end, d);
@@ -120,7 +122,7 @@ void check_substring(const char(&str)[N], std::string::const_iterator &it, std::
 	}
 }
 
-std::string get_proto_type(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+std::string get_proto_type(iterator &it, iterator end, diag &d) {
 	check_substring("proto", it, end, d);
 	check_next(it, end, '(', d);
 	skip_whitespace(it, end, d);
@@ -135,10 +137,20 @@ std::string get_proto_type(std::string::const_iterator &it, std::string::const_i
 
 /***************************************************************************/
 
-std::string get_to_sep(std::string::const_iterator &it, std::string::const_iterator end, char sep1, char sep2, diag &d) {
+template<typename... Objs>
+void apply(Objs...) {}
+
+template<typename... Seps>
+std::string get_to_sep(iterator &it, iterator end, diag &d, char sep, Seps... seps) {
 	std::string res;
-	char ch = 0;
-	for ( ch = nextch(it, end, d); ch != sep1 && ch != sep2; ch = nextch(it, end, d) ) {
+	char ch = nextch(it, end, d);
+	for ( ;; ch = nextch(it, end, d) ) {
+		bool flag = false;
+		auto func = [ch, &flag](char c) { return flag=flag || ch == c; };
+
+		apply(func(sep), func(seps)...);
+		if ( flag ) break;
+
 		res.push_back(ch);
 	}
 	if ( ch == ',' )
@@ -147,20 +159,22 @@ std::string get_to_sep(std::string::const_iterator &it, std::string::const_itera
 	return res;
 }
 
+/***************************************************************************/
+
 std::pair<std::string, std::string>
-get_ns_and_class_names(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+get_ns_and_class_names(iterator &it, iterator end, diag &d) {
 	static const char *ns = "namespace";
 	static const char *cl = "class";
 
 
 	skip_whitespace(it, end, d);
-	const std::string s1 = get_to_sep(it, end, ' ', ':', d);
-	if ( s1 != ns && s1 != cl )
+	const std::string tag1 = get_to_sep(it, end, d, ' ', ':', ']', '\n');
+	if ( tag1 != ns && tag1 != cl )
 		throw std::runtime_error("'class' or 'namespace' tags should be in line " +std::to_string(d.line));
 
 //	std::cout << "s1=|" << s1 << '|' << std::endl << std::flush;
 	skip_whitespace(it, end, d);
-	const std::string s2 = get_to_sep(it, end, ' ', ':', d);
+	const std::string val1 = get_to_sep(it, end, d, ' ', ':', ']', '\n');
 //	std::cout << "s2=|" << s2 << '|' << std::endl << std::flush;
 
 	skip_whitespace(it, end, d);
@@ -168,18 +182,18 @@ get_ns_and_class_names(std::string::const_iterator &it, std::string::const_itera
 	skip_whitespace(it, end, d);
 
 	skip_whitespace(it, end, d);
-	const std::string s3 = get_to_sep(it, end, ' ', ':', d);
-	if ( s3 != ns && s3 != cl )
+	const std::string tag2 = get_to_sep(it, end, d, ' ', ':', ']', '\n');
+	if ( tag2 != ns && tag2 != cl )
 		throw std::runtime_error("'class' or 'namespace' tags should be in line " +std::to_string(d.line));
 
 	//	std::cout << "s3=|" << s3 << '|' << std::endl << std::flush;
 	skip_whitespace(it, end, d);
-	const std::string s4 = get_to_sep(it, end, ' ', ':', d);
+	const std::string val2 = get_to_sep(it, end, d, ' ', ':', ']', '\n');
 //	std::cout << "s4=|" << s4 << '|' << std::endl << std::flush;
 
 	skip_whitespace(it, end, d);
 
-	return {s2, s4};
+	return {val1, val2};
 }
 
 /***************************************************************************/
@@ -213,7 +227,7 @@ split_args(const std::string &str) {
 	return res;
 }
 
-proc_info get_proc_info(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+proc_info get_proc_info(iterator &it, iterator end, diag &d) {
 	proc_info res;
 
 //	std::cout << "*it=" << *it << std::endl << std::flush;
@@ -224,7 +238,7 @@ proc_info get_proc_info(std::string::const_iterator &it, std::string::const_iter
 
 	//std::cout << "*it=" << *it << std::endl << std::flush;
 
-	res.request = get_to_sep(it, end, ' ', ',', d);
+	res.request = get_to_sep(it, end, d, ' ', ',');
 //	std::cout << "request: " << res.request << std::endl;
 	skip_whitespace(it, end, d);
 
@@ -233,7 +247,7 @@ proc_info get_proc_info(std::string::const_iterator &it, std::string::const_iter
 	skip_whitespace(it, end, d);
 
 //	std::cout << "*it=" << *it << std::endl << std::flush;
-	res.handler = get_to_sep(it, end, ' ', ',', d);
+	res.handler = get_to_sep(it, end, d, ' ', ',');
 //	std::cout << "handler: " << res.handler << std::endl;
 //	std::cout << "*it=" << *it << std::endl << std::flush;
 	skip_whitespace(it, end, d);
@@ -249,7 +263,7 @@ proc_info get_proc_info(std::string::const_iterator &it, std::string::const_iter
 	skip_whitespace(it, end, d);
 
 //	std::cout << "*it=" << *it << std::endl << std::flush;
-	const std::string args = get_to_sep(it, end, ')', ')', d);
+	const std::string args = get_to_sep(it, end, d, ')', ')');
 	res.args = split_args(args);
 //	res.dump(std::cout);
 //	std::cout << std::endl << std::flush;
@@ -282,7 +296,7 @@ void proto_section_switch(
 	}
 }
 
-void parse_one_section(proto_info &info, int cs, std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+void parse_one_section(proto_info &info, int cs, iterator &it, iterator end, diag &d) {
 	skip_whitespace(it, end, d);
 	// check for '[' (namspace and class_name section)
 	check_next(it, end, '[', d);
@@ -315,7 +329,7 @@ void parse_one_section(proto_info &info, int cs, std::string::const_iterator &it
 	proto_section_switch(info, cs, ns_cn.first, ns_cn.second, procs);
 }
 
-proto_info parse_one_proto(std::string::const_iterator &it, std::string::const_iterator end, diag &d) {
+proto_info parse_one_proto(iterator &it, iterator end, diag &d) {
 	proto_info res;
 
 	// get proto type from 'proto(<type>)' section
