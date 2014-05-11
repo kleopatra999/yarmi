@@ -29,24 +29,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include <string>
 
-/***************************************************************************/
+namespace yarmigen {
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+enum class e_lang;
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+std::string ext_by_type(const e_lang lang);
 
-/***************************************************************************/
+std::string read_file(const std::string &fname);
 
-#endif // _yarmi__generate_ns_to_string_hpp
+} // ns yarmigen

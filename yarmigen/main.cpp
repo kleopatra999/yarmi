@@ -29,24 +29,32 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include "cmdline.hpp"
+#include "tools.hpp"
+#include "dump_info.hpp"
+#include "reader.hpp"
+
+#include <iostream>
 
 /***************************************************************************/
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+int main(int argc, char **argv) {
+	using namespace yarmigen;
+	try {
+		options opt = parse_cmdline(argc, argv);
+		//opt.dump(std::cout);
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+		const std::string buf = read_file(opt.protoname);
+		const std::vector<proto_info> info = read(buf);
+
+		dump_info(std::cout, info);
+
+	} catch (const std::exception &ex) {
+		std::cerr << "[exception]: " << ex.what() << std::endl;
+		return 1;
+	}
+
+	return 0;
+}
 
 /***************************************************************************/
-
-#endif // _yarmi__generate_ns_to_string_hpp

@@ -29,24 +29,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include <string>
+#include <ostream>
 
-/***************************************************************************/
+namespace yarmigen {
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+enum class e_lang {
+	 c
+	,cpp
+	,python
+	,java
+	,js
+};
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+struct options {
+	std::string protoname;
+	std::string resname;
+	std::string resdir;
+	e_lang reslang;
 
-/***************************************************************************/
+	void dump(std::ostream &os) {
+		static const char *langnames[] =
+		{"c","cpp","python","java","js",0};
+		os
+		<< "protoname: " << protoname << std::endl
+		<< "resname  : " << resname << std::endl
+		<< "resdir   : " << resdir << std::endl
+		<< "reslang  : " << langnames[static_cast<int>(reslang)] << std::endl;
+	}
+};
 
-#endif // _yarmi__generate_ns_to_string_hpp
+} // ns yarmigen

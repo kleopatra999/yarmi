@@ -29,24 +29,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#ifndef _yarmigen__reader_hpp
+#define _yarmigen__reader_hpp
 
-/***************************************************************************/
+#include "protoinfo.hpp"
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+#include <vector>
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+namespace yarmigen {
 
-/***************************************************************************/
+std::vector<proto_info> read(const std::string &str);
 
-#endif // _yarmi__generate_ns_to_string_hpp
+} // ns yarmigen
+
+#endif // _yarmigen__reader_hpp

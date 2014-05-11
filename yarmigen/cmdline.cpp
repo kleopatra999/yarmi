@@ -29,24 +29,51 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include "cmdline.hpp"
+#include "throw.hpp"
 
-/***************************************************************************/
+#include <boost/program_options.hpp>
+#include <boost/filesystem/operations.hpp>
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+#include <map>
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+namespace yarmigen {
 
-/***************************************************************************/
+options parse_cmdline(int argc, char **argv) {
+	using namespace boost::program_options;
 
-#endif // _yarmi__generate_ns_to_string_hpp
+	std::string protoname, resfname, resdir, reslang;
+
+	options_description desc;
+	desc.add_options()
+		("help,h", "produce help message")
+		("proto,p", value<std::string>(&protoname)->required(), "proto file name")
+		("result,r", value<std::string>(&resfname)->required(), "generated file name")
+		("dir,d", value<std::string>(&resdir), "destination directory")
+		("lang,l", value<std::string>(&reslang)->required(), "language of generated code(c, cpp, python, java, js)")
+	;
+	variables_map vars;
+	store(command_line_parser(argc, argv).options(desc).run(), vars);
+	notify(vars);
+
+	if ( !boost::filesystem::exists(protoname) ) {
+		YARMIGEN_THROW("protofile(%s) is not exists", protoname);
+	}
+
+	std::map<std::string, e_lang> lang_map = {
+		 {"c"			, e_lang::c			}
+		,{"cpp"		, e_lang::cpp		}
+		,{"python"	, e_lang::python	}
+		,{"java"		, e_lang::java		}
+		,{"js"		, e_lang::js		}
+	};
+
+	auto lang = lang_map.find(reslang);
+	if ( lang == lang_map.end() ) {
+		YARMIGEN_THROW("bad language(%s) of generated code", reslang);
+	}
+
+	return {protoname, resfname, resdir, lang->second};
+}
+
+} // ns yarmigen

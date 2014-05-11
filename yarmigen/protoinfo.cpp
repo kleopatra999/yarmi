@@ -29,24 +29,60 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include "protoinfo.hpp"
 
-/***************************************************************************/
+#include <ostream>
+#include <iomanip>
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+namespace yarmigen {
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+void proc_info::dump(std::ostream &os) const {
+	enum { max_len = 32 };
 
-/***************************************************************************/
+	auto fill_by_spaces = [](std::ostream &os, std::size_t num) {
+		for ( ; num; --num )
+			os << ' ';
+	};
 
-#endif // _yarmi__generate_ns_to_string_hpp
+	os << '\'' << request << '\'';
+	fill_by_spaces(os, max_len - request.length());
+
+	os << " -> '" << handler << '\'';
+	fill_by_spaces(os, max_len - handler.length());
+
+	os << ": (";
+	for ( auto it = args.begin(); it != args.end(); ++it ) {
+		os << *it << (it+1 != args.end() ? ", " : "");
+	}
+	os << ')';
+}
+
+void proto_info::dump(std::ostream &os) const {
+	os
+	<< "type             : " << (type_ == info_type::api ? "api" : "service") << std::endl;
+	if ( type_ == info_type::api ) {
+		os
+		<< "client namespace : " << req_namespace_ << std::endl
+		<< "client class name: " << req_class_ << std::endl;
+		std::size_t idx = 0;
+		for ( const auto &it: req_procs_ ) {
+			os << "  " << std::setw(2) << std::setfill('0') << idx++ << ": ";
+			it.dump(os);
+			os << std::endl;
+		}
+
+		os
+		<< "server namespace : " << rep_namespace_ << std::endl
+		<< "server class name: " << rep_class_ << std::endl;
+		idx = 0;
+		for ( const auto &it: rep_procs_ ) {
+			os << "  " << std::setw(2) << std::setfill('0') << idx++ << ": ";
+			it.dump(os);
+			os << std::endl;
+		}
+	} else {
+
+	}
+}
+
+} // ns yarmigen

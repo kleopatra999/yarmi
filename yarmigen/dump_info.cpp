@@ -29,24 +29,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#include "dump_info.hpp"
+#include "protoinfo.hpp"
 
-/***************************************************************************/
+#include <ostream>
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+namespace yarmigen {
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+void dump_info(std::ostream &os, const std::vector<yarmigen::proto_info> &info) {
+	for ( const auto &it: info ) {
+		it.dump(os);
+		os << std::endl;
+	}
+}
 
-/***************************************************************************/
-
-#endif // _yarmi__generate_ns_to_string_hpp
+} // ns yarmigen

@@ -90,7 +90,7 @@
 #define YARMI_GENERATE_METACODE_HAS_REQUEST_AUX(unused, idx, seq) \
 	YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL( \
 		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
 	)
 
 /***************************************************************************/
@@ -141,8 +141,14 @@
 			) \
 		}; \
 		\
+		static void dump(std::ostream &os, const char * const *list) { \
+			os << "invoker: \"" YARMI_NS_TO_STRING(ns, cn) "\"" << std::endl; \
+			for ( ; *list; ++list ) { \
+				os << "  " << *list << ": " << ::yarmi::detail::fnv1a(*list) << std::endl; \
+			} \
+		} \
 	public: \
-		static constexpr const char** meta_requests() { return _meta_requests_names; } \
+		static constexpr const char* const* meta_requests() { return _meta_requests_names; } \
 		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
 		static constexpr const char*  meta_request_name(const id_type call_id) { \
 			return ( \
@@ -156,8 +162,9 @@
 		} \
 		static constexpr bool meta_has_request(const id_type call_id) { return meta_request_name(call_id) != 0; } \
 		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a(str)); } \
+		static void dump_requests(std::ostream &os) { dump(os, meta_requests()); } \
 		\
-		static constexpr const char** meta_handlers() { return _meta_handlers_names; } \
+		static constexpr const char* const* meta_handlers() { return _meta_handlers_names; } \
 		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
 		static constexpr const char*  meta_handler_name(const id_type call_id) { \
 			return ( \
@@ -170,7 +177,8 @@
 			); \
 		} \
 		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; } \
-		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a(str)); }
+		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a(str)); } \
+		static void dump_handlers(std::ostream &os) { dump(os, meta_handlers()); }
 
 /***************************************************************************/
 

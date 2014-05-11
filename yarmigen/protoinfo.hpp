@@ -29,24 +29,43 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__generate_ns_to_string_hpp
-#define _yarmi__generate_ns_to_string_hpp
+#ifndef _yarmigen__protoinfo_hpp
+#define _yarmigen__protoinfo_hpp
 
-/***************************************************************************/
+#include <string>
+#include <vector>
+#include <ostream>
 
-#define YARMI_NS_TO_STRING_ITEM(unused, idx, seq) \
-	BOOST_PP_IF(BOOST_PP_EQUAL(0, idx),,::)BOOST_PP_SEQ_ELEM(idx, seq)
+namespace yarmigen {
 
-#define YARMI_NS_TO_STRING(seq, sym) \
-	BOOST_PP_STRINGIZE( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_NS_TO_STRING_ITEM \
-			,seq \
-		) \
-		::sym \
-	)
+enum class info_type { api, service };
 
-/***************************************************************************/
+struct proc_info {
+	std::string request;
+	std::string handler;
+	std::vector<std::string> args;
 
-#endif // _yarmi__generate_ns_to_string_hpp
+	void dump(std::ostream &os) const;
+};
+
+struct proto_info {
+	proto_info()
+		:type_(info_type::api)
+	{}
+
+	info_type type_;
+
+	std::string req_namespace_;
+	std::string req_class_;
+	std::vector<proc_info> req_procs_;
+
+	std::string rep_namespace_;
+	std::string rep_class_;
+	std::vector<proc_info> rep_procs_;
+
+	void dump(std::ostream &os) const;
+};
+
+} // ns yarmigen
+
+#endif // _yarmigen__protoinfo_hpp

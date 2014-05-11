@@ -88,7 +88,14 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 
 /***************************************************************************/
 
-#define YARMI_CONSTRUCT_INVOKER(ns, cn, oppons, oppocn, seq, opposeq) \
+#define YARMI_CONSTRUCT_INVOKER( \
+	 ns      /* namespace */ \
+	,cn      /* class name */ \
+	,oppons  /* namespace for opposite class */ \
+	,oppocn  /* name of opposite class */ \
+	,seq     /* procedures sequence */ \
+	,opposeq /* opposite sequence sequence */ \
+) \
 	template<typename Impl, typename IO = Impl> \
 	struct cn { \
 		cn(Impl &impl, IO &io) \
@@ -104,7 +111,11 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 	private: \
 		Impl &impl; \
 		IO &io; \
-	};
+	}; \
+	template<typename Impl, typename IO> \
+	constexpr const char* cn<Impl, IO>::_meta_requests_names[]; \
+	template<typename Impl, typename IO> \
+	constexpr const char* cn<Impl, IO>::_meta_handlers_names[];
 
 /***************************************************************************/
 
