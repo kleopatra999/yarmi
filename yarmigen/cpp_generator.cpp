@@ -29,6 +29,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "cpp_generator.hpp"
+
 namespace yarmigen {
+
+void cpp_generator(std::ostream &os, const std::vector<proto_info> &info) {
+
+}
 
 } // ns yarmigen

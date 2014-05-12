@@ -31,24 +31,62 @@
 
 #include "cmdline.hpp"
 #include "tools.hpp"
+#include "throw.hpp"
 #include "dump_info.hpp"
 #include "reader.hpp"
 
+
+#include "c_generator.hpp"
+#include "cpp_generator.hpp"
+#include "python_generator.hpp"
+#include "java_generator.hpp"
+#include "js_generator.hpp"
+
 #include <iostream>
+#include <fstream>
+
+/***************************************************************************/
+
+void generate(std::ostream &os, const std::vector<yarmigen::proto_info> &info, const yarmigen::e_lang lang) {
+	using namespace yarmigen;
+
+	static generator_t gens[] = {
+		 &c_generator
+		,&cpp_generator
+		,&python_generator
+		,&java_generator
+		,&js_generator
+	};
+
+	const std::size_t idx = static_cast<std::size_t>(lang);
+	if ( idx > sizeof(gens)/sizeof(gens[0]) ) {
+		YARMIGEN_THROW("bad language index(%d) for language %s", idx, options::str_lang_by_enum(lang));
+	}
+
+	gens[idx](os, info);
+}
 
 /***************************************************************************/
 
 int main(int argc, char **argv) {
 	using namespace yarmigen;
+
 	try {
 		options opt = parse_cmdline(argc, argv);
 		//opt.dump(std::cout);
 
-		const std::string buf = read_file(opt.protoname);
+		const std::string buf = read_file(opt.in);
 		const std::vector<proto_info> info = read(buf);
 
 		dump_info(std::cout, info);
 
+		std::ofstream file(opt.out, std::ios::out|std::ios::trunc);
+		if ( !file ) {
+			std::cerr << "can't open output file" << std::endl;
+			return 1;
+		}
+
+		generate(file, info, opt.lang);
 	} catch (const std::exception &ex) {
 		std::cerr << "[exception]: " << ex.what() << std::endl;
 		return 1;

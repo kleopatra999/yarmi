@@ -2,7 +2,7 @@
 // Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
-// This file is part of YARMI(https://github.com/niXman/yarmi) project.
+// This file is part of THROW(https://github.com/niXman/throw) project.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,13 +29,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmigen__throw_hpp
-#define _yarmigen__throw_hpp
+#ifndef _throw__throw_hpp
+#define _throw__throw_hpp
 
 #include <stdexcept>
 #include <boost/format.hpp>
-
-namespace yarmigen {
 
 /***************************************************************************/
 
@@ -158,8 +156,8 @@ namespace yarmigen {
 /***************************************************************************/
 
 /* usage:
- * std::cout << YARMIGEN_MESSAGE_AS_STRING("message: %1%, %2%, %3%", "string1", 33, "string2") << std::endl;
- * std::string str = YARMIGEN_MESSAGE_AS_STRING("message: %1%, %2%, %3%", "string1", 33, "string2");
+ * std::cout << YARMIGEN_MESSAGE_AS_STRING("message: %s, %d, %s", "string1", 33, "string2") << std::endl;
+ * std::string str = YARMIGEN_MESSAGE_AS_STRING("message: %s, %d, %s", "string1", 33, "string2");
  */
 
 #define YARMIGEN_MESSAGE_AS_STRING(...) \
@@ -171,7 +169,7 @@ namespace yarmigen {
 /***************************************************************************/
 
 /* usage:
- * YARMIGEN_THROW("message: %1%, %2%, %3%", "string1", 33, "string2");
+ * YARMIGEN_THROW("message: %s, %d, %s", "string1", 33, "string2");
  */
 
 #define YARMIGEN_THROW(...) \
@@ -180,7 +178,7 @@ namespace yarmigen {
 /***************************************************************************/
 
 /* usage:
- * YARMIGEN_TYPED_THROW(std::logic_error, "message: %1%, %2%, %3%", "string1", 33, "string2");
+ * YARMIGEN_TYPED_THROW(std::logic_error, "message: %s, %d, %s", "string1", 33, "string2");
  */
 
 #define YARMIGEN_TYPED_THROW(extype, ...) \
@@ -197,10 +195,9 @@ namespace yarmigen {
  * }
  *
  * usage:
- * std::ofstream log("logfile.log");
  * YARMIGEN_TRY(exception_is_thrown)
  *    ...code...
- * YARMIGEN_CATCH_LOG(exception_is_thrown, log)
+ * YARMIGEN_CATCH_LOG(exception_is_thrown, std::cerr)
  * if ( exception_is_thrown ) {
  *    ...processing...
  * }
@@ -214,16 +211,18 @@ namespace yarmigen {
 #define YARMIGEN_CATCH(flagname) \
 	} catch (const std::exception &) { \
 		flagname = true; \
+	} catch (...) { \
+		flagname = true; \
 	}
 
 #define YARMIGEN_CATCH_LOG(flagname, logstream) \
 	} catch (const std::exception &ex) { \
 		flagname = true; \
-		logstream << YARMIGEN_MESSAGE_AS_STRING("[exception]: %1%", ex.what()) << std::endl; \
+		logstream << YARMIGEN_MESSAGE_AS_STRING("[exception]: %s", ex.what()) << std::endl; \
+	} catch (...) { \
+		flagname = true; \
 	}
 
 /***************************************************************************/
 
-} //  ns yarmigen
-
-#endif // _yarmigen__throw_hpp
+#endif // _throw__throw_hpp

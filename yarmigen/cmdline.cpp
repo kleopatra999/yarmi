@@ -42,14 +42,13 @@ namespace yarmigen {
 options parse_cmdline(int argc, char **argv) {
 	using namespace boost::program_options;
 
-	std::string protoname, resfname, resdir, reslang;
+	std::string protoname, resfname, reslang;
 
 	options_description desc;
 	desc.add_options()
 		("help,h", "produce help message")
-		("proto,p", value<std::string>(&protoname)->required(), "proto file name")
-		("result,r", value<std::string>(&resfname)->required(), "generated file name")
-		("dir,d", value<std::string>(&resdir), "destination directory")
+		("in,i", value<std::string>(&protoname)->required(), "proto file name")
+		("out,o", value<std::string>(&resfname)->required(), "generated file name")
 		("lang,l", value<std::string>(&reslang)->required(), "language of generated code(c, cpp, python, java, js)")
 	;
 	variables_map vars;
@@ -73,7 +72,7 @@ options parse_cmdline(int argc, char **argv) {
 		YARMIGEN_THROW("bad language(%s) of generated code", reslang);
 	}
 
-	return {protoname, resfname, resdir, lang->second};
+	return {protoname, resfname, lang->second};
 }
 
 } // ns yarmigen

@@ -43,19 +43,22 @@ enum class e_lang {
 };
 
 struct options {
-	std::string protoname;
-	std::string resname;
-	std::string resdir;
-	e_lang reslang;
+	std::string in;
+	std::string out;
+	e_lang lang;
 
 	void dump(std::ostream &os) {
+		os
+		<< "in file  : " << in << std::endl
+		<< "out file : " << out << std::endl
+		<< "reslang  : " << str_lang_by_enum(lang) << std::endl;
+	}
+
+	static const char* str_lang_by_enum(const e_lang lang) {
 		static const char *langnames[] =
 		{"c","cpp","python","java","js",0};
-		os
-		<< "protoname: " << protoname << std::endl
-		<< "resname  : " << resname << std::endl
-		<< "resdir   : " << resdir << std::endl
-		<< "reslang  : " << langnames[static_cast<int>(reslang)] << std::endl;
+
+		return langnames[static_cast<int>(lang)];
 	}
 };
 

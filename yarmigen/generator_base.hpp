@@ -30,14 +30,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iosfwd>
+#include <vector>
 
 namespace yarmigen {
 
 struct proto_info;
 
-struct generator_base {
-	virtual ~generator_base() {}
-	virtual void generate(std::ostream &os, const proto_info &info) = 0;
-};
+using generator_t = void (*)(std::ostream &os, const std::vector<proto_info> &info);
 
 } // ns yarmigen
