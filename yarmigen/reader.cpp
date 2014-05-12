@@ -39,26 +39,37 @@
 
 namespace yarmigen {
 
-static const char proto_str[] = "proto";
-static const char proto_str_open_char = '(';
-static const char proto_str_close_char = ')';
+/***************************************************************************/
 
-static const char proto_type_api_str[] = "api";
-static const char proto_type_service_str[] = "service";
+#define YARMIGEN_DECL_C(name, val) \
+	static constexpr const char name = val
 
-static const char proto_ns_cl_open_char = '[';
-static const char proto_ns_cl_close_char = ']';
-static const char proto_ns_cl_tag_separator = ':';
-static const char proto_ns_cl_namespace_str[] = "namespace";
-static const char proto_ns_cl_class_str[] = "class";
+#define YARMIGEN_DECL_S(name, val) \
+	static constexpr const char name[] = val
 
-static const char proto_open_body_char = '{';
-static const char proto_close_body_char = '}';
+/***************************************************************************/
 
-static const char proto_proc_open_char = '[';
-static const char proto_proc_close_char = ']';
-static const char proto_proc_sig_open_char = '(';
-static const char proto_proc_sig_close_char = ')';
+YARMIGEN_DECL_S(proto_str, "proto");
+
+YARMIGEN_DECL_C(proto_str_open_char, '(');
+YARMIGEN_DECL_C(proto_str_close_char, ')');
+
+YARMIGEN_DECL_S(proto_type_api_str, "api");
+YARMIGEN_DECL_S(proto_type_service_str, "service");
+
+YARMIGEN_DECL_C(proto_ns_cl_open_char, '[');
+YARMIGEN_DECL_C(proto_ns_cl_close_char, ']');
+YARMIGEN_DECL_C(proto_ns_cl_tag_separator, ':');
+YARMIGEN_DECL_S(proto_ns_cl_namespace_str, "namespace");
+YARMIGEN_DECL_S(proto_ns_cl_class_str, "class");
+
+YARMIGEN_DECL_C(proto_open_body_char, '{');
+YARMIGEN_DECL_C(proto_close_body_char, '}');
+
+YARMIGEN_DECL_C(proto_proc_open_char, '[');
+YARMIGEN_DECL_C(proto_proc_close_char, ']');
+YARMIGEN_DECL_C(proto_proc_sig_open_char, '(');
+YARMIGEN_DECL_C(proto_proc_sig_close_char, ')');
 
 /***************************************************************************/
 
