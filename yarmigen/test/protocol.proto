@@ -1,5 +1,5 @@
 
-proto(api) {
+proto(api) /* maybe one of 'api' | 'service' */ {
    [
        namespace: yarmi      // client invoker namespace
       ,class: client_invoker // name of the client invoker
