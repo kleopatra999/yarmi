@@ -34,7 +34,7 @@
 
 /***************************************************************************/
 
-#define YARMI_OPEN_NS_ITEM(unused, data, elem) \
+#define YARMI_OPEN_NS_ITEM(unused1, unused2, elem) \
 	namespace elem {
 
 #define YARMI_OPEN_NS(seq) \
