@@ -58,11 +58,11 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 	if ( cid ) *cid = call_id;
 
 	bool flag = false;
-	auto apply = [](...) {};
-	auto func  = [](const id_type call_id, bool &flag, iarchive_type &iarchive, Invoker &invoker) {
-		return (flag=flag || invoker.invoke(call_id, iarchive));
+	auto apply  = [](...) {};
+	auto pred   = [](const id_type call_id, bool &flag, iarchive_type &iarchive, Invoker &invoker)->bool {
+		return flag=flag || invoker.invoke(call_id, iarchive);
 	};
-	apply(func(call_id, flag, iarchive, head), func(call_id, flag, iarchive, tail)...);
+	apply(pred(call_id, flag, iarchive, head), pred(call_id, flag, iarchive, tail)...);
 
 	return flag;
 }
