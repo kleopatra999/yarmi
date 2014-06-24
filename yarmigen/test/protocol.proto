@@ -1,23 +1,28 @@
 
 proto(api) {
    [
-       namespace: yarmi      // client invoker namespace
-      ,class: client_invoker // name of the client invoker
+       namespace yarmi      // client invoker namespace
+      ,class client_invoker // name of the client invoker
    ]
-   [registration , on_registration, (std::string)                           ] // username
-   [activation   , on_activation  , (std::string, std::string, std::string) ] // registration key : username : password
-   [login        , on_login       , (std::string, std::string)              ] // username : password
+	[enum myenum1 {e1,e2,e3=2}; ] // так декларим enum
+	[struct mystruct1 {u32 a; string b; array<i64> c; set<string> d; map<u32, string> e; }; ] // а так декларим структуры
+	[using ms = mystruct1;]
+	[ using ms2 = mystruct1; ]
+	[		using ms2 = mystruct1;		]
+   [registration , on_registration, (string)                           ] // username
+   [activation   , on_activation  , (string, string, string) ] // registration key : username : password
+   [login        , on_login       , (string, string)              ] // username : password
    [logout       , on_logout      , ()                                      ] // without args
    [users_online , on_users_online, ()                                      ] // without args
-   [users_online , on_users_online, (std::string)                           ] // substring of username
+   [users_online , on_users_online, (string)                           ] // substring of username
    ,
    [
-       namespace: yarmi      // server invoker namespace
-      ,class: server_invoker // name of the server invoker
+       namespace yarmi      // server invoker namespace
+      ,class server_invoker // name of the server invoker
    ]
-   [registration , on_registration, (std::string, std::string)              ] // message : registration key
-   [activation   , on_activation  , (std::string)                           ] // message
-   [login        , on_login       , (std::string)                           ] // message
-   [logout       , on_logout      , (std::string)                           ] // message
-   [users_online , on_users_online, (std::vector<std::string>)              ] // vector of usernames
+   [registration , on_registration, (string, string)              ] // message : registration key
+   [activation   , on_activation  , (string)                           ] // message
+   [login        , on_login       , (string)                           ] // message
+   [logout       , on_logout      , (string)                           ] // message
+   [users_online , on_users_online, (array<string>)              ] // array of usernames
 }

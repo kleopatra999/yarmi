@@ -33,11 +33,41 @@
 #include "reader.hpp"
 #include "protoinfo.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 namespace yarmigen {
+
+/***************************************************************************/
+
+using iterator = std::string::const_iterator;
+
+/***************************************************************************/
+
+struct cursor {
+	cursor()
+		:m_line(1)
+		,m_col(0)
+	{}
+
+	void next_line() { ++m_line; m_col = 0; }
+	void prev_line() { --m_line; m_col = 0; }
+	void next_column() { ++m_col; }
+	void prev_column() { m_col = m_col ? m_col-1 : 0; }
+
+	std::size_t line()   const { return m_line; }
+	std::size_t column() const { return m_col;  }
+	std::string format() const {
+		return "line " + std::to_string(m_line) + " column " + std::to_string(m_col);
+	}
+
+private:
+	std::size_t m_line;
+	std::size_t m_col;
+};
 
 /***************************************************************************/
 
@@ -73,29 +103,49 @@ YARMIGEN_DECL_C(proto_proc_sig_close_char, ')');
 
 /***************************************************************************/
 
-using iterator = std::string::const_iterator;
+std::pair<bool, const char*>
+check_type_and_get_real_type(const std::string &type, cursor &c) {
+	static const std::unordered_map<std::string, const char*> types = {
+		 {"i8"    , "std::int8_t"        }
+		,{"int8"  , "std::int8_t"        }
+		,{"u8"    , "std::uint8_t"       }
+		,{"uint8" , "std::uint8_t"       }
+		,{"i16"   , "std::int16_t"       }
+		,{"int16" , "std::int16_t"       }
+		,{"u16"   , "std::uint16_t"      }
+		,{"uint16", "std::uint16_t"      }
+		,{"i32"   , "std::int32_t"       }
+		,{"int32" , "std::int32_t"       }
+		,{"u32"   , "std::uint32_t"      }
+		,{"uint32", "std::uint32_t"      }
+		,{"i64"   , "std::int64_t"       }
+		,{"int64" , "std::int64_t"       }
+		,{"u64"   , "std::uint64_t"      }
+		,{"uint64", "std::uint64_t"      }
+		,{"double", "double"             }
+		,{"string", "std::string"        }
+		,{"array" , "std::vector"        }
+		,{"set"   , "std::unordered_set" }
+		,{"map"   , "std::unordered_map" }
+	};
 
-/***************************************************************************/
+	std::size_t pos = type.find('<');
+	if ( pos != std::string::npos ) {
+		const auto open_angles = std::count(type.begin(), type.end(), '<');
+		const auto close_angles= std::count(type.begin(), type.end(), '>');
+		if ( open_angles != close_angles ) {
+			YARMIGEN_THROW(" count of '<' and '>' brackets is not equal, %s", c.format());
+		}
 
-struct cursor {
-	cursor()
-		:line(1)
-		,col(0)
-	{}
-
-	void next_line() {
-		++line;
-		col = 0;
+		const std::string tmp(type.begin(), type.begin()+pos);
+		const auto r = check_type_and_get_real_type(tmp, c);
+		if ( r.first ) return {true, r.second};
 	}
-	void next_column() { ++col; }
 
-	std::string format() const {
-		return "line " + std::to_string(line) + " column " + std::to_string(col);
-	}
-
-	std::size_t line;
-	std::size_t col;
-};
+	const auto it = types.find(type);
+	const auto ok = it != types.end();
+	return {ok, (ok ? it->second : 0)};
+}
 
 /***************************************************************************/
 
@@ -134,7 +184,7 @@ void skip_whitespace(iterator &it, iterator end, cursor &c) {
 
 			default:
 				--it;
-				--c.col;
+				c.prev_column();
 				return;
 		}
 	}
@@ -168,18 +218,16 @@ std::string get_proto_type(iterator &it, iterator end, cursor &c) {
 
 /***************************************************************************/
 
-template<typename... Objs>
-void apply(Objs...) {}
-
 template<typename... Seps>
 std::string get_to_sep(iterator &it, iterator end, cursor &c, char sep, Seps... seps) {
 	std::string res;
+	auto apply = [](...) {};
+	auto func  = [](bool &flag, char ch, char sep) { return flag=flag || ch == sep; };
+
 	char ch = nextch(it, end, c);
 	for ( ;; ch = nextch(it, end, c) ) {
 		bool flag = false;
-		auto func = [&flag](char ch, char sep) { return flag=flag || ch == sep; };
-
-		apply(func(ch, sep), func(ch, seps)...);
+		apply(func(flag, ch, sep), func(flag, ch, seps)...);
 		if ( flag ) break;
 
 		res.push_back(ch);
@@ -208,7 +256,7 @@ get_ns_and_class_names(iterator &it, iterator end, cursor &c) {
 		YARMIGEN_THROW("'%s' or '%s' tags should be in %d"
 			,proto_ns_cl_namespace_str
 			,proto_ns_cl_class_str
-			,c.line
+			,c.line()
 		);
 	}
 
@@ -243,7 +291,7 @@ get_ns_and_class_names(iterator &it, iterator end, cursor &c) {
 		YARMIGEN_THROW("'%s' or '%s' tags should be in %d"
 			,proto_ns_cl_namespace_str
 			,proto_ns_cl_class_str
-			,c.line
+			,c.line()
 		);
 	}
 
@@ -332,8 +380,19 @@ proc_info get_proc_info(iterator &it, iterator end, cursor &c) {
 	skip_whitespace(it, end, c);
 
 //	std::cout << "*it=" << *it << std::endl << std::flush;
+	const std::size_t column = c.column();
 	const std::string args = get_to_sep(it, end, c, proto_proc_sig_close_char);
 	res.args = split_args(args);
+	// check types
+	for ( const auto &it: res.args ) {
+		if ( it.empty() ) continue;
+		auto r = check_type_and_get_real_type(it, c);
+		std::cout << "type: " << (r.first ? r.second : "undefined") << std::endl;
+		if ( !r.first ) {
+			YARMIGEN_THROW("type '%s' is not supported type, line %d", it, c.line());
+		}
+	}
+
 //	res.dump(std::cout);
 //	std::cout << std::endl << std::flush;
 

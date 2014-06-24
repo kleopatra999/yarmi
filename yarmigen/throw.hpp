@@ -173,7 +173,7 @@
  */
 
 #define YARMIGEN_THROW(...) \
-	throw std::runtime_error(YARMIGEN_MESSAGE_AS_STRING(__VA_ARGS__));
+	throw std::runtime_error(YARMIGEN_MESSAGE_AS_STRING(__VA_ARGS__))
 
 /***************************************************************************/
 
@@ -182,7 +182,7 @@
  */
 
 #define YARMIGEN_TYPED_THROW(extype, ...) \
-	throw extype(YARMIGEN_MESSAGE_AS_STRING(__VA_ARGS__));
+	throw extype(YARMIGEN_MESSAGE_AS_STRING(__VA_ARGS__))
 
 /***************************************************************************/
 
