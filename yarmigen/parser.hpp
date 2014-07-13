@@ -29,35 +29,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "protoinfo.hpp"
-#include "tools.hpp"
-#include "tokens.hpp"
+#ifndef _yarmigen__reader_hpp
+#define _yarmigen__reader_hpp
 
-#include <ostream>
+#include "protoinfo.hpp"
 
 namespace yarmigen {
 
 /***************************************************************************/
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
-
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
-
-	return (res == type_api_str ? proto_type::api : proto_type::service);
-}
-
-/***************************************************************************/
-
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
-}
+std::vector<proto_info>
+parse(const std::string &data);
 
 /***************************************************************************/
 
 } // ns yarmigen
+
+#endif // _yarmigen__reader_hpp

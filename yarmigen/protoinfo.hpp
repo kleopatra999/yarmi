@@ -32,39 +32,33 @@
 #ifndef _yarmigen__protoinfo_hpp
 #define _yarmigen__protoinfo_hpp
 
-#include <string>
+#include "records.hpp"
+
 #include <vector>
-#include <ostream>
+#include <string>
 
 namespace yarmigen {
 
-enum class info_type { api, service };
+/***************************************************************************/
 
-struct proc_info {
-	std::string request;
-	std::string handler;
-	std::vector<std::string> args;
-
-	void dump(std::ostream &os) const;
-};
+enum class proto_type { api, service };
 
 struct proto_info {
-	proto_info()
-		:type_(info_type::api)
-	{}
+	proto_type type{proto_type::api};
 
-	info_type type_;
-
-	std::string req_namespace_;
-	std::string req_class_;
-	std::vector<proc_info> req_procs_;
-
-	std::string rep_namespace_;
-	std::string rep_class_;
-	std::vector<proc_info> rep_procs_;
-
-	void dump(std::ostream &os) const;
+	std::vector<record_ptr> cl_records;
+	std::vector<record_ptr> sr_records;
 };
+
+/***************************************************************************/
+
+proto_type get_proto_type(cursor &c);
+
+/***************************************************************************/
+
+bool is_template(const std::string &name);
+
+/***************************************************************************/
 
 } // ns yarmigen
 

@@ -37,10 +37,6 @@
 
 namespace yarmigen {
 
-struct proto_info;
-
-void dump_info(std::ostream &os, const std::vector<proto_info> &info);
-
 } // ns yarmigen
 
 #endif // _yarmigen__dump_info_hpp

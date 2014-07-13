@@ -33,6 +33,6 @@
 
 namespace yarmigen {
 
-void c_generator(const std::string &cmdline, std::ostream &os, const std::vector<proto_info> &info);
+void c_generator(std::ostream &os, const std::vector<proto_info> &info);
 
 } // ns yarmigen

@@ -29,33 +29,77 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "parser.hpp"
 #include "protoinfo.hpp"
 #include "tools.hpp"
 #include "tokens.hpp"
+#include "records.hpp"
 
-#include <ostream>
+#include <stdexcept>
+#include <iostream>
+#include <map>
 
 namespace yarmigen {
 
 /***************************************************************************/
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
+void parse_one_proto(proto_info &pi, cursor &c) {
+	// get proto type from 'proto(<type>)' section
+	pi.type = get_proto_type(c);
 
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
+	// check fo '{'
+	check_next(c, proto_body_open_char);
 
-	return (res == type_api_str ? proto_type::api : proto_type::service);
+	bool client = true;
+	for ( ;; ) {
+		cursor tc = c;
+		const std::string kword = get_to_sep(c, ' ', proto_body_close_char);
+		if ( !kword.empty() && kword[0] == ',' ) {
+			nextch(c);
+			client = false;
+			continue;
+		}
+		if ( kword.empty() )
+			break;
+
+		record_ptr o = record_factory(kword);
+		if ( !o )
+			YARMIGEN_THROW(
+				 "bad keyword \"%1%\" in %2%"
+				,kword
+				,tc.format()
+			);
+
+		o->parse(pi, c);
+//		o->dump(std::cout);
+		(client ? &pi.cl_records : &pi.sr_records)->push_back(std::move(o));
+	}
+
+	// check for '}'
+	check_next(c, proto_body_close_char);
+	// check for ';'
+	check_next(c, proto_body_close_dotcomma_char);
 }
 
 /***************************************************************************/
 
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
+std::vector<proto_info>
+parse(const std::string &data) {
+	cursor c(data.begin(), data.end());
+	std::vector<proto_info> res;
+
+	for ( ;; ) {
+		proto_info pi;
+		parse_one_proto(pi, c);
+
+		res.push_back(std::move(pi));
+
+		// end of file
+		if ( std::distance(c.it, c.end) == 1 )
+			break;
+	}
+
+	return std::move(res);
 }
 
 /***************************************************************************/

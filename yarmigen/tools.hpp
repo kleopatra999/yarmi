@@ -29,14 +29,95 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "throw.hpp"
+#include "cursor.hpp"
+
 #include <string>
+#include <iosfwd>
 
 namespace yarmigen {
+
+/***************************************************************************/
 
 enum class e_lang;
 
 std::string ext_by_type(const e_lang lang);
 
-std::string read_file(const std::string &fname);
+std::string read_file(std::ifstream &);
+
+/***************************************************************************/
+
+char nextch(cursor &c);
+char prevch(cursor &c);
+char curch(cursor &c);
+void skipws(cursor &c);
+void check_next(cursor &c, const char ch);
+
+template<std::size_t N>
+void check_substring(cursor &c, const char(&str)[N]) {
+	skipws(c);
+	static_assert(N > 2, "N > 2");
+	for ( std::size_t idx = 0; idx < N-1; ++idx ) {
+		const char ch = nextch(c);
+		if ( ch != str[idx] )
+			YARMIGEN_THROW(
+				 "unexpected character. expected '%c' get '%c', %s"
+				,ch
+				,str[idx]
+				,c.format()
+			);
+	}
+}
+
+template<typename... Seps>
+std::string get_to_sep(cursor &c, char sep, Seps... seps) {
+	skipws(c);
+	std::string res;
+
+	for ( char ch = nextch(c); ; ch = nextch(c) ) {
+		bool flag = false;
+		auto func = [](bool &f, char ch, char sep) { return f=f || ch == sep; };
+		auto apply= [](...) {};
+
+		apply(func(flag, ch, sep), func(flag, ch, seps)...);
+		if ( flag ) break;
+
+		res.push_back(ch);
+	}
+
+	prevch(c);
+
+	return res;
+}
+
+/***************************************************************************/
+
+template<typename... Chars>
+std::string erase_chars(const std::string &str, char ch, Chars... chars) {
+	std::string res;
+
+	for ( auto c: str ) {
+		bool flag = false;
+		auto func = [](bool &f, char c, char ch) { return f=f || c == ch; };
+		auto apply= [](...) {};
+
+		apply(func(flag, c, ch), func(flag, c, chars)...);
+		if ( flag ) continue;
+
+		res.push_back(c);
+	}
+
+	return res;
+}
+
+std::vector<std::string>
+split_template_args(const std::string &str);
+
+/***************************************************************************/
+
+struct proto_info;
+bool struct_already_declared(const proto_info &pi, const std::string &name);
+
+/***************************************************************************/
 
 } // ns yarmigen

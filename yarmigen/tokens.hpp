@@ -29,35 +29,62 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "protoinfo.hpp"
-#include "tools.hpp"
-#include "tokens.hpp"
-
-#include <ostream>
+#ifndef _yarmigen__tokens_hpp
+#define _yarmigen__tokens_hpp
 
 namespace yarmigen {
 
 /***************************************************************************/
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
+#define YARMIGEN_DECL_C(name, val) \
+	static constexpr const char name = val
 
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
+#define YARMIGEN_DECL_S(name, val) \
+	static constexpr const char name[] = val
 
-	return (res == type_api_str ? proto_type::api : proto_type::service);
-}
+YARMIGEN_DECL_S(proto_str, "proto");
 
-/***************************************************************************/
+YARMIGEN_DECL_C(proto_str_open_char, '(');
+YARMIGEN_DECL_C(proto_str_close_char, ')');
+YARMIGEN_DECL_C(proto_body_open_char, '{');
+YARMIGEN_DECL_C(proto_body_close_char, '}');
+YARMIGEN_DECL_C(proto_body_close_dotcomma_char, ';');
 
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
-}
+YARMIGEN_DECL_S(type_api_str, "api");
+YARMIGEN_DECL_S(type_service_str, "service");
+
+YARMIGEN_DECL_S(namespace_str, "namespace");
+YARMIGEN_DECL_C(namespace_close_dotcomma_char, ';');
+
+YARMIGEN_DECL_S(class_str, "class");
+YARMIGEN_DECL_C(class_close_dotcomma_char, ';');
+
+YARMIGEN_DECL_C(section_open_char, '[');
+YARMIGEN_DECL_C(section_closechar, ']');
+
+YARMIGEN_DECL_C(enum_body_open_char, '{');
+YARMIGEN_DECL_C(enum_body_close_char, '}');
+YARMIGEN_DECL_C(enum_body_close_dotcomma_char, ';');
+YARMIGEN_DECL_C(enum_type_separator, ':');
+YARMIGEN_DECL_C(enum_assign_char, '=');
+
+YARMIGEN_DECL_C(using_assign_char, '=');
+YARMIGEN_DECL_C(using_close_dotcomma_char, ';');
+
+YARMIGEN_DECL_C(const_assign_char, '=');
+YARMIGEN_DECL_C(const_close_dotcomma_char, ';');
+
+YARMIGEN_DECL_C(struct_body_open_char, '{');
+YARMIGEN_DECL_C(struct_body_close_char, '}');
+YARMIGEN_DECL_C(struct_body_close_dotcomma_char, ';');
+YARMIGEN_DECL_C(struct_base_classes_separator, ':');
+
+YARMIGEN_DECL_C(proc_sig_open_char, '(');
+YARMIGEN_DECL_C(proc_sig_close_char, ')');
+YARMIGEN_DECL_C(proc_sig_close_dotcomma_char, ';');
 
 /***************************************************************************/
 
 } // ns yarmigen
+
+#endif // _yarmigen__tokens_hpp

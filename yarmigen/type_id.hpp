@@ -29,35 +29,67 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "protoinfo.hpp"
-#include "tools.hpp"
-#include "tokens.hpp"
+#ifndef _yarmigen__type_id_hpp
+#define _yarmigen__type_id_hpp
 
-#include <ostream>
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/seq/for_each.hpp>
+
+#include <string>
 
 namespace yarmigen {
 
 /***************************************************************************/
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
+#define YARMIGEN_TYPES_ENUM_SEQ \
+	(bool) \
+	(i8) \
+	(u8) \
+	(i16) \
+	(u16) \
+	(i32) \
+	(u32) \
+	(i64) \
+	(u64) \
+	(double) \
+	(binary) \
+	(string) \
+	(array) \
+	(set) \
+	(map) \
+	(unknown)
 
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
+#define YARMIGEN_TYPE_ID_ENUM_NAME \
+	type_id
+#define YARMIGEN_TYPES_ENUM_PREFIX \
+	type_
 
-	return (res == type_api_str ? proto_type::api : proto_type::service);
-}
+#define YARMIGEN_DECLARE_TYPES_ENUM_ELEM(unused1, pref, elem) \
+	BOOST_PP_CAT(pref, elem),
+
+#define YARMIGEN_DECLARE_TYPES_ENUM(name, pref, seq) \
+	enum class name { \
+		BOOST_PP_SEQ_FOR_EACH( \
+			 YARMIGEN_DECLARE_TYPES_ENUM_ELEM \
+			,pref \
+			,seq \
+		) \
+	};
+
+YARMIGEN_DECLARE_TYPES_ENUM(
+	 YARMIGEN_TYPE_ID_ENUM_NAME
+	,YARMIGEN_TYPES_ENUM_PREFIX
+	,YARMIGEN_TYPES_ENUM_SEQ
+)
 
 /***************************************************************************/
 
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
-}
+type_id type_id_by_name(const std::string &name);
+const char* type_name_by_id(const type_id id);
+bool is_type_name(const std::string &name);
 
 /***************************************************************************/
 
 } // ns yarmigen
+
+#endif // _yarmigen__type_id_hpp

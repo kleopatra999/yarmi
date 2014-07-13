@@ -33,7 +33,6 @@
 #include "throw.hpp"
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #include <map>
 
@@ -42,8 +41,7 @@ namespace yarmigen {
 options parse_cmdline(int argc, char **argv) {
 	using namespace boost::program_options;
 
-	std::string protoname, resfname, reslang, pass;
-	bool protect = false;
+	std::string protoname, resfname, reslang;
 
 	options_description desc;
 	desc.add_options()
@@ -51,21 +49,12 @@ options parse_cmdline(int argc, char **argv) {
 		("in,i", value<std::string>(&protoname)->required(), "proto file name")
 		("out,o", value<std::string>(&resfname)->required(), "generated file name")
 		("lang,l", value<std::string>(&reslang)->required(), "language of generated code(c, cpp, python, java, js)")
-		("encode,e", value<bool>(&protect), "encode API strings")
-		("password,p", value<std::string>(&pass), "password used for encoding API strings")
 	;
 	variables_map vars;
 	store(command_line_parser(argc, argv).options(desc).run(), vars);
 	notify(vars);
 
-	if ( protect && pass.empty() ) {
-		YARMIGEN_THROW("'--password' is required if '--encode' is set");
-	}
-	if ( !boost::filesystem::exists(protoname) ) {
-		YARMIGEN_THROW("protofile(%s) is not exists", protoname);
-	}
-
-	std::map<std::string, e_lang> lang_map = {
+	static const std::map<std::string, e_lang> lang_map = {
 		 {"c"			, e_lang::c			}
 		,{"cpp"		, e_lang::cpp		}
 		,{"python"	, e_lang::python	}
@@ -78,7 +67,7 @@ options parse_cmdline(int argc, char **argv) {
 		YARMIGEN_THROW("bad language(%s) of generated code", reslang);
 	}
 
-	return {protoname, resfname, lang->second, protect};
+	return {protoname, resfname, lang->second};
 }
 
 } // ns yarmigen

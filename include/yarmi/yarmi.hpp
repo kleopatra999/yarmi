@@ -49,6 +49,9 @@
 
 namespace yarmi {
 
+template<typename... R>
+void unpack(R...) {}
+
 template<typename Invoker, typename... Invokers>
 bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head, Invokers&... tail) {
 	istream_type istream(ptr, size);
@@ -57,14 +60,13 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 	iarchive & call_id;
 	if ( cid ) *cid = call_id;
 
-	bool flag = false;
-	auto apply  = [](...) {};
-	auto pred   = [](const id_type call_id, bool &flag, iarchive_type &iarchive, Invoker &invoker)->bool {
-		return flag=flag || invoker.invoke(call_id, iarchive);
+	bool result = false;
+	auto o = [&result](const id_type call_id, iarchive_type &iarchive, Invoker &invoker)->bool {
+		return result = result || invoker.invoke(call_id, iarchive);
 	};
-	apply(pred(call_id, flag, iarchive, head), pred(call_id, flag, iarchive, tail)...);
+	unpack(o(call_id, iarchive, head), o(call_id, iarchive, tail)...);
 
-	return flag;
+	return result;
 }
 
 } // ns yarmi

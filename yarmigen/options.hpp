@@ -43,17 +43,9 @@ enum class e_lang {
 };
 
 struct options {
-	options(const std::string &in, const std::string &out, e_lang lang, bool protect)
-		:in(in)
-		,out(out)
-		,lang(lang)
-		,protect(protect)
-	{}
-
-	const std::string in;
-	const std::string out;
-	const e_lang lang;
-	const bool protect;
+	std::string in;
+	std::string out;
+	e_lang lang;
 
 	void dump(std::ostream &os) {
 		os

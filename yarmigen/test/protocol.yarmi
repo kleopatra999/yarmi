@@ -1,0 +1,50 @@
+
+// only CPP style comments allowed
+
+proto(api) { // maybe one of 'api' or 'service'
+   namespace yarmi;      // client invoker namespace
+   class client_invoker; // name of the client invoker
+
+   enum myenum1:u32{e1,e2,e3=2}; // enum declaration
+   enum myenum2 :u32{ e1,e2,e3=2 }; // enum declaration
+   enum myenum3: u32{ e1 , e2 , e3=2 }; // enum declaration
+   enum myenum4: u32  { e1 , e2 , e3=2 }; // enum declaration
+
+   const u32 myu32 = 0;
+   const myenum1 mye1 = myenum1::e1;
+
+   using ms1=mystruct1; // using/typedef
+   using ms2= mystruct1; // using/typedef
+   using ms3 =  mystruct1; // using/typedef
+   using ms4  =mystruct1; // using/typedef
+   using ms5 = array<mystruct1>; // using/typedef
+   using ms6 = set<mystruct1>; // using/typedef
+   using ms7 = map<u32, mystruct1>; // using/typedef
+
+   struct mystruct1 { // struct declaration
+	  const u32 g = 33;
+	  array<i64> a;
+	  u32 b; // member of mystruct1
+	  string c; // some member of mystruct1
+	  array<i64> d;
+	  set<string> e;
+	  map<u32, string> f; // some member of mystruct1
+   };
+   struct mystruct2: mystruct1, mystruct1 { u32 h; const u32 i = 0; };
+
+   proc registration -> on_registration: (string)                ; // username
+   proc activation   -> on_activation  : (string, string, string); // registration key : username : password
+   proc login        -> on_login       : (string, string)        ; // username : password
+   proc logout       -> on_logout      : ()                      ; // without args
+   proc users_online -> on_users_online: ()                      ; // without args
+   proc users_online -> on_users_online: (string)                ; // substring of username
+   ,
+   namespace yarmi;      // server invoker namespace
+   class server_invoker; // name of the server invoker
+
+   proc registration -> on_registration: (string, string)        ; // message : registration key
+   proc activation   -> on_activation  : (string)                ; // message
+   proc login        -> on_login       : (string)                ; // message
+   proc logout       -> on_logout      : (string)                ; // message
+   proc users_online -> on_users_online: (array<string>)         ; // array of usernames
+};

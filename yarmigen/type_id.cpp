@@ -29,33 +29,83 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "protoinfo.hpp"
-#include "tools.hpp"
-#include "tokens.hpp"
+#include "type_id.hpp"
 
-#include <ostream>
+#include <algorithm>
+#include <string>
+
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/tuple/elem.hpp>
 
 namespace yarmigen {
 
 /***************************************************************************/
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
+#define YARMIGEN_DECLARE_TYPES_MAP_IMPL(unused1, data, elem) \
+	{	 BOOST_PP_STRINGIZE(elem) \
+		,BOOST_PP_TUPLE_ELEM(0, data)::BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(1, data), elem) \
+	},
 
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
+#define YARMIGEN_DECLARE_TYPES_MAP(name, enum, pref, seq) \
+	static const pair name[] = { \
+		BOOST_PP_SEQ_FOR_EACH( \
+			 YARMIGEN_DECLARE_TYPES_MAP_IMPL \
+			,(enum, pref) \
+			,seq \
+		) \
+		{nullptr, enum::BOOST_PP_CAT(pref, unknown)} \
+	};
 
-	return (res == type_api_str ? proto_type::api : proto_type::service);
+/***************************************************************************/
+
+struct pair {
+	const char *name;
+	const type_id type;
+};
+
+YARMIGEN_DECLARE_TYPES_MAP(
+	 map
+	,YARMIGEN_TYPE_ID_ENUM_NAME
+	,YARMIGEN_TYPES_ENUM_PREFIX
+	,YARMIGEN_TYPES_ENUM_SEQ
+)
+
+static const auto beg = &map[0];
+static const auto end = &map[sizeof(map)/sizeof(pair)];
+
+/***************************************************************************/
+
+type_id type_id_by_name(const std::string &name) {
+	const auto it = std::find_if(
+		 beg, end
+		,[&name](const pair &p) { return p.name != nullptr && p.name == name; }
+	);
+
+	if ( it != end )
+		return it->type;
+
+	return type_id::type_unknown;
+}
+
+const char* type_name_by_id(const type_id id) {
+	const auto it = std::find_if(
+		 beg, end
+		,[id](const pair &p) { return p.name != nullptr && p.type == id; }
+	);
+
+	if ( it != end )
+		return it->name;
+
+	return nullptr;
 }
 
 /***************************************************************************/
 
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
+bool is_type_name(const std::string &name) {
+	// template type decl
+	const auto p = name.find('<');
+	return type_id_by_name((p != std::string::npos ? name.substr(0, p) : name)) != type_id::type_unknown;
 }
 
 /***************************************************************************/

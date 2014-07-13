@@ -36,11 +36,4 @@
 
 namespace yarmigen {
 
-void dump_info(std::ostream &os, const std::vector<yarmigen::proto_info> &info) {
-	for ( const auto &it: info ) {
-		it.dump(os);
-		os << std::endl;
-	}
-}
-
 } // ns yarmigen

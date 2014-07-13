@@ -31,8 +31,6 @@
 
 #include <yarmi/client_base.hpp>
 
-#include <yas/buffers.hpp>
-
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>

@@ -33,8 +33,7 @@
 #include "tools.hpp"
 #include "throw.hpp"
 #include "dump_info.hpp"
-#include "reader.hpp"
-
+#include "parser.hpp"
 
 #include "c_generator.hpp"
 #include "cpp_generator.hpp"
@@ -44,51 +43,25 @@
 
 #include <iostream>
 #include <fstream>
-#include <map>
-#include <cstring>
+#include <sstream>
 
 /***************************************************************************/
 
-void generate(const std::string& cmdline, std::ostream &os, const std::vector<yarmigen::proto_info> &info, const yarmigen::e_lang lang) {
+void generate(std::ostream &os, const std::vector<yarmigen::proto_info> &info, const yarmigen::e_lang lang) {
 	using namespace yarmigen;
-
-	static const std::map<e_lang, generator_t> map = {
-		 {e_lang::c     , &c_generator     }
-		,{e_lang::cpp   , &cpp_generator   }
-		,{e_lang::python, &python_generator}
-		,{e_lang::java  , &java_generator  }
-		,{e_lang::js    , &js_generator    }
+	static const generator_t gens[] = {
+		 &c_generator
+		,&cpp_generator
+		,&python_generator
+		,&java_generator
+		,&js_generator
 	};
 
-	auto it = map.find(lang);
-	if ( it == map.end() ) {
-		YARMIGEN_THROW("bad language %s", options::str_lang_by_enum(lang));
-	}
+	const std::size_t idx = static_cast<std::size_t>(lang);
+	if ( idx > sizeof(gens)/sizeof(gens[0]) )
+		YARMIGEN_THROW("bad language index(%1%) for language %2%", idx, options::str_lang_by_enum(lang));
 
-	it->second(cmdline, os, info);
-}
-
-/***************************************************************************/
-
-std::string make_cmdline_string(char **argv) {
-	#ifdef _WIN32
-	#	define SEP '\\'
-	#else
-	#	define SEP '/'
-	#endif
-
-	const char *pn = std::strrchr(argv[0], SEP);
-	pn = ( !pn ? "yarmigen" : pn+1);
-
-	std::string res = pn;
-	res.push_back(' ');
-
-	for ( char **it = argv+1; *it; ++it ) {
-		res += *it;
-		res.push_back(' ');
-	}
-
-	return res;
+	gens[idx](os, info);
 }
 
 /***************************************************************************/
@@ -97,23 +70,24 @@ int main(int argc, char **argv) {
 	using namespace yarmigen;
 
 	try {
-		options opt = parse_cmdline(argc, argv);
+		const options opt = parse_cmdline(argc, argv);
 		//opt.dump(std::cout);
 
-		const std::string buf = read_file(opt.in);
-		const std::vector<proto_info> info = read(buf);
+		std::ifstream ifile(opt.in);
+		if ( !ifile )
+			YARMIGEN_THROW("can't open input file \""+opt.in+"\"");
 
-		dump_info(std::cout, info);
+		const std::string buf = read_file(ifile);
+		const std::vector<proto_info> info = parse(buf);
+		//dump_info(std::cout, info);
 
-		std::ofstream file(opt.out, std::ios::out|std::ios::trunc);
-		if ( !file ) {
-			std::cerr << "can't open output file" << std::endl;
+		std::ofstream ofile(opt.out, std::ios::out|std::ios::trunc);
+		if ( !ofile ) {
+			std::cerr << "can't create output file \"" << opt.out << "\"" << std::endl;
 			return 1;
 		}
 
-		const std::string cmdline = make_cmdline_string(argv);
-		//std::cout << "cmdline='" << cmdline << "'" << std::endl;
-		generate(cmdline, file, info, opt.lang);
+		generate(ofile, info, opt.lang);
 	} catch (const std::exception &ex) {
 		std::cerr << "[exception]: " << ex.what() << std::endl;
 		return 1;

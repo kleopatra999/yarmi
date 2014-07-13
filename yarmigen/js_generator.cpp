@@ -33,8 +33,9 @@
 
 namespace yarmigen {
 
-void js_generator(const std::string &cmdline, std::ostream &os, const std::vector<proto_info> &info) {
-
+void js_generator(std::ostream &os, const std::vector<proto_info> &info) {
+	((void)os);
+	((void)info);
 }
 
 } // ns yarmigen

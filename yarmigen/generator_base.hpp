@@ -36,6 +36,6 @@ namespace yarmigen {
 
 struct proto_info;
 
-using generator_t = void (*)(const std::string &cmdline, std::ostream &os, const std::vector<proto_info> &info);
+using generator_t = void (*)(std::ostream &os, const std::vector<proto_info> &info);
 
 } // ns yarmigen

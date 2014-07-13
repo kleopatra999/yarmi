@@ -29,35 +29,50 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "protoinfo.hpp"
-#include "tools.hpp"
-#include "tokens.hpp"
+#ifndef _yarmigen__cursor_hpp
+#define _yarmigen__cursor_hpp
 
-#include <ostream>
+#include <cstdint>
+#include <string>
 
 namespace yarmigen {
 
-/***************************************************************************/
+using iterator = std::string::const_iterator;
 
-proto_type get_proto_type(cursor &c) {
-	check_substring(c, proto_str);
-	check_next(c, proto_str_open_char);
+struct cursor {
+	cursor(iterator it, iterator end)
+		:it(it)
+		,end(end)
+		,line(1)
+		,col(0)
+	{}
+	cursor(const cursor &c)
+		:line(c.line)
+		,col(c.col)
+	{}
 
-	std::string res;
-	for (char ch = nextch(c);
-		  ch != proto_str_close_char;
-		  ch = nextch(c)
-	) { res.push_back(ch); }
+	void inc_line() {
+		++line;
+		col = 0;
+	}
+	void inc_column() { ++col; }
+	void dec_column() { --col; }
 
-	return (res == type_api_str ? proto_type::api : proto_type::service);
-}
+	std::size_t get_line() const { return line; }
+	std::size_t get_column() const { return col; }
 
-/***************************************************************************/
+	std::string format() const {
+		return "line " + std::to_string(line) + " column " + std::to_string(col+1);
+	}
 
-bool is_template(const std::string &name) {
-	return name.find('<') != std::string::npos;
-}
+public:
+	iterator it, end;
 
-/***************************************************************************/
+private:
+	std::size_t line;
+	std::size_t col;
+};
 
 } // ns yarmigen
+
+#endif // _yarmigen__cursor_hpp

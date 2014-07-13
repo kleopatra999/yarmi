@@ -34,8 +34,6 @@
 #include <yarmi/handler_allocator.hpp>
 #include <yarmi/make_preallocated_handler.hpp>
 
-#include <yas/buffers.hpp>
-
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>

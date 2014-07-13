@@ -34,7 +34,7 @@
 
 /***************************************************************************/
 
-#define YARMI_OPEN_NS_ITEM(unused1, unused2, elem) \
+#define YARMI_OPEN_NS_ITEM(unused, data, elem) \
 	namespace elem {
 
 #define YARMI_OPEN_NS(seq) \
@@ -44,14 +44,14 @@
 		,seq \
 	)
 
-#define YARMI_CLOSE_NS_ITEM(unused1, unused2, unused3) \
-	}
+#define YARMI_CLOSE_NS_ITEM(unused1, unused2, data) \
+	data
 
 #define YARMI_CLOSE_NS(seq) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_SEQ_SIZE(seq) \
 		,YARMI_CLOSE_NS_ITEM \
-		,~ \
+		,} \
 	)
 
 /***************************************************************************/
