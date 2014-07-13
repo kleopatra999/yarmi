@@ -144,7 +144,7 @@
 		static void dump(std::ostream &os, const char * const *list) { \
 			os << "invoker: \"" YARMI_NS_TO_STRING(ns, cn) "\"" << std::endl; \
 			for ( ; *list; ++list ) { \
-				os << "  " << *list << ": " << ::yarmi::detail::fnv1a(*list) << std::endl; \
+				os << "  " << *list << ": 0x" << std::hex << ::yarmi::detail::fnv1a(*list) << std::endl; \
 			} \
 		} \
 	public: \

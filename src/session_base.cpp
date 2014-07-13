@@ -33,6 +33,7 @@
 #include <yarmi/session_base.hpp>
 #include <yarmi/handler_allocator.hpp>
 #include <yarmi/make_preallocated_handler.hpp>
+#include <yarmi/throw.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -75,7 +76,7 @@ struct session_base::impl {
 
 	void header_readed(const boost::system::error_code &ec, std::size_t rd, session_base::session_ptr self) {
 		if ( ec || rd != header_size ) {
-			std::cerr << "YARMI: header read error: \"" << ec.message() << "\"" << std::endl;
+			std::cerr << YARMI_FORMAT_MESSAGE("header read error: \"%1%\"", ec.message()) << std::endl;
 			return;
 		}
 
@@ -110,14 +111,14 @@ struct session_base::impl {
 		,std::size_t buffer_size
 	) {
 		if ( ec || rd != buffer_size ) {
-			std::cerr << "YARMI: body read error: \"" << ec.message() << "\"" << std::endl;
+			std::cerr << YARMI_FORMAT_MESSAGE("body read error: \"%1%\"", ec.message()) << std::endl;
 			return;
 		}
 
 		try {
 			self->on_received(buffer.get(), buffer_size);
 		} catch (const std::exception &ex) {
-			std::cerr << "YARMI: exception is thrown when invoking: \"" << ex.what() << "\"" << std::endl;
+			std::cerr << YARMI_FORMAT_MESSAGE("exception is thrown when invoking: \"%1%\"", ex.what()) << std::endl;
 		}
 
 		read_header(self);
@@ -155,7 +156,7 @@ struct session_base::impl {
 		,yas::shared_buffer buffer
 	) {
 		if ( ec || wr != buffer.size ) {
-			std::cerr << "YARMI: write error: \"" << ec.message() << "\"" << std::endl;
+			std::cerr << YARMI_FORMAT_MESSAGE("write error: \"%1%\"", ec.message()) << std::endl;
 		}
 		in_process = false;
 		if ( ! buffers.empty() ) {
@@ -205,7 +206,7 @@ void session_base::close() { pimpl->socket.close(); }
 
 void session_base::send(const yas::shared_buffer &buffer) {
 	if ( get_on_destruction() ) {
-		std::cerr << "YARMI: cannot send data when session already in destruction state" << std::endl;
+		std::cerr << YARMI_FORMAT_MESSAGE("cannot send data when session already in destruction state") << std::endl;
 		return;
 	}
 

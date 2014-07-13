@@ -6,6 +6,9 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += \
 	-std=c++11
 
+INCLUDEPATH += \
+	../include
+
 LIBS += \
 	-lboost_program_options
 
@@ -19,14 +22,13 @@ SOURCES += main.cpp \
 	python_generator.cpp \
 	protoinfo.cpp \
 	dump_info.cpp \
-    parser.cpp \
-    type_id.cpp \
-    records.cpp
+	parser.cpp \
+	type_id.cpp \
+	records.cpp
 
 HEADERS += \
 	 cmdline.hpp \
 	 options.hpp \
-	 throw.hpp \
 	tools.hpp \
 	c_generator.hpp \
 	cpp_generator.hpp \
@@ -37,10 +39,10 @@ HEADERS += \
 	protoinfo.hpp \
 	dump_info.hpp \
 	cursor.hpp \
-    parser.hpp \
-    type_id.hpp \
-    tokens.hpp \
-    records.hpp
+	parser.hpp \
+	type_id.hpp \
+	tokens.hpp \
+	records.hpp
 
 OTHER_FILES += \
 	test/protocol.yarmi

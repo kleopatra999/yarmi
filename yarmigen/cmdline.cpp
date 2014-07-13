@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <yarmi/throw.hpp>
 #include "cmdline.hpp"
-#include "throw.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -64,7 +64,7 @@ options parse_cmdline(int argc, char **argv) {
 
 	auto lang = lang_map.find(reslang);
 	if ( lang == lang_map.end() ) {
-		YARMIGEN_THROW("bad language(%s) of generated code", reslang);
+		YARMI_THROW("bad language(%s) of generated code", reslang);
 	}
 
 	return {protoname, resfname, lang->second};

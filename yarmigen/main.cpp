@@ -31,7 +31,7 @@
 
 #include "cmdline.hpp"
 #include "tools.hpp"
-#include "throw.hpp"
+#include <yarmi/throw.hpp>
 #include "dump_info.hpp"
 #include "parser.hpp"
 
@@ -59,7 +59,7 @@ void generate(std::ostream &os, const std::vector<yarmigen::proto_info> &info, c
 
 	const std::size_t idx = static_cast<std::size_t>(lang);
 	if ( idx > sizeof(gens)/sizeof(gens[0]) )
-		YARMIGEN_THROW("bad language index(%1%) for language %2%", idx, options::str_lang_by_enum(lang));
+		YARMI_THROW("bad language index(%1%) for language %2%", idx, options::str_lang_by_enum(lang));
 
 	gens[idx](os, info);
 }
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 
 		std::ifstream ifile(opt.in);
 		if ( !ifile )
-			YARMIGEN_THROW("can't open input file \""+opt.in+"\"");
+			YARMI_THROW("can't open input file \""+opt.in+"\"");
 
 		const std::string buf = read_file(ifile);
 		const std::vector<proto_info> info = parse(buf);

@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <yarmi/throw.hpp>
 #include "options.hpp"
-#include "throw.hpp"
 #include "cursor.hpp"
 #include "protoinfo.hpp"
 
@@ -42,7 +42,7 @@ namespace yarmigen {
 
 char nextch(cursor &c) {
 	if ( c.it == c.end )
-		YARMIGEN_THROW("end of file exceeded in %s", c.format());
+		YARMI_THROW("end of file exceeded in %s", c.format());
 
 	c.inc_column();
 	return *(c.it++);
@@ -64,7 +64,7 @@ void skipws(cursor &c) {
 		switch ( ch ) {
 			case '/':
 				if ( (ch=curch(c)) != '/' )
-					YARMIGEN_THROW(
+					YARMI_THROW(
 						"bad char '%c' in %s"
 						,ch
 						,c.format()
@@ -92,7 +92,7 @@ void check_next(cursor &c, const char ch) {
 	skipws(c);
 	const char ch2 = nextch(c);
 	if ( ch != ch2 )
-		YARMIGEN_THROW(
+		YARMI_THROW(
 			 "next char error in %s, expected '%c' get '%c'"
 			,c.format()
 			,ch

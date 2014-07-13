@@ -34,6 +34,7 @@
 #include <yarmi/session_base.hpp>
 #include <yarmi/handler_allocator.hpp>
 #include <yarmi/make_preallocated_handler.hpp>
+#include <yarmi/throw.hpp>
 
 #include <boost/noncopyable.hpp>
 
@@ -51,7 +52,7 @@ static bool default_on_connected_predicate(const boost::asio::ip::tcp::endpoint 
 	return true;
 }
 static void default_error_handler(const std::string &msg) {
-	std::cerr << "YARMI: server: \"" << msg << "\"" << std::endl << std::flush;
+	std::cerr << msg << std::endl << std::flush;
 }
 
 } // ns detail
@@ -61,8 +62,8 @@ static void default_error_handler(const std::string &msg) {
 template<
 	 typename UC
 	,template<typename UC> class GC
-	,typename CP=bool(*)(const boost::asio::ip::tcp::endpoint &)
-	,typename EH=void(*)(const std::string &)
+	,typename CP = bool(*)(const boost::asio::ip::tcp::endpoint &)
+	,typename EH = void(*)(const std::string &)
 >
 struct server: private boost::noncopyable {
 	server(
@@ -99,29 +100,21 @@ struct server: private boost::noncopyable {
 private:
 	void session_deleter(session_base *session) {
 		session->set_on_destruction(true);
-		try {
+		std::ostringstream os;
+
+		YARMI_TRY(on_disconnected_flag)
 			session->on_disconnected();
-		} catch (const std::exception &ex) {
-			std::ostringstream os;
-			os << "[exception] session->on_disconnected(): \"" << ex.what() << "\"";
-			eh(os.str());
-		}
+		YARMI_CATCH_LOG(on_disconnected_flag, os, eh(os.str());)
 
 		if ( ! gc.has_session(session) ) {
-			std::ostringstream os;
-			os << "session " << std::hex << session << " not in connected sessions list";
-			eh(os.str());
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
 		} else {
 			gc.del_session(session);
 		}
 
-		try {
+		YARMI_TRY(delete_session_flag)
 			delete session;
-		} catch (const std::exception &ex) {
-			std::ostringstream os;
-			os << "[exception] delete session: \"" << ex.what() << "\"";
-			eh(os.str());
-		}
+		YARMI_CATCH_LOG(delete_session_flag, os, eh(os.str());)
 	}
 
 	void on_accepted(const boost::system::error_code &ec, session_base::session_ptr session) {
@@ -129,25 +122,18 @@ private:
 			boost::system::error_code ec2;
 			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
 			if ( ec2 ) {
-				std::ostringstream os;
-				os << "cannot get remote endpoint\"" << ec2.message() << "\"";
-				eh(os.str());
+				eh(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
 			}
 
 			if ( ! cp(ep) ) {
-				std::ostringstream os;
-				os << "IP \"" << ep.address().to_string() << "\" is in backlist";
-				eh(os.str());
+				eh(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
 			} else {
+				std::ostringstream os;
 				gc.add_session(session.get());
 
-				try {
+				YARMI_TRY(on_connected_flag)
 					session->on_connected();
-				} catch (const std::exception &ex) {
-					std::ostringstream os;
-					os << "[exception] session->on_connected(): \"" << ex.what() << "\"";
-					eh(os.str());
-				}
+				YARMI_CATCH_LOG(on_connected_flag, os, eh(os.str());)
 
 				/** start session */
 				session->start();

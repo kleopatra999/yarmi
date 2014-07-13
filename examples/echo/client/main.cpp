@@ -41,10 +41,7 @@ struct client_impl: yarmi::client_invoker<client_impl, yarmi::client_base> {
 	client_impl(yarmi::client_base &base)
 		:yarmi::client_invoker<client_impl, yarmi::client_base>(*this, base)
 		,msg_index(0)
-	{
-		dump_requests(std::cout);
-		dump_handlers(std::cout);
-	}
+	{}
 
 	void on_pong(const std::string &msg) {
 		//std::cout << "received: \"" << msg << "\"" << std::endl;

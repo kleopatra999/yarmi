@@ -44,7 +44,7 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session_base: std::enable_shared_from_this<session_base> {
-	typedef std::shared_ptr<session_base> session_ptr;
+	using session_ptr = std::shared_ptr<session_base>;
 
 	template<typename Impl, template<typename> class GC, typename D>
 	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {

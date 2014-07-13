@@ -29,6 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <yarmi/throw.hpp>
+
 #include "user_context.hpp"
 #include "global_context.hpp"
 
@@ -43,23 +45,26 @@ user_context::user_context(boost::asio::io_service &ios, global_context<user_con
 /***************************************************************************/
 
 void user_context::on_connected() {
-	std::cout << "YARMI: on_connected(" << get_socket().remote_endpoint().address().to_string() << ") called" << std::endl;
+	std::cout << YARMI_FORMAT_MESSAGE(
+		 "on_connected(%1%) called"
+		,get_socket().remote_endpoint().address().to_string()
+	) << std::endl;
 }
 
 void user_context::on_disconnected() {
-	std::cout << "YARMI: on_disconnected() called" << std::endl;
+	std::cout << YARMI_FORMAT_MESSAGE("on_disconnected() called") << std::endl;
 }
 
 void user_context::on_received(const char *ptr, std::size_t size) {
-	try {
+	YARMI_TRY(invoke_flag)
 		yarmi::id_type call_id = 0;
-		const bool ok = invoke(ptr, size, &call_id);
-		if ( ! ok ) {
-			std::cerr << "user_context::on_received(): no handler for call_id=" << call_id << std::endl;
+		if ( !invoke(ptr, size, &call_id) ) {
+			std::cerr << YARMI_FORMAT_MESSAGE(
+				 "no handler for call_id \"%1%\""
+				,call_id
+			) << std::endl;
 		}
-	} catch (const std::exception &ex) {
-		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
-	}
+	YARMI_CATCH_LOG(invoke_flag, std::cerr)
 }
 
 /***************************************************************************/

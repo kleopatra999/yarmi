@@ -31,6 +31,7 @@
 
 #include <yarmi/global_context_base.hpp>
 #include <yarmi/session_base.hpp>
+#include <yarmi/throw.hpp>
 
 #include <stdexcept>
 #include <sstream>
@@ -97,9 +98,7 @@ const global_context_base &global_context_base::get_global_context_base() const 
 
 std::uint64_t global_context_base::add_session(session_base *session) {
 	if ( has_session(session) ) {
-		std::ostringstream os;
-		os << "YARMI: session " << std::hex << session << " already in sessions list";
-		throw std::runtime_error(os.str());
+		YARMI_THROW("session \"%1%\" already in sessions list", session);
 	}
 
 	std::int64_t idx = impl->session_ids--;
@@ -110,9 +109,7 @@ std::uint64_t global_context_base::add_session(session_base *session) {
 
 void global_context_base::del_session(session_base *session) {
 	if ( !has_session(session) ) {
-		std::ostringstream os;
-		os << "YARMI: session " << std::hex << session << " not in sessions list";
-		throw std::runtime_error(os.str());
+		YARMI_THROW("session \"%1%\" not in sessions list", session);
 	}
 
 	auto &index = impl->sessions.get<session_wrapper::by_session>();
@@ -122,9 +119,7 @@ void global_context_base::del_session(session_base *session) {
 
 void global_context_base::del_session(std::int64_t id) {
 	if ( !has_session(id) ) {
-		std::ostringstream os;
-		os << "YARMI: session with ID " << id << " not in sessions list";
-		throw std::runtime_error(os.str());
+		YARMI_THROW("session with ID \"%1%\" not in sessions list", id);
 	}
 
 	auto &index = impl->sessions.get<session_wrapper::by_id>();
@@ -139,9 +134,7 @@ void global_context_base::set_id(session_base *session, std::int64_t id) {
 
 	auto it = index.find(session);
 	if ( it == index.end() ) {
-		std::ostringstream os;
-		os << "YARMI: session " << std::hex << session << " not in sessions list";
-		throw std::runtime_error(os.str());
+		YARMI_THROW("YARMI: session \"%1%\" not in sessions list", session);
 	}
 
 	index.erase(it);

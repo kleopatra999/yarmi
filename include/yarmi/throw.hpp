@@ -46,56 +46,56 @@
 /***************************************************************************/
 // based on the: http://gustedt.wordpress.com/2010/06/08/detect-empty-macro-arguments
 
-#define __THROW_YARMIGEN_ARG16(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, ...) _15
-#define __THROW_YARMIGEN_HAS_COMMA(...) __THROW_YARMIGEN_ARG16(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-#define __THROW_YARMIGEN__TRIGGER_PARENTHESIS_(...) ,
+#define __THROW_YARMI_ARG16(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, ...) _15
+#define __THROW_YARMI_HAS_COMMA(...) __THROW_YARMI_ARG16(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+#define __THROW_YARMI__TRIGGER_PARENTHESIS_(...) ,
 
-#define __THROW_YARMIGEN_ISEMPTY(...) \
-	__THROW_YARMIGEN__ISEMPTY( \
+#define __THROW_YARMI_ISEMPTY(...) \
+	__THROW_YARMI__ISEMPTY( \
 		/* test if there is just one argument, eventually an empty one */ \
-		__THROW_YARMIGEN_HAS_COMMA(__VA_ARGS__), \
+		__THROW_YARMI_HAS_COMMA(__VA_ARGS__), \
 		/* test if _TRIGGER_PARENTHESIS_ together with the argument adds a comma */ \
-		__THROW_YARMIGEN_HAS_COMMA(__THROW_YARMIGEN__TRIGGER_PARENTHESIS_ __VA_ARGS__),                 \
+		__THROW_YARMI_HAS_COMMA(__THROW_YARMI__TRIGGER_PARENTHESIS_ __VA_ARGS__),                 \
 		/* test if the argument together with a parenthesis adds a comma */ \
-		__THROW_YARMIGEN_HAS_COMMA(__VA_ARGS__ (/*empty*/)), \
+		__THROW_YARMI_HAS_COMMA(__VA_ARGS__ (/*empty*/)), \
 		/* test if placing it between _TRIGGER_PARENTHESIS_ and the parenthesis adds a comma */ \
-		__THROW_YARMIGEN_HAS_COMMA(__THROW_YARMIGEN__TRIGGER_PARENTHESIS_ __VA_ARGS__ (/*empty*/)) \
+		__THROW_YARMI_HAS_COMMA(__THROW_YARMI__TRIGGER_PARENTHESIS_ __VA_ARGS__ (/*empty*/)) \
 	)
 
-#define __THROW_YARMIGEN_PASTE5(_0, _1, _2, _3, _4) \
+#define __THROW_YARMI_PASTE5(_0, _1, _2, _3, _4) \
 	_0 ## _1 ## _2 ## _3 ## _4
 
-#define __THROW_YARMIGEN__ISEMPTY(_0, _1, _2, _3) \
-	__THROW_YARMIGEN_HAS_COMMA(__THROW_YARMIGEN_PASTE5(__THROW_YARMIGEN__IS_EMPTY_CASE_, _0, _1, _2, _3))
+#define __THROW_YARMI__ISEMPTY(_0, _1, _2, _3) \
+	__THROW_YARMI_HAS_COMMA(__THROW_YARMI_PASTE5(__THROW_YARMI__IS_EMPTY_CASE_, _0, _1, _2, _3))
 
-#define __THROW_YARMIGEN__IS_EMPTY_CASE_0001 \
+#define __THROW_YARMI__IS_EMPTY_CASE_0001 \
 	,
 
-#define __THROW_YARMIGEN_TUPLE_IS_EMPTY(...) \
-	__THROW_YARMIGEN_ISEMPTY(__VA_ARGS__)
+#define __THROW_YARMI_TUPLE_IS_EMPTY(...) \
+	__THROW_YARMI_ISEMPTY(__VA_ARGS__)
 
 /***************************************************************************/
 
-#define __THROW_YARMIGEN_PASTE_ELEM(unused, idx, args) \
+#define __THROW_YARMI_PASTE_ELEM(unused, idx, args) \
 	% (BOOST_PP_TUPLE_ELEM(idx, args))
 
-#define __THROW_YARMIGEN_FORMAT_MESSAGE_WITHOUT_ARGS(...)
+#define __THROW_YARMI_FORMAT_MESSAGE_WITHOUT_ARGS(...)
 
-#define __THROW_YARMIGEN_FORMAT_MESSAGE_WITH_ARGS(...) \
+#define __THROW_YARMI_FORMAT_MESSAGE_WITH_ARGS(...) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_TUPLE_SIZE((__VA_ARGS__)) \
-		,__THROW_YARMIGEN_PASTE_ELEM \
+		,__THROW_YARMI_PASTE_ELEM \
 		,(__VA_ARGS__) \
 	)
 
 /***************************************************************************/
 
 /* usage:
- * std::cout << YARMIGEN_FORMAT_MESSAGE("message: %1%, %2%, %3%", "string1", 33, "string2") << std::endl;
- * std::string str = YARMIGEN_FORMAT_MESSAGE_AS_STRING("message: %1%, %2%, %3%", "string1", 33, "string2");
+ * std::cout << YARMI_FORMAT_MESSAGE("message: %1%, %2%, %3%", "string1", 33, "string2") << std::endl;
+ * std::string str = YARMI_FORMAT_MESSAGE_AS_STRING("message: %1%, %2%, %3%", "string1", 33, "string2");
  */
 
-#define YARMIGEN_FORMAT_MESSAGE(fmt, ...) \
+#define YARMI_FORMAT_MESSAGE(fmt, ...) \
 	boost::format( \
 		static_cast<const std::ostringstream&>( \
 			std::ostringstream() \
@@ -105,57 +105,57 @@
 		).str() \
 	) \
 	BOOST_PP_IF( \
-		 __THROW_YARMIGEN_TUPLE_IS_EMPTY(__VA_ARGS__) \
-		,__THROW_YARMIGEN_FORMAT_MESSAGE_WITHOUT_ARGS \
-		,__THROW_YARMIGEN_FORMAT_MESSAGE_WITH_ARGS \
+		 __THROW_YARMI_TUPLE_IS_EMPTY(__VA_ARGS__) \
+		,__THROW_YARMI_FORMAT_MESSAGE_WITHOUT_ARGS \
+		,__THROW_YARMI_FORMAT_MESSAGE_WITH_ARGS \
 	)(__VA_ARGS__)
 
-#define YARMIGEN_FORMAT_MESSAGE_AS_STRING(fmt, ...) \
-	(YARMIGEN_FORMAT_MESSAGE(fmt, __VA_ARGS__)).str()
+#define YARMI_FORMAT_MESSAGE_AS_STRING(fmt, ...) \
+	(YARMI_FORMAT_MESSAGE(fmt, __VA_ARGS__)).str()
 
 /***************************************************************************/
 
 /* usage:
- * YARMIGEN_THROW("message: %1%, %2%, %3%", "string1", 33, "string2");
+ * YARMI_THROW("message: %1%, %2%, %3%", "string1", 33, "string2");
  */
 
-#define YARMIGEN_THROW(fmt, ...) \
-	throw std::runtime_error(YARMIGEN_FORMAT_MESSAGE_AS_STRING(fmt, __VA_ARGS__))
+#define YARMI_THROW(fmt, ...) \
+	throw std::runtime_error(YARMI_FORMAT_MESSAGE_AS_STRING(fmt, __VA_ARGS__))
 
 /***************************************************************************/
 
 /* usage:
- * YARMIGEN_TYPED_THROW(std::logic_error, "message: %1%, %2%, %3%", "string1", 33, "string2");
+ * YARMI_TYPED_THROW(std::logic_error, "message: %1%, %2%, %3%", "string1", 33, "string2");
  */
 
-#define YARMIGEN_TYPED_THROW(extype, fmt, ...) \
-	throw extype(YARMIGEN_FORMAT_MESSAGE_AS_STRING(fmt, __VA_ARGS__))
+#define YARMI_TYPED_THROW(extype, fmt, ...) \
+	throw extype(YARMI_FORMAT_MESSAGE_AS_STRING(fmt, __VA_ARGS__))
 
 /***************************************************************************/
 
 /* usage:
- * YARMIGEN_TRY(exception_is_thrown)
+ * YARMI_TRY(exception_is_thrown)
  *    ...code...
- * YARMIGEN_CATCH(exception_is_thrown)
+ * YARMI_CATCH(exception_is_thrown)
  * if ( exception_is_thrown ) {
  *    ...processing...
  * }
  *
  * usage:
- * YARMIGEN_TRY(exception_is_thrown)
+ * YARMI_TRY(exception_is_thrown)
  *    ...code...
- * YARMIGEN_CATCH_LOG(exception_is_thrown, std::cerr)
+ * YARMI_CATCH_LOG(exception_is_thrown, std::cerr)
  * if ( exception_is_thrown ) {
  *    ...processing...
  * }
  */
 
-#define YARMIGEN_TRY(flagname) \
+#define YARMI_TRY(flagname) \
 	bool flagname = false; \
 	((void)flagname); \
 	try {
 
-#define YARMIGEN_CATCH(flagname, ...) \
+#define YARMI_CATCH(flagname, ...) \
 	} catch (const std::exception &) { \
 		flagname = true; \
 		{ __VA_ARGS__; } \
@@ -164,14 +164,14 @@
 		{ __VA_ARGS__; } \
 	}
 
-#define YARMIGEN_CATCH_LOG(flagname, logstream, ...) \
+#define YARMI_CATCH_LOG(flagname, logstream, ...) \
 	} catch (const std::exception &ex) { \
 		flagname = true; \
-		logstream << YARMIGEN_FORMAT_MESSAGE("[exception]: %1%", ex.what()) << std::endl; \
+		logstream << YARMI_FORMAT_MESSAGE("[exception]: %1%", ex.what()) << std::endl; \
 		{ __VA_ARGS__; } \
 	} catch (...) { \
 		flagname = true; \
-		logstream << YARMIGEN_FORMAT_MESSAGE("[exception]: unknown exception") << std::endl; \
+		logstream << YARMI_FORMAT_MESSAGE("[exception]: unknown exception") << std::endl; \
 		{ __VA_ARGS__; } \
 	}
 

@@ -29,7 +29,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "throw.hpp"
+#include <yarmi/throw.hpp>
 #include "cursor.hpp"
 
 #include <string>
@@ -60,7 +60,7 @@ void check_substring(cursor &c, const char(&str)[N]) {
 	for ( std::size_t idx = 0; idx < N-1; ++idx ) {
 		const char ch = nextch(c);
 		if ( ch != str[idx] )
-			YARMIGEN_THROW(
+			YARMI_THROW(
 				 "unexpected character. expected '%c' get '%c', %s"
 				,ch
 				,str[idx]

@@ -75,8 +75,8 @@ struct global_context_base: private boost::noncopyable {
 	/** operations */
 	void send_to(std::int64_t id, const yas::shared_buffer &buffer);
 
-	template<typename Allocator, template<typename, typename> class container>
-	void send_to(const container<std::int64_t, Allocator> &cont, const yas::shared_buffer &buffer) {
+	template<typename Allocator, template<typename, typename> class Container>
+	void send_to(const Container<std::int64_t, Allocator> &cont, const yas::shared_buffer &buffer) {
 		for ( const auto &it: cont ) {
 			send_to(it, buffer);
 		}

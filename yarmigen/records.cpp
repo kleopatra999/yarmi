@@ -126,7 +126,7 @@ void record_enum::parse(proto_info &, cursor &c) {
 		const std::string type = get_to_sep(c, ' ', enum_body_open_char);
 		pimpl->type = type_id_by_name(type);
 		if ( pimpl->type == type_id::type_unknown ) {
-			YARMIGEN_THROW(
+			YARMI_THROW(
 				"enum underlying type error: '%s' in %s"
 				,type
 				,c1.format()
@@ -161,7 +161,7 @@ void record_enum::parse(proto_info &, cursor &c) {
 			pimpl->elems.push_back({n, v});
 		// error
 		} else {
-			YARMIGEN_THROW(
+			YARMI_THROW(
 				"syntax error: '%c' in %s"
 				,cc
 				,c.format()
@@ -372,14 +372,14 @@ void record_struct::parse(proto_info &info, cursor &c) {
 				case ' ':
 				case ',': {
 					if ( ch == ',' && base.empty() )
-						YARMIGEN_THROW(
+						YARMI_THROW(
 							"bad char '%c', expected name of base struct in %s"
 							,ch
 							,c.format()
 						);
 
 					if ( !struct_already_declared(info, base) )
-						YARMIGEN_THROW(
+						YARMI_THROW(
 							 "base struct '%s'(%s) is not declared"
 							,base
 							,tc.format()
@@ -418,7 +418,7 @@ void record_struct::parse(proto_info &info, cursor &c) {
 
 		record_ptr o = record_factory((is_type ? "var" : kword));
 		if ( !o )
-			YARMIGEN_THROW(
+			YARMI_THROW(
 				 "bad keyword \"%s\" in %s"
 				,kword
 				,c.format()

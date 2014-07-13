@@ -64,14 +64,14 @@ void parse_one_proto(proto_info &pi, cursor &c) {
 
 		record_ptr o = record_factory(kword);
 		if ( !o )
-			YARMIGEN_THROW(
+			YARMI_THROW(
 				 "bad keyword \"%1%\" in %2%"
 				,kword
 				,tc.format()
 			);
 
 		o->parse(pi, c);
-		//o->dump(std::cout);
+		o->dump(std::cout);
 		(client ? &pi.cl_records : &pi.sr_records)->push_back(std::move(o));
 	}
 
