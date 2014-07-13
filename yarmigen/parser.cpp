@@ -71,7 +71,7 @@ void parse_one_proto(proto_info &pi, cursor &c) {
 			);
 
 		o->parse(pi, c);
-//		o->dump(std::cout);
+		//o->dump(std::cout);
 		(client ? &pi.cl_records : &pi.sr_records)->push_back(std::move(o));
 	}
 

@@ -88,4 +88,12 @@ HEADERS += \
     ../../../include/yarmi/declare_tuple_is_empty.hpp \
     ../../../include/yarmi/fnv1a.hpp \
     ../../../include/yarmi/serialization.hpp \
-    ../../../include/yarmi/declare_metacode.hpp
+    ../../../include/yarmi/declare_metacode.hpp \
+    ../../../include/yarmi/generate_callers.hpp \
+    ../../../include/yarmi/generate_enum.hpp \
+    ../../../include/yarmi/generate_invoker.hpp \
+    ../../../include/yarmi/generate_lazy_if.hpp \
+    ../../../include/yarmi/generate_metacode.hpp \
+    ../../../include/yarmi/generate_ns_to_string.hpp \
+    ../../../include/yarmi/generate_ns.hpp \
+    ../../../include/yarmi/generate_tuple_is_empty.hpp
