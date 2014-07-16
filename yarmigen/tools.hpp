@@ -75,6 +75,11 @@ std::string get_to_sep(cursor &c, char sep, Seps... seps) {
 	std::string res;
 
 	for ( char ch = nextch(c); ; ch = nextch(c) ) {
+		if ( ch == '/' ) {
+			prevch(c);
+			skipws(c);
+			continue;
+		}
 		bool flag = false;
 		auto func = [](bool &f, char ch, char sep) { return f=f || ch == sep; };
 		auto apply= [](...) {};

@@ -162,14 +162,21 @@ bool struct_already_declared(const proto_info &pi, const std::string &name) {
 	auto beg = pi.cl_records.begin();
 	auto end = pi.cl_records.end();
 	for ( ; beg != end; ++beg ) {
-		if ( (*beg)->type() == record_type::struct_ && (*beg)->name() == name )
-			return true;
+		if ( (*beg)->type() == record_type::struct_ ) {
+			record_get_name_visitor gn;
+			static_cast<record_struct*>((*beg).get())->accept(gn);
+			if ( gn.name == name ) return true;
+		}
 	}
+
 	beg = pi.sr_records.begin();
 	end = pi.sr_records.end();
 	for ( ; beg != end; ++beg ) {
-		if ( (*beg)->type() == record_type::struct_ && (*beg)->name() == name )
-			return true;
+		if ( (*beg)->type() == record_type::struct_ ) {
+			record_get_name_visitor gn;
+			static_cast<record_struct*>((*beg).get())->accept(gn);
+			if ( gn.name == name ) return true;
+		}
 	}
 
 	return false;

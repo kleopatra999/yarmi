@@ -2,13 +2,16 @@
 // only CPP style comments allowed
 
 proto(api) { // maybe one of 'api' or 'service'
-   namespace yarmi;      // client invoker namespace
+   namespace yarmi// client invoker namespace
+   ;
    class client_invoker; // name of the client invoker
 
    enum myenum1:u32{e1,e2,e3=2}; // enum declaration
    enum myenum2 :u32{ e1,e2,e3=2 }; // enum declaration
    enum myenum3: u32{ e1 , e2 , e3=2 }; // enum declaration
    enum myenum4: u32  { e1 , e2 , e3=2 }; // enum declaration
+   enum myenum5{ e1 , e2 , e3=2 }; // enum declaration
+   enum myenum1{};
 
    const u32 myu32 = 0;
    const myenum1 mye1 = myenum1::e1;

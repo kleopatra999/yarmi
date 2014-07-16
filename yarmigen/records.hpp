@@ -29,18 +29,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmigen__concrete_records_hpp
-#define _yarmigen__concrete_records_hpp
+#ifndef _yarmigen__records_hpp
+#define _yarmigen__records_hpp
+
+#include "visitors.hpp"
 
 #include <memory>
 #include <iosfwd>
 
 namespace yarmigen {
-
-/***************************************************************************/
-
-struct proto_info;
-struct cursor;
 
 /***************************************************************************/
 
@@ -55,15 +52,19 @@ enum class record_type {
 	,proto_
 };
 
+/***************************************************************************/
+
+struct proto_info;
+struct cursor;
+
 struct record_base {
 	virtual void parse(proto_info &info, cursor &c) = 0;
 	virtual void write(std::ostream &os) const = 0;
 	virtual void dump(std::ostream &os) const = 0;
 	virtual record_type type() const = 0;
-	virtual const std::string& name() const = 0;
 
 	virtual ~record_base() {}
-};
+}; // struct record_base
 
 /***************************************************************************/
 
@@ -74,8 +75,9 @@ struct record_namespace: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
@@ -91,8 +93,9 @@ struct record_class: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
@@ -108,13 +111,14 @@ struct record_enum: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_enum
 
 /***************************************************************************/
 
@@ -125,13 +129,14 @@ struct record_using: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_using
 
 /***************************************************************************/
 
@@ -142,13 +147,14 @@ struct record_const: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_const
 
 /***************************************************************************/
 
@@ -159,13 +165,12 @@ struct record_proc: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_proc
 
 /***************************************************************************/
 
@@ -176,13 +181,14 @@ struct record_var: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_var
 
 /***************************************************************************/
 
@@ -193,13 +199,14 @@ struct record_struct: record_base {
 	void parse(proto_info &info, cursor &c);
 	void write(std::ostream &os) const;
 	void dump(std::ostream &os) const;
-	const std::string& name() const;
 	record_type type() const;
+
+	void accept(record_get_name_visitor &v) const;
 
 private:
 	struct impl;
 	impl *pimpl;
-};
+}; // struct record_struct
 
 /***************************************************************************/
 
@@ -211,4 +218,4 @@ record_ptr record_factory(const std::string &kword);
 
 } // ns yarmigen
 
-#endif // _yarmigen__concrete_records_hpp
+#endif // _yarmigen__records_hpp

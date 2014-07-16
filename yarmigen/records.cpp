@@ -69,8 +69,9 @@ void record_namespace::dump(std::ostream &os) const {
 	<< "  name: " << pimpl->name << std::endl;
 }
 
-const std::string& record_namespace::name() const { return pimpl->name; }
 record_type record_namespace::type() const { return record_type::namespace_; }
+
+void record_namespace::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
@@ -97,14 +98,19 @@ void record_class::dump(std::ostream &os) const {
 	<< "  name: " << pimpl->name << std::endl;
 }
 
-const std::string& record_class::name() const { return pimpl->name; }
+//const std::string& record_class::name() const { return pimpl->name; }
 record_type record_class::type() const { return record_type::class_; }
+void record_class::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
 struct record_enum::impl {
-	std::string name;
+	impl()
+		:type(type_id::type_u64)
+	{}
+
 	type_id type;
+	std::string name;
 	std::vector<std::pair<std::string, std::string>> elems;
 }; // struct record_enum::impl
 
@@ -116,7 +122,7 @@ record_enum::~record_enum()
 { delete pimpl; }
 
 void record_enum::parse(proto_info &, cursor &c) {
-	pimpl->name = get_to_sep(c, ' ', enum_type_separator);
+	pimpl->name = get_to_sep(c, ' ', enum_body_open_char, enum_type_separator);
 
 	// if enum has specified underlying type
 	skipws(c);
@@ -125,13 +131,12 @@ void record_enum::parse(proto_info &, cursor &c) {
 		cursor c1 = c;
 		const std::string type = get_to_sep(c, ' ', enum_body_open_char);
 		pimpl->type = type_id_by_name(type);
-		if ( pimpl->type == type_id::type_unknown ) {
+		if ( pimpl->type == type_id::type_unknown )
 			YARMI_THROW(
 				"enum underlying type error: '%s' in %s"
 				,type
 				,c1.format()
 			);
-		}
 	}
 
 	check_next(c, enum_body_open_char);
@@ -189,8 +194,10 @@ void record_enum::dump(std::ostream &os) const {
 	os << "  };" << std::endl;
 }
 
-const std::string& record_enum::name() const { return pimpl->name; }
+//const std::string& record_enum::name() const { return pimpl->name; }
 record_type record_enum::type() const { return record_type::enum_; }
+
+void record_enum::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
@@ -222,8 +229,9 @@ void record_using::dump(std::ostream &os) const {
 	<< "  type: " << pimpl->type << std::endl;
 }
 
-const std::string& record_using::name() const { return pimpl->name; }
 record_type record_using::type() const { return record_type::using_; }
+
+void record_using::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
@@ -258,8 +266,9 @@ void record_const::dump(std::ostream &os) const {
 	<< "  val : " << pimpl->val << std::endl;
 }
 
-const std::string& record_const::name() const { return pimpl->name; }
 record_type record_const::type() const { return record_type::const_; }
+
+void record_const::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
@@ -296,7 +305,6 @@ void record_proc::dump(std::ostream &os) const {
 	<< "  sig    : " << pimpl->sig << std::endl;
 }
 
-const std::string& record_proc::name() const { return pimpl->name; }
 record_type record_proc::type() const { return record_type::proto_; }
 
 /***************************************************************************/
@@ -330,8 +338,10 @@ void record_var::dump(std::ostream &os) const {
 	<< "  name: " << pimpl->name << std::endl;
 }
 
-const std::string& record_var::name() const { return pimpl->name; }
+//const std::string& record_var::name() const { return pimpl->name; }
 record_type record_var::type() const { return record_type::var_; }
+
+void record_var::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
@@ -455,21 +465,22 @@ void record_struct::dump(std::ostream &os) const {
 
 }
 
-const std::string& record_struct::name() const { return pimpl->name; }
 record_type record_struct::type() const { return record_type::struct_; }
+
+void record_struct::accept(record_get_name_visitor &v) const { v.name = pimpl->name; }
 
 /***************************************************************************/
 
 record_ptr record_factory(const std::string &kword) {
 	static const std::map<std::string, record_ptr(*)()> map = {
-		 {"namespace", [](){return record_ptr(new record_namespace);}}
-		,{"class"    , [](){return record_ptr(new record_class);}}
-		,{"enum"     , [](){return record_ptr(new record_enum);}}
-		,{"struct"   , [](){return record_ptr(new record_struct);}}
-		,{"using"    , [](){return record_ptr(new record_using);}}
-		,{"const"    , [](){return record_ptr(new record_const);}}
-		,{"var"      , [](){return record_ptr(new record_var);}}
-		,{"proc"     , [](){return record_ptr(new record_proc);}}
+		 {"namespace", [](){return record_ptr(new record_namespace);}	}
+		,{"class"    , [](){return record_ptr(new record_class);}		}
+		,{"enum"     , [](){return record_ptr(new record_enum);}			}
+		,{"struct"   , [](){return record_ptr(new record_struct);}		}
+		,{"using"    , [](){return record_ptr(new record_using);}		}
+		,{"const"    , [](){return record_ptr(new record_const);}		}
+		,{"var"      , [](){return record_ptr(new record_var);}			}
+		,{"proc"     , [](){return record_ptr(new record_proc);}			}
 	};
 
 	auto it = map.find(kword);

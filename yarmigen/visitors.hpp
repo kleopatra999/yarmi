@@ -29,78 +29,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "cmdline.hpp"
-#include "tools.hpp"
-#include "dump_info.hpp"
-#include "parser.hpp"
+#ifndef _yarmigen__visitors_hpp
+#define _yarmigen__visitors_hpp
 
-#include "c_generator.hpp"
-#include "cpp_generator.hpp"
-#include "python_generator.hpp"
-#include "java_generator.hpp"
-#include "js_generator.hpp"
+#include "type_id.hpp"
 
-#include "checks.hpp"
-
-#include <yarmi/throw.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
+namespace yarmigen {
 
 /***************************************************************************/
 
-void generate(std::ostream &os, const std::vector<yarmigen::proto_info> &info, const yarmigen::e_lang lang) {
-	using namespace yarmigen;
-	static const generator_t gens[] = {
-		 &c_generator
-		,&cpp_generator
-		,&python_generator
-		,&java_generator
-		,&js_generator
-	};
-
-	const std::size_t idx = static_cast<std::size_t>(lang);
-	if ( idx > sizeof(gens)/sizeof(gens[0]) )
-		YARMI_THROW("bad language index(%1%) for language %2%", idx, options::str_lang_by_enum(lang));
-
-	gens[idx](os, info);
-}
+struct record_get_name_visitor {
+	std::string name;
+};
 
 /***************************************************************************/
 
-int main(int argc, char **argv) {
-	using namespace yarmigen;
+} // ns yarmigen
 
-	try {
-		const options opt = parse_cmdline(argc, argv);
-		//opt.dump(std::cout);
-
-		std::ifstream ifile(opt.in);
-		if ( !ifile )
-			YARMI_THROW("can't open input file \""+opt.in+"\"");
-
-		const std::string buf = read_file(ifile);
-		const std::vector<proto_info> info = parse(buf);
-
-		std::cout << "checking...";
-		full_check(info);
-		std::cout << "done!" << std::endl;
-		//dump_info(std::cout, info);
-
-		std::ofstream ofile(opt.out, std::ios::out|std::ios::trunc);
-		if ( !ofile ) {
-			std::cerr << "can't create output file \"" << opt.out << "\"" << std::endl;
-			return 1;
-		}
-
-		generate(ofile, info, opt.lang);
-	} catch (const std::exception &ex) {
-		std::cerr << "[exception]: " << ex.what() << std::endl;
-		return 1;
-	}
-
-	return 0;
-}
-
-/***************************************************************************/
+#endif // _yarmigen__visitors_hpp

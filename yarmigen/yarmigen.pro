@@ -24,7 +24,8 @@ SOURCES += main.cpp \
 	dump_info.cpp \
 	parser.cpp \
 	type_id.cpp \
-	records.cpp
+	records.cpp \
+    checks.cpp
 
 HEADERS += \
 	 cmdline.hpp \
@@ -42,7 +43,9 @@ HEADERS += \
 	parser.hpp \
 	type_id.hpp \
 	tokens.hpp \
-	records.hpp
+	records.hpp \
+    visitors.hpp \
+    checks.hpp
 
 OTHER_FILES += \
 	test/protocol.yarmi
