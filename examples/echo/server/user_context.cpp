@@ -55,7 +55,7 @@ void user_context::on_disconnected() {
 	std::cout << YARMI_FORMAT_MESSAGE("on_disconnected() called") << std::endl;
 }
 
-void user_context::on_received(const char *ptr, std::size_t size) {
+void user_context::on_received(const char *ptr, const std::size_t size) {
 	YARMI_TRY(invoke_flag)
 		yarmi::id_type call_id = 0;
 		if ( !invoke(ptr, size, &call_id) ) {

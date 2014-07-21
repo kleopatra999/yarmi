@@ -56,6 +56,7 @@ struct session_base::impl {
 		:gcb(gcb)
 		,stat(sb.get_server_statistic())
 		,socket(sb.get_io_service())
+		,eh(sb.get_error_handler())
 		,buffers()
 		,in_process(false)
 	{}
@@ -77,9 +78,13 @@ struct session_base::impl {
 		);
 	}
 
-	void header_readed(const boost::system::error_code &ec, std::size_t rd, session_base::session_ptr self) {
+	void header_readed(
+		 const boost::system::error_code &ec
+		,const std::size_t rd
+		,session_base::session_ptr self
+	) {
 		if ( ec || rd != header_size ) {
-			std::cerr << YARMI_FORMAT_MESSAGE("header read error: \"%1%\"", ec.message()) << std::endl;
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("header read error: \"%1%\"", ec.message()));
 			return;
 		}
 
@@ -111,13 +116,13 @@ struct session_base::impl {
 	}
 	void body_readed(
 		 const boost::system::error_code &ec
-		,std::size_t rd
+		,const std::size_t rd
 		,session_base::session_ptr self
 		,std::shared_ptr<char> buffer
 		,std::size_t buffer_size
 	) {
 		if ( ec || rd != buffer_size ) {
-			std::cerr << YARMI_FORMAT_MESSAGE("body read error: \"%1%\"", ec.message()) << std::endl;
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("body read error: \"%1%\"", ec.message()));
 			return;
 		}
 
@@ -128,7 +133,7 @@ struct session_base::impl {
 		try {
 			self->on_received(buffer.get(), rd);
 		} catch (const std::exception &ex) {
-			std::cerr << YARMI_FORMAT_MESSAGE("exception is thrown when invoking: \"%1%\"", ex.what()) << std::endl;
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("exception is thrown when invoking: \"%1%\"", ex.what()));
 		}
 
 		read_header(self);
@@ -137,6 +142,8 @@ struct session_base::impl {
 	void send(session_base::session_ptr self, const yas::shared_buffer &buffer) {
 		if ( !in_process ) {
 			in_process = true;
+
+			stat.write_queue_size = buffers.size()+1;
 
 			boost::asio::async_write(
 				 socket
@@ -155,24 +162,26 @@ struct session_base::impl {
 			);
 		} else {
 			buffers.push(buffer);
+			stat.write_queue_size = buffers.size();
 		}
 	}
 
 	void sent(
 		 const boost::system::error_code &ec
-		,std::size_t wr
+		,const std::size_t wr
 		,session_base::session_ptr self
 		,yas::shared_buffer buffer
 	) {
 		in_process = false;
 
 		if ( ec || wr != buffer.size ) {
-			std::cerr << YARMI_FORMAT_MESSAGE("write error: \"%1%\"", ec.message()) << std::endl;
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("write error: \"%1%\"", ec.message()));
 		}
 
 		stat.writen += wr;
 		stat.write_rate += wr;
 		++stat.write_ops;
+		--stat.write_queue_size;
 
 		if ( ! buffers.empty() ) {
 			yas::shared_buffer buffer = buffers.front();
@@ -188,6 +197,8 @@ struct session_base::impl {
 	global_context_base &gcb;
 	server_statistic &stat;
 	boost::asio::ip::tcp::socket socket;
+
+	server_base::error_handler_type eh;
 
 	/** buffers list */
 	std::queue<yas::shared_buffer> buffers;

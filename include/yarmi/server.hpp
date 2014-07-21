@@ -44,7 +44,7 @@ template<typename UC, template<typename UC> class GC>
 struct server: server_base {
 	server(
 		 const std::string &ip
-		,std::uint16_t port
+		,const std::uint16_t port
 		,boost::asio::io_service &ios
 		,GC<UC> &gc
 		,connection_pred_type   cp = [](const boost::asio::ip::tcp::endpoint &){ return true; }

@@ -142,6 +142,20 @@ struct server_base::impl {
 
 	/************************************************************************/
 
+	static std::string datetime_as_string(const std::time_t time) {
+		struct tm *tm = 0;
+		char buf[128] = "\0";
+
+		tm = std::localtime(&time);
+		if ( !tm ) {
+			YARMI_FORMAT_MESSAGE_AS_STRING("\"t\" is NULL");
+		} else {
+			std::strftime(buf, sizeof(buf), "%d-%m-%Y %H:%M:%S", tm);
+		}
+
+		return buf;
+	}
+
 	void start_timer() {
 		timer.expires_from_now(boost::posix_time::seconds(1));
 		timer.async_wait([this](const boost::system::error_code &ec){on_timeout(ec);});
@@ -149,7 +163,9 @@ struct server_base::impl {
 
 	void on_timeout(const boost::system::error_code &ec) {
 		stat.connections = gcb.sessions();
-		stat.seconds = std::time(0) - start_time_in_seconds;
+		std::time_t time = std::time(0);
+		stat.seconds = time-start_time_in_seconds;
+		stat.datetime = datetime_as_string(time);
 
 		if ( sh )
 			sh(stat);
@@ -158,6 +174,7 @@ struct server_base::impl {
 		stat.write_rate = 0;
 		stat.read_ops = 0;
 		stat.write_ops = 0;
+		stat.write_queue_size = 0;
 
 		if ( !ec )
 			start_timer();
@@ -180,7 +197,7 @@ struct server_base::impl {
 server_base::server_base(
 	 boost::asio::io_service &ios
 	,const std::string &ip
-	,std::uint16_t port
+	,const std::uint16_t port
 	,global_context_base &gcb
 	,connection_pred_type cp
 	,error_handler_type eh
@@ -203,6 +220,8 @@ void server_base::stop() { pimpl->stop(); }
 void server_base::stop_accept() { pimpl->stop_accept(); }
 
 server_statistic &server_base::get_server_statistic() { return pimpl->stat; }
+
+const server_base::error_handler_type &server_base::get_error_handler() const { return pimpl->eh; }
 
 /***************************************************************************/
 

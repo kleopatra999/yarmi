@@ -52,7 +52,7 @@ int main() {
 		,gc
 		,[](const boost::asio::ip::tcp::endpoint &){return true;}
 		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {st.print(std::cout);}
+		,[](const yarmi::server_statistic &st) {st.print(std::cout);std::cout<<std::endl;}
 	);
 	server.start();
 

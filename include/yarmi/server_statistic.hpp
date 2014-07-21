@@ -34,6 +34,7 @@
 
 #include <cstdint>
 #include <iosfwd>
+#include <string>
 
 namespace yarmi {
 
@@ -49,10 +50,12 @@ struct server_statistic {
 		,write_rate(0)
 		,read_ops(0)
 		,write_ops(0)
+		,write_queue_size(0)
 		,memory(0)
 		,max_memory(0)
 	{}
 
+	std::string		datetime;
 	std::size_t		seconds;
 	std::size_t		connections;
 	std::uint64_t	readed;
@@ -61,6 +64,7 @@ struct server_statistic {
 	std::size_t		write_rate;
 	std::size_t		read_ops;
 	std::size_t		write_ops;
+	std::size_t		write_queue_size;
 	std::size_t		memory;
 	std::size_t		max_memory;
 

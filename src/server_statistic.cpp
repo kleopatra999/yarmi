@@ -46,12 +46,15 @@ std::string format_size(std::uint64_t fs) {
 	static const std::uint64_t KB = 1024;
 	static const std::uint64_t MB = KB*KB;
 	static const std::uint64_t GB = MB*KB;
+	static const std::uint64_t TB = GB*KB;
 
-	if ( (fs/GB) > 0 ) {
+	if ( fs/TB ) {
+		return (boost::format("%.2f T") % ((double)fs/TB)).str();
+	} else if ( fs/GB ) {
 		return (boost::format("%.2f G") % ((double)fs/GB)).str();
-	} else if ( (fs/MB) > 0 ) {
+	} else if ( fs/MB ) {
 		return (boost::format("%.2f M") % ((double)fs/MB)).str();
-	} else if ( (fs/KB) > 0 ) {
+	} else if ( fs/KB ) {
 		return (boost::format("%.2f K") % ((double)fs/KB)).str();
 	}
 
@@ -63,20 +66,23 @@ std::string format_size(std::uint64_t fs) {
 void server_statistic::print(std::ostream &os) const {
 
 	static const char *fmt =
-"uptime     : %02d:%02d:%02d\n"
-"connections: %d\n"
-"readed     : %d\n"
-"writen     : %d\n"
-"read rate  : %d\n"
-"write rate : %d\n"
-"read ops   : %d\n"
-"write ops  : %d\n"
-"memory     : %d\n"
-"max memory : %d"
+"datetime        : %s\n"
+"uptime          : %04d:%02d:%02d\n"
+"connections     : %d\n"
+"readed          : %d\n"
+"writen          : %d\n"
+"read rate       : %d\n"
+"write rate      : %d\n"
+"read ops        : %d\n"
+"write ops       : %d\n"
+"write queue size: %d\n"
+"memory          : %d\n"
+"max memory      : %d"
 ;
 
 	os
 	<< boost::format(fmt)
+		% datetime
 		% (seconds/(60*60)) % ((seconds/(60))%60) % (seconds%60)
 		% connections
 		% format_size(readed)
@@ -85,6 +91,7 @@ void server_statistic::print(std::ostream &os) const {
 		% format_size(write_rate)
 		% read_ops
 		% write_ops
+		% write_queue_size
 		% memory
 		% max_memory
 	;

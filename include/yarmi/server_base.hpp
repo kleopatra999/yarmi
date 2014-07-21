@@ -58,7 +58,7 @@ struct server_base: boost::noncopyable {
 	server_base(
 		 boost::asio::io_service &ios
 		,const std::string &ip
-		,std::uint16_t port
+		,const std::uint16_t port
 		,global_context_base &gcb
 		,connection_pred_type cp
 		,error_handler_type eh
@@ -76,6 +76,7 @@ struct server_base: boost::noncopyable {
 
 private:
 	server_statistic& get_server_statistic();
+	const error_handler_type& get_error_handler() const;
 
 private:
 	struct impl;
