@@ -29,34 +29,46 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__server_statistic_hpp
+#define _yarmi__server_statistic_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <cstdint>
+#include <iosfwd>
 
-#include <yarmi/server.hpp>
+namespace yarmi {
 
-#include <iostream>
+/***************************************************************************/
+
+struct server_statistic {
+	server_statistic()
+		:seconds(0)
+		,connections(0)
+		,readed(0)
+		,writen(0)
+		,read_rate(0)
+		,write_rate(0)
+		,read_ops(0)
+		,write_ops(0)
+		,memory(0)
+		,max_memory(0)
+	{}
+
+	std::size_t		seconds;
+	std::size_t		connections;
+	std::uint64_t	readed;
+	std::uint64_t	writen;
+	std::size_t		read_rate;
+	std::size_t		write_rate;
+	std::size_t		read_ops;
+	std::size_t		write_ops;
+	std::size_t		memory;
+	std::size_t		max_memory;
+
+	void print(std::ostream &os) const;
+};
 
 /***************************************************************************/
 
-int main() {
-	boost::asio::io_service ios;
+} // ns yarmi
 
-	global_context<user_context> gc;
-
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {st.print(std::cout);}
-	);
-	server.start();
-
-	ios.run();
-}
-
-/***************************************************************************/
+#endif // _yarmi__server_statistic_hpp

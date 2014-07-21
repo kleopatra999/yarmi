@@ -31,6 +31,8 @@
 
 #include <yarmi/serialization.hpp>
 #include <yarmi/session_base.hpp>
+#include <yarmi/server_base.hpp>
+#include <yarmi/global_context_base.hpp>
 #include <yarmi/handler_allocator.hpp>
 #include <yarmi/make_preallocated_handler.hpp>
 #include <yarmi/throw.hpp>
@@ -50,14 +52,15 @@ namespace yarmi {
 struct session_base::impl {
 	enum { header_size = sizeof(std::uint32_t)+::yarmi::iarchive_type::header_size() };
 
-	impl(boost::asio::io_service &ios)
-		:socket(ios)
+	impl(server_base &sb, global_context_base &gcb)
+		:gcb(gcb)
+		,stat(sb.get_server_statistic())
+		,socket(sb.get_io_service())
 		,buffers()
 		,in_process(false)
-		,on_destruction(false)
 	{}
 
-	void read_header(session_base::session_ptr self) {
+	void read_header(session_ptr self) {
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(header_buffer)
@@ -79,6 +82,9 @@ struct session_base::impl {
 			std::cerr << YARMI_FORMAT_MESSAGE("header read error: \"%1%\"", ec.message()) << std::endl;
 			return;
 		}
+
+		stat.readed += rd;
+		stat.read_rate += rd;
 
 		::yarmi::istream_type is(header_buffer, header_size);
 		::yarmi::iarchive_type ia(is);
@@ -115,8 +121,12 @@ struct session_base::impl {
 			return;
 		}
 
+		stat.readed += rd;
+		stat.read_rate += rd;
+		++stat.read_ops;
+
 		try {
-			self->on_received(buffer.get(), buffer_size);
+			self->on_received(buffer.get(), rd);
 		} catch (const std::exception &ex) {
 			std::cerr << YARMI_FORMAT_MESSAGE("exception is thrown when invoking: \"%1%\"", ex.what()) << std::endl;
 		}
@@ -124,12 +134,9 @@ struct session_base::impl {
 		read_header(self);
 	}
 
-	void send(session_base::session_ptr self) {
+	void send(session_base::session_ptr self, const yas::shared_buffer &buffer) {
 		if ( !in_process ) {
 			in_process = true;
-
-			yas::shared_buffer buffer = buffers.front();
-			buffers.pop();
 
 			boost::asio::async_write(
 				 socket
@@ -146,6 +153,8 @@ struct session_base::impl {
 					)
 				)
 			);
+		} else {
+			buffers.push(buffer);
 		}
 	}
 
@@ -155,32 +164,42 @@ struct session_base::impl {
 		,session_base::session_ptr self
 		,yas::shared_buffer buffer
 	) {
+		in_process = false;
+
 		if ( ec || wr != buffer.size ) {
 			std::cerr << YARMI_FORMAT_MESSAGE("write error: \"%1%\"", ec.message()) << std::endl;
 		}
-		in_process = false;
+
+		stat.writen += wr;
+		stat.write_rate += wr;
+		++stat.write_ops;
+
 		if ( ! buffers.empty() ) {
-			send(self);
+			yas::shared_buffer buffer = buffers.front();
+			buffers.pop();
+
+			send(self, buffer);
 		}
 	}
 
 	yarmi::handler_allocator<512> read_allocator;
 	yarmi::handler_allocator<512> write_allocator;
 
+	global_context_base &gcb;
+	server_statistic &stat;
 	boost::asio::ip::tcp::socket socket;
 
 	/** buffers list */
 	std::queue<yas::shared_buffer> buffers;
 	bool in_process;
-	bool on_destruction;
 
 	char header_buffer[header_size];
 }; // struct session_base::impl
 
 /***************************************************************************/
 
-session_base::session_base(boost::asio::io_service &ios)
-	:pimpl(new impl(ios))
+session_base::session_base(server_base &sb, global_context_base &gcb)
+	:pimpl(new impl(sb, gcb))
 {}
 
 session_base::~session_base()
@@ -205,20 +224,8 @@ void session_base::close() { pimpl->socket.close(); }
 /***************************************************************************/
 
 void session_base::send(const yas::shared_buffer &buffer) {
-	if ( get_on_destruction() ) {
-		std::cerr << YARMI_FORMAT_MESSAGE("cannot send data when session already in destruction state") << std::endl;
-		return;
-	}
-
-	pimpl->buffers.push(buffer);
-
-	pimpl->send(shared_from_this());
+	pimpl->send(shared_from_this(), buffer);
 }
-
-/***************************************************************************/
-
-void session_base::set_on_destruction(bool flag) { pimpl->on_destruction = flag; }
-bool session_base::get_on_destruction() const { return pimpl->on_destruction; }
 
 /***************************************************************************/
 

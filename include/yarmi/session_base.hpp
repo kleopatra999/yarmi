@@ -41,24 +41,15 @@
 
 namespace yarmi {
 
+struct global_context_base;
+struct server_base;
+
 /***************************************************************************/
 
 struct session_base: std::enable_shared_from_this<session_base> {
 	using session_ptr = std::shared_ptr<session_base>;
 
-	template<typename Impl, template<typename> class GC, typename D>
-	static session_ptr create(boost::asio::io_service &ios, GC<Impl> &gc, D del) {
-		Impl *impl = new Impl(ios, gc);
-		session_ptr ptr;
-		try {
-			ptr.reset(impl, del);
-		} catch(...) {
-			delete impl;
-		}
-		return ptr;
-	}
-
-	session_base(boost::asio::io_service &ios);
+	session_base(server_base &sb, global_context_base &gcb);
 	virtual ~session_base();
 
 	boost::asio::ip::tcp::socket&
@@ -73,9 +64,6 @@ struct session_base: std::enable_shared_from_this<session_base> {
 	virtual void on_connected() {}
 	virtual void on_disconnected() {}
 	virtual void on_received(const char *ptr, const std::size_t size) = 0;
-
-	void set_on_destruction(bool flag);
-	bool get_on_destruction() const;
 
 private:
 	struct impl;

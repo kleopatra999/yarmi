@@ -45,7 +45,9 @@ SOURCES += \
 	main.cpp \
 	user_context.cpp \
 	 ../../../src/session_base.cpp \
-	 ../../../src/global_context_base.cpp
+	 ../../../src/global_context_base.cpp \
+    ../../../src/server_base.cpp \
+    ../../../src/server_statistic.cpp
 
 LIBS += \
 	-lboost_system
@@ -90,4 +92,10 @@ HEADERS += \
 	 ../../../include/yarmi/generate_metacode.hpp \
 	 ../../../include/yarmi/generate_ns_to_string.hpp \
 	 ../../../include/yarmi/generate_ns.hpp \
-	 ../../../include/yarmi/generate_tuple_is_empty.hpp
+	 ../../../include/yarmi/generate_tuple_is_empty.hpp \
+    ../../../include/yarmi/server_base.hpp \
+    ../../../include/yarmi/server_statistic.hpp \
+    ../../../include/yarmi/throw.hpp
+
+OTHER_FILES += \
+    ../../../include/yarmi/global_context_base.hpp.rej

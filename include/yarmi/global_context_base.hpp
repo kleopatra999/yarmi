@@ -33,6 +33,7 @@
 #define _yarmi__global_context_base_hpp
 
 #include <yarmi/yarmi.hpp>
+#include <yarmi/server_statistic.hpp>
 
 #include <boost/noncopyable.hpp>
 
@@ -85,8 +86,8 @@ struct global_context_base: private boost::noncopyable {
 	void send_to_all(const session_base *session, const yas::shared_buffer &buffer);
 
 private:
-	struct pimpl;
-	pimpl *impl;
+	struct impl;
+	impl *pimpl;
 };
 
 /***************************************************************************/

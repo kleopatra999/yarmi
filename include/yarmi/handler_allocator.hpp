@@ -42,25 +42,23 @@ namespace yarmi {
 
 template<std::size_t alloc_size>
 struct handler_allocator: private boost::noncopyable {
-	constexpr std::size_t storage_size() const { return alloc_size; }
-
 	handler_allocator()
 		:in_use(false)
 	{}
 
 	void* allocate(std::size_t size) {
 		//std::cout << "handler_allocator::allocate(): " << size << std::endl;
-		if ( size <= storage_size() ) {
+		if ( size <= alloc_size ) {
 			if ( ! in_use ) {
 				in_use = true;
 				return std::addressof(storage);
 			}
-		} else {
-			std::cerr
-			<< "handler_allocator::allocate() allocate using operator new(). "
-			<< "handler_allocator::size=" << storage_size() << ", requested size=" << size
-			<< std::endl;
 		}
+
+//		std::cerr
+//		<< "handler_allocator::allocate() allocate using operator new(). "
+//		<< "handler_allocator::size=" << alloc_size << ", requested size=" << size
+//		<< std::endl;
 
 		return ::operator new(size);
 	}

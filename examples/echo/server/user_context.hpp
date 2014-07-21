@@ -36,13 +36,19 @@
 
 #include <yarmi/session_base.hpp>
 
-/***************************************************************************/
-
 template<typename>
 struct global_context;
 
+/***************************************************************************/
+
+namespace yarmi {
+struct server_base;
+} // ns yarmi
+
+/***************************************************************************/
+
 struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
-	user_context(boost::asio::io_service &ios, global_context<user_context> &gc);
+	user_context(yarmi::server_base &sb, global_context<user_context> &gc);
 
 	void on_connected();
 	void on_disconnected();

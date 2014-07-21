@@ -49,9 +49,6 @@
 
 namespace yarmi {
 
-template<typename... R>
-void unpack(R...) {}
-
 template<typename Invoker, typename... Invokers>
 bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head, Invokers&... tail) {
 	istream_type istream(ptr, size);

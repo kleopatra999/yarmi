@@ -29,34 +29,61 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__server_base_hpp
+#define _yarmi__server_base_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <yarmi/server_statistic.hpp>
 
-#include <yarmi/server.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
-#include <iostream>
+#include <functional>
+
+namespace yarmi {
 
 /***************************************************************************/
 
-int main() {
-	boost::asio::io_service ios;
+struct session_base;
+struct global_context_base;
+struct server_statistic;
 
-	global_context<user_context> gc;
+struct server_base: boost::noncopyable {
+	friend struct session_base;
 
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {st.print(std::cout);}
+	using connection_pred_type   = std::function<bool(const boost::asio::ip::tcp::endpoint &)>;
+	using error_handler_type     = std::function<void(const std::string &)>;
+	using statistic_handler_type = std::function<void(const server_statistic &)>;
+	using session_factory_type   = std::function<session_base*()>;
+
+	server_base(
+		 boost::asio::io_service &ios
+		,const std::string &ip
+		,std::uint16_t port
+		,global_context_base &gcb
+		,connection_pred_type cp
+		,error_handler_type eh
+		,statistic_handler_type sh
+		,session_factory_type sc
 	);
-	server.start();
+	virtual ~server_base();
 
-	ios.run();
-}
+	boost::asio::io_service&
+	get_io_service();
+
+	void start();
+	void stop();
+	void stop_accept();
+
+private:
+	server_statistic& get_server_statistic();
+
+private:
+	struct impl;
+	impl *pimpl;
+};
 
 /***************************************************************************/
+
+} // ns yarmi
+
+#endif // _yarmi__server_base_hpp

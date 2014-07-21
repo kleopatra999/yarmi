@@ -53,13 +53,11 @@ struct session_wrapper {
 	struct by_id;
 };
 
-struct global_context_base::pimpl {
-	pimpl()
+struct global_context_base::impl {
+	impl()
 		:session_ids(-1)
 		,sessions()
 	{}
-
-	std::int64_t session_ids;
 
 	typedef boost::multi_index::multi_index_container<
 		 session_wrapper
@@ -78,17 +76,19 @@ struct global_context_base::pimpl {
 			>
 		>
 	> sessions_cont;
+
+	std::int64_t session_ids;
 	sessions_cont sessions;
 }; // struct pimpl
 
 /***************************************************************************/
 
 global_context_base::global_context_base()
-	:impl(new pimpl)
+	:pimpl(new impl)
 {}
 
 global_context_base::~global_context_base() {
-	delete impl;
+	delete pimpl;
 }
 
 global_context_base &global_context_base::get_global_context_base() { return *this; }
@@ -101,8 +101,8 @@ std::uint64_t global_context_base::add_session(session_base *session) {
 		YARMI_THROW("session \"%1%\" already in sessions list", session);
 	}
 
-	std::int64_t idx = impl->session_ids--;
-	impl->sessions.insert(session_wrapper{session, idx});
+	std::int64_t idx = pimpl->session_ids--;
+	pimpl->sessions.insert(session_wrapper{session, idx});
 
 	return idx;
 }
@@ -112,7 +112,7 @@ void global_context_base::del_session(session_base *session) {
 		YARMI_THROW("session \"%1%\" not in sessions list", session);
 	}
 
-	auto &index = impl->sessions.get<session_wrapper::by_session>();
+	auto &index = pimpl->sessions.get<session_wrapper::by_session>();
 	auto it = index.find(session);
 	index.erase(it);
 }
@@ -122,7 +122,7 @@ void global_context_base::del_session(std::int64_t id) {
 		YARMI_THROW("session with ID \"%1%\" not in sessions list", id);
 	}
 
-	auto &index = impl->sessions.get<session_wrapper::by_id>();
+	auto &index = pimpl->sessions.get<session_wrapper::by_id>();
 	auto it = index.find(id);
 	index.erase(it);
 }
@@ -130,7 +130,7 @@ void global_context_base::del_session(std::int64_t id) {
 /***************************************************************************/
 
 void global_context_base::set_id(session_base *session, std::int64_t id) {
-	auto &index = impl->sessions.get<session_wrapper::by_session>();
+	auto &index = pimpl->sessions.get<session_wrapper::by_session>();
 
 	auto it = index.find(session);
 	if ( it == index.end() ) {
@@ -139,44 +139,44 @@ void global_context_base::set_id(session_base *session, std::int64_t id) {
 
 	index.erase(it);
 
-	impl->sessions.insert(session_wrapper{session, id});
+	pimpl->sessions.insert(session_wrapper{session, id});
 }
 
 /***************************************************************************/
 
 bool global_context_base::has_session(session_base *session) const {
-	const auto &index = impl->sessions.get<session_wrapper::by_session>();
+	const auto &index = pimpl->sessions.get<session_wrapper::by_session>();
 	return index.find(session) != index.end();
 }
 
 bool global_context_base::has_session(std::int64_t id) const {
-	const auto &index = impl->sessions.get<session_wrapper::by_id>();
+	const auto &index = pimpl->sessions.get<session_wrapper::by_id>();
 	return index.find(id) != index.end();
 }
 
 session_base* global_context_base::get_session(std::int64_t id) const {
 	if ( ! has_session(id) ) return 0;
 
-	const auto it = impl->sessions.get<session_wrapper::by_id>().find(id);
+	const auto it = pimpl->sessions.get<session_wrapper::by_id>().find(id);
 	return it->session;
 }
 
 /***************************************************************************/
 
 std::size_t global_context_base::sessions() const {
-	return impl->sessions.size();
+	return pimpl->sessions.size();
 }
 
 /***************************************************************************/
 
 void global_context_base::send_to(std::int64_t id, const yas::shared_buffer &buffer) {
-	const auto it = impl->sessions.get<session_wrapper::by_id>().find(id);
-	if ( it == impl->sessions.get<session_wrapper::by_id>().end() ) return;
+	const auto it = pimpl->sessions.get<session_wrapper::by_id>().find(id);
+	if ( it == pimpl->sessions.get<session_wrapper::by_id>().end() ) return;
 	it->session->send(buffer);
 }
 
 void global_context_base::send_to_all(const session_base *session, const yas::shared_buffer &buffer) {
-	for ( const auto &it: impl->sessions ) {
+	for ( const auto &it: pimpl->sessions ) {
 		if ( it.session == session ) continue;
 		it.session->send(buffer);
 	}
