@@ -49,13 +49,13 @@ std::string format_size(std::uint64_t fs) {
 	static const std::uint64_t TB = GB*KB;
 
 	if ( fs/TB ) {
-		return (boost::format("%.2f T") % ((double)fs/TB)).str();
+		return (boost::format("%.2f Tb") % ((double)fs/TB)).str();
 	} else if ( fs/GB ) {
-		return (boost::format("%.2f G") % ((double)fs/GB)).str();
+		return (boost::format("%.2f Gb") % ((double)fs/GB)).str();
 	} else if ( fs/MB ) {
-		return (boost::format("%.2f M") % ((double)fs/MB)).str();
+		return (boost::format("%.2f Mb") % ((double)fs/MB)).str();
 	} else if ( fs/KB ) {
-		return (boost::format("%.2f K") % ((double)fs/KB)).str();
+		return (boost::format("%.2f Kb") % ((double)fs/KB)).str();
 	}
 
 	return (boost::format("%d B")   % fs).str();
@@ -64,20 +64,22 @@ std::string format_size(std::uint64_t fs) {
 /***************************************************************************/
 
 void server_statistic::print(std::ostream &os) const {
-
 	static const char *fmt =
 "datetime        : %s\n"
 "uptime          : %04d:%02d:%02d\n"
 "connections     : %d\n"
-"readed          : %d\n"
-"writen          : %d\n"
-"read rate       : %d\n"
-"write rate      : %d\n"
-"read ops        : %d\n"
-"write ops       : %d\n"
-"write queue size: %d\n"
-"memory          : %d\n"
-"max memory      : %d"
+"total readed    : %d\n"
+"total writen    : %d\n"
+"read rate       : %d/sec\n"
+"write rate      : %d/sec\n"
+"read ops        : %d/sec\n"
+"write ops       : %d/sec\n"
+"send queue size : %d\n"
+"data memory     : %d\n"
+"virtual memory  : %d\n"
+"CPU system usage: %d%%\n"
+"CPU user usage  : %d%%\n"
+"CPU total usage : %d%%"
 ;
 
 	os
@@ -92,8 +94,11 @@ void server_statistic::print(std::ostream &os) const {
 		% read_ops
 		% write_ops
 		% write_queue_size
-		% memory
-		% max_memory
+		% format_size(data_memory)
+		% format_size(virt_memory)
+		% user_cpu
+		% system_cpu
+		% total_cpu
 	;
 }
 

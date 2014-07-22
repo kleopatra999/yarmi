@@ -51,8 +51,11 @@ struct server_statistic {
 		,read_ops(0)
 		,write_ops(0)
 		,write_queue_size(0)
-		,memory(0)
-		,max_memory(0)
+		,data_memory(0)
+		,virt_memory(0)
+		,user_cpu(0)
+		,system_cpu(0)
+		,total_cpu(0)
 	{}
 
 	std::string		datetime;
@@ -65,8 +68,11 @@ struct server_statistic {
 	std::size_t		read_ops;
 	std::size_t		write_ops;
 	std::size_t		write_queue_size;
-	std::size_t		memory;
-	std::size_t		max_memory;
+	std::size_t		data_memory;
+	std::size_t		virt_memory;
+	std::size_t		user_cpu;
+	std::size_t		system_cpu;
+	std::size_t		total_cpu;
 
 	void print(std::ostream &os) const;
 };

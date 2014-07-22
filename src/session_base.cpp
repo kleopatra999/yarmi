@@ -50,11 +50,10 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session_base::impl {
-	enum { header_size = sizeof(std::uint32_t)+::yarmi::iarchive_type::header_size() };
+	enum { header_size = sizeof(std::uint32_t)+yarmi::iarchive_type::header_size() };
 
-	impl(server_base &sb, global_context_base &gcb)
-		:gcb(gcb)
-		,stat(sb.get_server_statistic())
+	impl(server_base &sb)
+		:stat(sb.get_server_statistic())
 		,socket(sb.get_io_service())
 		,eh(sb.get_error_handler())
 		,buffers()
@@ -93,13 +92,17 @@ struct session_base::impl {
 
 		::yarmi::istream_type is(header_buffer, header_size);
 		::yarmi::iarchive_type ia(is);
-		std::uint32_t body_length = 0;
-		ia & body_length;
+		std::uint32_t body_size = 0;
+		ia & body_size;
 
-		std::shared_ptr<char> body_buffer(new char[body_length], [](char *ptr){delete []ptr;});
+		read_body(body_size, self);
+	}
+	void read_body(const std::size_t body_size, session_base::session_ptr self) {
+		std::shared_ptr<char> body_buffer(new char[body_size], [](char *ptr){delete []ptr;});
+
 		boost::asio::async_read(
 			 socket
-			,boost::asio::buffer(body_buffer.get(), body_length)
+			,boost::asio::buffer(body_buffer.get(), body_size)
 			,yarmi::make_preallocated_handler(
 				read_allocator
 				,std::bind(
@@ -109,7 +112,7 @@ struct session_base::impl {
 					,std::placeholders::_2
 					,self
 					,body_buffer
-					,body_length
+					,body_size
 				)
 			)
 		);
@@ -140,11 +143,13 @@ struct session_base::impl {
 	}
 
 	void send(session_base::session_ptr self, const yas::shared_buffer &buffer) {
+		if ( !buffer.data.get() || !buffer.size )
+			return;
+
+		++stat.write_queue_size;
+
 		if ( !in_process ) {
 			in_process = true;
-
-			stat.write_queue_size = buffers.size()+1;
-
 			boost::asio::async_write(
 				 socket
 				,boost::asio::buffer(buffer.data.get(), buffer.size)
@@ -162,7 +167,6 @@ struct session_base::impl {
 			);
 		} else {
 			buffers.push(buffer);
-			stat.write_queue_size = buffers.size();
 		}
 	}
 
@@ -194,7 +198,6 @@ struct session_base::impl {
 	yarmi::handler_allocator<512> read_allocator;
 	yarmi::handler_allocator<512> write_allocator;
 
-	global_context_base &gcb;
 	server_statistic &stat;
 	boost::asio::ip::tcp::socket socket;
 
@@ -209,8 +212,8 @@ struct session_base::impl {
 
 /***************************************************************************/
 
-session_base::session_base(server_base &sb, global_context_base &gcb)
-	:pimpl(new impl(sb, gcb))
+session_base::session_base(server_base &sb)
+	:pimpl(new impl(sb))
 {}
 
 session_base::~session_base()

@@ -49,7 +49,7 @@ struct server_base;
 struct session_base: std::enable_shared_from_this<session_base> {
 	using session_ptr = std::shared_ptr<session_base>;
 
-	session_base(server_base &sb, global_context_base &gcb);
+	session_base(server_base &sb);
 	virtual ~session_base();
 
 	boost::asio::ip::tcp::socket&

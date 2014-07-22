@@ -29,38 +29,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__os_resources_hpp
+#define _yarmi__os_resources_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <cstdint>
 
-#include <yarmi/server.hpp>
+namespace yarmi {
+namespace detail {
 
-#include <iostream>
+void memory_usage(std::size_t *vm, std::size_t *rss);
+void cpu_usage(std::size_t *u_usage, std::size_t *s_usage);
 
-/***************************************************************************/
+} // ns detail
+} // ns yarmi
 
-int main() {
-	boost::asio::io_service ios;
-
-	global_context<user_context> gc;
-
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
-
-	ios.run();
-}
-
-/***************************************************************************/
+#endif // _yarmi__os_resources_hpp

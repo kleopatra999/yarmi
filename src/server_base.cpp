@@ -36,6 +36,7 @@
 #include <yarmi/server_statistic.hpp>
 #include <yarmi/global_context_base.hpp>
 #include <yarmi/throw.hpp>
+#include <yarmi/os_resources.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -166,6 +167,10 @@ struct server_base::impl {
 		std::time_t time = std::time(0);
 		stat.seconds = time-start_time_in_seconds;
 		stat.datetime = datetime_as_string(time);
+
+		detail::memory_usage(&stat.virt_memory, &stat.data_memory);
+		detail::cpu_usage(&stat.user_cpu, &stat.system_cpu);
+		stat.total_cpu = stat.user_cpu + stat.system_cpu;
 
 		if ( sh )
 			sh(stat);

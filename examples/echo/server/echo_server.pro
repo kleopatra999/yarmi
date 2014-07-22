@@ -46,8 +46,11 @@ SOURCES += \
 	user_context.cpp \
 	 ../../../src/session_base.cpp \
 	 ../../../src/global_context_base.cpp \
-    ../../../src/server_base.cpp \
-    ../../../src/server_statistic.cpp
+	../../../src/server_base.cpp \
+	../../../src/server_statistic.cpp
+
+win32 { SOURCES += ../../../src/os_resources_win.cpp }
+unix { SOURCES += ../../../src/os_resources_nix.cpp }
 
 LIBS += \
 	-lboost_system
@@ -93,9 +96,10 @@ HEADERS += \
 	 ../../../include/yarmi/generate_ns_to_string.hpp \
 	 ../../../include/yarmi/generate_ns.hpp \
 	 ../../../include/yarmi/generate_tuple_is_empty.hpp \
-    ../../../include/yarmi/server_base.hpp \
-    ../../../include/yarmi/server_statistic.hpp \
-    ../../../include/yarmi/throw.hpp
+	../../../include/yarmi/server_base.hpp \
+	../../../include/yarmi/server_statistic.hpp \
+	../../../include/yarmi/throw.hpp \
+	../../../include/yarmi/os_resources.hpp
 
 OTHER_FILES += \
-    ../../../include/yarmi/global_context_base.hpp.rej
+	../../../include/yarmi/global_context_base.hpp.rej
