@@ -104,48 +104,30 @@ int get_usage(struct pstat* result) {
 	return 0;
 }
 
-/*
- * calculates the elapsed CPU usage between 2 measuring points in ticks
- */
-void calc_cpu_usage(const pstat &cur_usage, const pstat &last_usage, std::size_t *ucpu_usage, std::size_t *scpu_usage)
-{
-	*ucpu_usage = (cur_usage.utime_ticks + cur_usage.cutime_ticks) -
-		(last_usage.utime_ticks + last_usage.cutime_ticks);
-
-	*scpu_usage = (cur_usage.stime_ticks + cur_usage.cstime_ticks) -
-		(last_usage.stime_ticks + last_usage.cstime_ticks);
-}
-
-/*
- * calculates the elapsed CPU usage between 2 measuring points. in percent
- */
-void calc_cpu_usage_pct(const pstat &cur_usage, const pstat &last_usage, std::size_t *ucpu_usage, std::size_t *scpu_usage)
-{
-	std::size_t ucpu_usage_tmp = 0, scpu_usage_tmp = 0;
+void calc_cpu_usage(const pstat &cur_usage, const pstat &last_usage, std::size_t *ucpu_usage, std::size_t *scpu_usage, std::size_t *total_cpu_usage) {
 	const std::size_t number_of_processors = sysconf(_SC_NPROCESSORS_ONLN);
 	const std::size_t total_time_diff = cur_usage.cpu_total_time - last_usage.cpu_total_time;
 
-	calc_cpu_usage(cur_usage, last_usage, &ucpu_usage_tmp, &scpu_usage_tmp);
-
-	*ucpu_usage = (ucpu_usage_tmp/(double)total_time_diff) * 100 * number_of_processors;
-	*scpu_usage = (scpu_usage_tmp/(double)total_time_diff) * 100 * number_of_processors;
+	*ucpu_usage = (((cur_usage.utime_ticks + cur_usage.cutime_ticks)
+						 - (last_usage.utime_ticks + last_usage.cutime_ticks))
+						 /(double)total_time_diff) * 100 * number_of_processors;
+	*scpu_usage = (((cur_usage.stime_ticks + cur_usage.cstime_ticks)
+						 - (last_usage.stime_ticks + last_usage.cstime_ticks))
+						 /(double)total_time_diff) * 100 * number_of_processors;
+	*total_cpu_usage = (*ucpu_usage) + (*scpu_usage);
 }
 
 /***************************************************************************/
 
-void memory_usage(std::size_t *vm, std::size_t *rss) {
-	struct pstat ps;
-	memset(&ps, 0, sizeof(ps));
-
-	get_usage(&ps);
-
-	*vm  = ps.vm;
-	*rss = ps.rssm;
-}
-
 struct pstat ps1;
 
-void cpu_usage(std::size_t *u_usage, std::size_t *s_usage) {
+void get_resources_usage(
+	 std::size_t *virtual_memory_usage
+	,std::size_t *resident_memory_usage
+	,std::size_t *user_cpu_usage
+	,std::size_t *system_cpu_usage
+	,std::size_t *total_cpu_usage
+) {
 	static bool inited = false;
 	if ( !inited ) {
 		get_usage(&ps1);
@@ -156,7 +138,9 @@ void cpu_usage(std::size_t *u_usage, std::size_t *s_usage) {
 	struct pstat ps2;
 	get_usage(&ps2);
 
-	calc_cpu_usage_pct(ps2, ps1, u_usage, s_usage);
+	*virtual_memory_usage = ps2.vm;
+	*resident_memory_usage= ps2.rssm;
+	calc_cpu_usage(ps2, ps1, user_cpu_usage, system_cpu_usage, total_cpu_usage);
 
 	memcpy(&ps1, &ps2, sizeof(ps1));
 }

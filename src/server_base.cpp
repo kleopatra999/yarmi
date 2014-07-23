@@ -168,9 +168,13 @@ struct server_base::impl {
 		stat.seconds = time-start_time_in_seconds;
 		stat.datetime = datetime_as_string(time);
 
-		detail::memory_usage(&stat.virt_memory, &stat.data_memory);
-		detail::cpu_usage(&stat.user_cpu, &stat.system_cpu);
-		stat.total_cpu = stat.user_cpu + stat.system_cpu;
+		detail::get_resources_usage(
+			 &stat.virt_memory
+			,&stat.data_memory
+			,&stat.user_cpu
+			,&stat.system_cpu
+			,&stat.total_cpu
+		);
 
 		if ( sh )
 			sh(stat);
