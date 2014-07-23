@@ -82,6 +82,12 @@ struct global_context_base: private boost::noncopyable {
 			send_to(it, buffer);
 		}
 	}
+	template<typename T>
+	void send_to(const std::initializer_list<T> &list, const yas::shared_buffer &buffer) {
+		for ( const auto &it: list) {
+			send_to(it, buffer);
+		}
+	}
 
 	void send_to_all(const session_base *session, const yas::shared_buffer &buffer);
 
