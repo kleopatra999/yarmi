@@ -42,39 +42,6 @@ YARMI_CONSTRUCT(
 	(yarmi),
 	server_invoker, // name of the server invoker
 	(pong, on_pong, (std::string))
-	,
-	YARMI_GENERATE_STRUCT(
-		struct1
-		,
-		(a, int)
-		(b, std::string)
-		(c, std::pair<int, std::string>)
-		,
-		struct1()
-			:a{}
-			,b{}
-			,c{}
-		{}
-
-		int get_a() const {return a;}
-	)
-	YARMI_GENERATE_ENUM(
-		enum1
-		,
-		(a, 3)
-		(b)
-		(c)
-		(d)
-	)
-	YARMI_GENERATE_ENUM_CLASS(
-		 enum2
-		,std::uint8_t
-		,
-		(a, 3)
-		(b, 4)
-		(c, 5)
-		(d, 6)
-	)
 );
 
 #endif // _yarmi__echo__protocol_hpp
