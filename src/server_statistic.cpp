@@ -33,11 +33,6 @@
 
 #include <boost/format.hpp>
 
-#include <ostream>
-
-#include <sys/resource.h>
-#include <sys/times.h>
-
 namespace yarmi {
 
 /***************************************************************************/
@@ -58,7 +53,7 @@ std::string format_size(std::uint64_t fs) {
 		return (boost::format("%.2f Kb") % ((double)fs/KB)).str();
 	}
 
-	return (boost::format("%d B")   % fs).str();
+	return (boost::format("%d B") % fs).str();
 }
 
 /***************************************************************************/
@@ -72,13 +67,13 @@ void server_statistic::print(std::ostream &os) const {
 "total writen    : %d\n"
 "read rate       : %d/sec\n"
 "write rate      : %d/sec\n"
-"read ops        : %d /sec\n"
-"write ops       : %d /sec\n"
+"read ops        : %d/sec\n"
+"write ops       : %d/sec\n"
 "send queue size : %d\n"
 "data memory     : %d\n"
 "virtual memory  : %d\n"
-"CPU system usage: %d%%\n"
 "CPU user usage  : %d%%\n"
+"CPU system usage: %d%%\n"
 "CPU total usage : %d%%"
 ;
 

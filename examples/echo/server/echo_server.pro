@@ -88,7 +88,6 @@ HEADERS += \
 	 ../../../include/yarmi/serialization.hpp \
 	 ../../../include/yarmi/object_constructor.hpp \
 	 ../../../include/yarmi/generate_callers.hpp \
-	 ../../../include/yarmi/generate_enum.hpp \
 	 ../../../include/yarmi/generate_helpers.hpp \
 	 ../../../include/yarmi/generate_invoker.hpp \
 	 ../../../include/yarmi/generate_lazy_if.hpp \
@@ -99,7 +98,17 @@ HEADERS += \
 	../../../include/yarmi/server_base.hpp \
 	../../../include/yarmi/server_statistic.hpp \
 	../../../include/yarmi/throw.hpp \
-	../../../include/yarmi/os_resources.hpp
-
-OTHER_FILES += \
-	../../../include/yarmi/global_context_base.hpp.rej
+	../../../include/yarmi/os_resources.hpp \
+	../../../include/yarmi/generate_struct.hpp \
+	../../../include/yarmi/generate_struct/decorators.hpp \
+	../../../include/yarmi/generate_struct/list.hpp \
+	../../../include/yarmi/generate_struct/map.hpp \
+	../../../include/yarmi/generate_struct/pair.hpp \
+	../../../include/yarmi/generate_struct/jsonify.hpp \
+	../../../include/yarmi/generate_struct/set.hpp \
+	../../../include/yarmi/generate_struct/tuple.hpp \
+	../../../include/yarmi/generate_struct/unordered_map.hpp \
+	../../../include/yarmi/generate_struct/unordered_set.hpp \
+	../../../include/yarmi/generate_struct/vector.hpp \
+	../../../include/yarmi/generate_enum.hpp \
+    ../../../include/yarmi/generate_invokers_sfinae.hpp

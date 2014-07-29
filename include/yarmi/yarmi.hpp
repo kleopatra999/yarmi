@@ -36,7 +36,6 @@
 
 #include <yarmi/fnv1a.hpp>
 #include <yarmi/serialization.hpp>
-#include <yarmi/generate_enum.hpp>
 #include <yarmi/generate_ns.hpp>
 #include <yarmi/generate_lazy_if.hpp>
 #include <yarmi/generate_tuple_is_empty.hpp>
@@ -44,6 +43,9 @@
 #include <yarmi/generate_metacode.hpp>
 #include <yarmi/generate_callers.hpp>
 #include <yarmi/generate_invoker.hpp>
+#include <yarmi/generate_invokers_sfinae.hpp>
+#include <yarmi/generate_struct.hpp>
+#include <yarmi/generate_enum.hpp>
 
 /***************************************************************************/
 
@@ -71,13 +73,13 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 
 /***************************************************************************/
 
-#define YARMI_DECLARE_MESSAGE_WRAP_X(...) \
-	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_Y
-#define YARMI_DECLARE_MESSAGE_WRAP_Y(...) \
-	((__VA_ARGS__)) YARMI_DECLARE_MESSAGE_WRAP_X
+#define YARMI_WRAP_SEQUENCE_X(...) \
+	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_Y
+#define YARMI_WRAP_SEQUENCE_Y(...) \
+	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_X
 
-#define YARMI_DECLARE_MESSAGE_WRAP_X0
-#define YARMI_DECLARE_MESSAGE_WRAP_Y0
+#define YARMI_WRAP_SEQUENCE_X0
+#define YARMI_WRAP_SEQUENCE_Y0
 
 /***************************************************************************/
 
@@ -92,19 +94,23 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 	,oppons  /* namespace for opposite class */ \
 	,oppocn  /* name of opposite class */ \
 	,seq     /* procedures sequence */ \
-	,opposeq /* opposite sequence sequence */ \
+	,opposeq /* opposite procedures sequence */ \
 ) \
 	template<typename Impl, typename IO = Impl> \
 	struct cn { \
+		using this_type = cn<Impl, IO>; \
+		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
 		\
 		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
-		\
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
-		YARMI_GENERATE_INVOKERS(ns, cn, opposeq) \
+		YARMI_GENERATE_INVOKERS(opposeq) \
+	\
+	private: \
+		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
 		\
 	private: \
 		Impl &impl; \
@@ -124,28 +130,38 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 	,server_invoker_ns \
 	,server_invoker_name \
 	,server_apis_seq \
+	,... \
 ) \
-	YARMI_OPEN_NS(client_invoker_ns) \
+	namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns) \
+	{ \
+		__VA_ARGS__; \
+	} /* ns */ \
+	\
+	YARMI_GENERATE_OPEN_NS(client_invoker_ns) \
+		using namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns); \
+		\
 		YARMI_CONSTRUCT_INVOKER( \
 			 client_invoker_ns \
 			,client_invoker_name \
 			,server_invoker_ns \
 			,server_invoker_name \
-			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
-			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X client_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X server_apis_seq, 0) \
 		) \
-	YARMI_CLOSE_NS(client_invoker_ns) \
+	YARMI_GENERATE_CLOSE_NS(client_invoker_ns) \
 	\
-	YARMI_OPEN_NS(server_invoker_ns) \
+	YARMI_GENERATE_OPEN_NS(server_invoker_ns) \
+		using namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns); \
+		\
 		YARMI_CONSTRUCT_INVOKER( \
 			 server_invoker_ns \
 			,server_invoker_name \
 			,client_invoker_ns \
 			,client_invoker_name \
-			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X server_apis_seq, 0) \
-			,BOOST_PP_CAT(YARMI_DECLARE_MESSAGE_WRAP_X client_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X server_apis_seq, 0) \
+			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X client_apis_seq, 0) \
 		) \
-	YARMI_CLOSE_NS(server_invoker_ns)
+	YARMI_GENERATE_CLOSE_NS(server_invoker_ns)
 
 /***************************************************************************/
 

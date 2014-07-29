@@ -29,37 +29,36 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__generate_invokers_sfinae_hpp
+#define _yarmi__generate_invokers_sfinae_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#define YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
+	BOOST_PP_CAT(_, BOOST_PP_CAT(name, BOOST_PP_CAT(_, idx)))
 
-#include <yarmi/server.hpp>
+#define YARMI_GENERATE_INVOKERS_SFINAE_IMPL(idx, name, _tuple) \
+	template<typename Obj, typename... Args> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
+		(Obj &o, const Args&... args) -> decltype(o.name(args..., std::make_tuple(std::cref(args)...)), void()) { \
+			o.name(args..., std::make_tuple(std::cref(args)...)); \
+	} \
+	template<typename Obj, typename... Args> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
+		(Obj &o, const Args&... args) -> decltype(o.name(args...), void()) { \
+			o.name(args...); \
+	}
 
-#include <iostream>
+#define YARMI_GENERATE_INVOKERS_SFINAE_AUX(unused, idx, seq) \
+	YARMI_GENERATE_INVOKERS_SFINAE_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
 
-/***************************************************************************/
+#define YARMI_GENERATE_INVOKERS_SFINAE(seq) \
+	BOOST_PP_REPEAT( \
+		 BOOST_PP_SEQ_SIZE(seq) \
+		,YARMI_GENERATE_INVOKERS_SFINAE_AUX \
+		,seq \
+	)
 
-int main() {
-	global_context<user_context> gc;
-
-	boost::asio::io_service ios;
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
-
-	ios.run();
-}
-
-/***************************************************************************/
+#endif // _yarmi__generate_invokers_sfinae_hpp

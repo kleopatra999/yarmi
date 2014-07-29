@@ -51,6 +51,40 @@ YARMI_CONSTRUCT(
 	(login        , on_login       , (std::string)                           ) // message
 	(logout       , on_logout      , (std::string)                           ) // message
 	(users_online , on_users_online, (std::vector<std::string>)              ) // vector of usernames
+	(ping         , on_ping        , (struct1)              ) // vector of usernames
+	,
+	YARMI_GENERATE_STRUCT(
+		struct1
+		,
+		(a, int)
+		(b, std::string)
+		(c, std::pair<int, std::string>)
+		,
+		struct1()
+			:a{}
+			,b{}
+			,c{}
+		{}
+
+		int get_a() const {return a;}
+	)
+	YARMI_GENERATE_ENUM(
+		enum1
+		,
+		(a, 3)
+		(b)
+		(c)
+		(d)
+	)
+	YARMI_GENERATE_ENUM_CLASS(
+		 enum2
+		,std::uint8_t
+		,
+		(a, 3)
+		(b, 4)
+		(c, 5)
+		(d, 6)
+	)
 );
 
 #endif // _yarmi__chat__protocol_hpp

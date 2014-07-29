@@ -34,24 +34,47 @@
 
 /***************************************************************************/
 
-#define YARMI_OPEN_NS_ITEM(unused1, unused2, elem) \
+#define YARMI_GENERATE_OPEN_NS_ITEM(unused1, unused2, elem) \
 	namespace elem {
 
-#define YARMI_OPEN_NS(seq) \
+#define YARMI_GENERATE_OPEN_NS(seq) \
 	BOOST_PP_SEQ_FOR_EACH( \
-		 YARMI_OPEN_NS_ITEM \
+		 YARMI_GENERATE_OPEN_NS_ITEM \
 		,~ \
 		,seq \
 	)
 
-#define YARMI_CLOSE_NS_ITEM(unused1, unused2, unused3) \
+#define YARMI_GENERATE_CLOSE_NS_ITEM(unused1, unused2, unused3) \
 	}
 
-#define YARMI_CLOSE_NS(seq) \
+#define YARMI_GENERATE_CLOSE_NS(seq) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_CLOSE_NS_ITEM \
+		,YARMI_GENERATE_CLOSE_NS_ITEM \
 		,~ \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_NS_NAME_ELEM(unused1, idx, seq) \
+	BOOST_PP_SEQ_ELEM(idx, seq)
+
+#define YARMI_GENERATE_NS_NAME_CAT(client_invoker_ns_str, server_invoker_ns_str) \
+	BOOST_PP_CAT(BOOST_PP_CAT(client_, client_invoker_ns_str), BOOST_PP_CAT(__, BOOST_PP_CAT(server_, server_invoker_ns_str)))
+
+#define YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns) \
+	YARMI_GENERATE_NS_NAME_CAT( \
+		BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(client_invoker_ns) \
+				,YARMI_GENERATE_NS_NAME_ELEM \
+				,client_invoker_ns \
+			) \
+		, \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(server_invoker_ns) \
+			,YARMI_GENERATE_NS_NAME_ELEM \
+			,server_invoker_ns \
+		) \
 	)
 
 /***************************************************************************/

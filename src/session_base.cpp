@@ -237,8 +237,12 @@ void session_base::close() { pimpl->socket.close(); }
 
 /***************************************************************************/
 
+yas::shared_buffer session_base::on_send(const yas::shared_buffer &buffer) {
+	return std::move(buffer);
+}
+
 void session_base::send(const yas::shared_buffer &buffer) {
-	pimpl->send(shared_from_this(), buffer);
+	pimpl->send(shared_from_this(), on_send(buffer));
 }
 
 /***************************************************************************/

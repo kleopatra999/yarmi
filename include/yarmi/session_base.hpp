@@ -61,6 +61,7 @@ struct session_base: std::enable_shared_from_this<session_base> {
 
 	void send(const yas::shared_buffer &buffer);
 
+	virtual yas::shared_buffer on_send(const yas::shared_buffer &buffer);
 	virtual void on_connected() {}
 	virtual void on_disconnected() {}
 	virtual void on_received(const char *ptr, const std::size_t size) = 0;

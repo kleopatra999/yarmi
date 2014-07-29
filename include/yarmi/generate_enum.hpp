@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -36,51 +36,114 @@
 
 #define YARMI_GENERATE_ENUM_MEMBERS(unused, idx, seq) \
 	BOOST_PP_IF( \
-		 BOOST_PP_EQUAL(2 ,BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, seq))) \
-		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, seq))=BOOST_PP_TUPLE_ELEM(2, 1, BOOST_PP_SEQ_ELEM(idx, seq)) /* member = value */ \
-		,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, seq)) /* member */ \
-	) /* BOOST_PP_IF */ \
-	YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_SEQ_SIZE(seq), idx)
+		 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, seq))) \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq))=BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) /* member = value */ \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) /* member */ \
+	) \
+		BOOST_PP_COMMA_IF(BOOST_PP_LESS(BOOST_PP_ADD(idx, 1), BOOST_PP_SEQ_SIZE(seq)))
 
 #define YARMI_GENERATE_ENUM_WRITE_CASES(unused, idx, tuple) \
-	case BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
-		 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))) \
-		,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-		,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-	) /* BOOST_PP_IF */ \
-	: \
-	return BOOST_PP_STRINGIZE( \
-		BOOST_PP_TUPLE_ELEM(2, 0, tuple)::BOOST_PP_IF( \
-			 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple)))) \
-			,BOOST_PP_TUPLE_ELEM(2, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
-			,BOOST_PP_TUPLE_ELEM(1, 0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, 1, tuple))) \
+	case BOOST_PP_TUPLE_ELEM(0, tuple)::BOOST_PP_IF( \
+			 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple)))) \
+			,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple))) \
+			,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple))) \
 		) /* BOOST_PP_IF */ \
-	) \
+		: \
+		return "\"" BOOST_PP_STRINGIZE( \
+			BOOST_PP_TUPLE_ELEM(0, tuple)::BOOST_PP_IF( \
+				 BOOST_PP_EQUAL(2, BOOST_PP_TUPLE_SIZE(BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple)))) \
+				,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple))) \
+				,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(1, tuple))) \
+			) /* BOOST_PP_IF */ \
+		) "\"" \
 	;
 
-#define YARMI_GENERATE_ENUM(name, type, seq) \
+/***************************************************************************/
+
+#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM(unused, data, elem) \
+	inline BOOST_PP_TUPLE_ELEM(0, data) operator elem ( \
+		 const BOOST_PP_TUPLE_ELEM(0, data) &l \
+		,const BOOST_PP_TUPLE_ELEM(0, data) &r \
+	) { \
+		return static_cast<BOOST_PP_TUPLE_ELEM(0, data)>( \
+			static_cast<BOOST_PP_TUPLE_ELEM(1, data)>(l) \
+			elem \
+			static_cast<BOOST_PP_TUPLE_ELEM(1, data)>(r)) \
+		; \
+	}
+
+#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, ...) \
+	BOOST_PP_SEQ_FOR_EACH( \
+		 YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM \
+		,(name, type) \
+		,BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__)) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_ENUM_CLASS_IMPL(name, type, seq) \
 	enum class name: type { \
 		BOOST_PP_REPEAT( \
 			 BOOST_PP_SEQ_SIZE(seq) \
-			,YARMI_GEERATE_ENUM_MEMBERS \
+			,YARMI_GENERATE_ENUM_MEMBERS \
 			,seq \
 		) \
 	}; \
 	\
-	static const char* enum_cast(const name &o) { \
+	inline const char* enum_cast(const name &o) { \
 		switch (o) { \
 			BOOST_PP_REPEAT( \
-				BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_ENUM_WRITE_CASES \
-				,(name, seq) \
+				BOOST_PP_SEQ_SIZE(seq), \
+				YARMI_GENERATE_ENUM_WRITE_CASES, \
+				(name, seq) \
 			) \
 		} \
-		return #name "::unknown"; \
+		return "\"" #name "::unknown\""; \
 	} \
 	\
-	static std::ostream& operator<< (std::ostream &s, const name &o) { \
+	inline std::ostream& operator<< (std::ostream &s, const name &o) { \
+		return s << enum_cast(o); \
+	} \
+	YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, &, |, ^, <<, >>)
+
+#define YARMI_GENERATE_ENUM_CLASS(name, type, seq) \
+	YARMI_GENERATE_ENUM_CLASS_IMPL( \
+		 name \
+		,type \
+		,BOOST_PP_CAT(YARMI_GENERATE_STRUCT_WRAP_X seq, 0) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_ENUM_IMPL(name, seq) \
+	enum name { \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(seq) \
+			,YARMI_GENERATE_ENUM_MEMBERS \
+			,seq \
+		) \
+	}; \
+	\
+	inline const char* enum_cast(const name &o) { \
+		switch (o) { \
+			BOOST_PP_REPEAT( \
+				BOOST_PP_SEQ_SIZE(seq), \
+				YARMI_GENERATE_ENUM_WRITE_CASES, \
+				(name, seq) \
+			) \
+		} \
+		return "\"" #name "::unknown\""; \
+	} \
+	\
+	inline std::ostream& operator<< (std::ostream &s, const name &o) { \
 		return s << enum_cast(o); \
 	}
+
+#define YARMI_GENERATE_ENUM(name, seq) \
+	YARMI_GENERATE_ENUM_IMPL( \
+		 name \
+		,BOOST_PP_CAT(YARMI_GENERATE_STRUCT_WRAP_X seq, 0) \
+	)
 
 /***************************************************************************/
 

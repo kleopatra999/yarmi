@@ -29,37 +29,69 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__generate_struct__jsonify_hpp
+#define _yarmi__generate_struct__jsonify_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
-
-#include <yarmi/server.hpp>
-
-#include <iostream>
+#include <ostream>
+#include <string>
+#include <type_traits>
 
 /***************************************************************************/
 
-int main() {
-	global_context<user_context> gc;
+namespace yarmi{
+namespace detail {
 
-	boost::asio::io_service ios;
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
+template<typename T>
+struct _is_string: std::integral_constant<bool, std::is_same<T, std::string>::value>
+{};
 
-	ios.run();
+template<typename T>
+struct _is_bool: std::integral_constant<bool, std::is_same<T, bool>::value>
+{};
+
+template<typename T>
+struct _is_char: std::integral_constant<
+	 bool
+	,(std::is_same<T, char>::value || std::is_same<T, unsigned char>::value || std::is_same<T, signed char>::value)
+>
+{};
+
+template<typename T>
+struct _is_not_string_bool_char: std::integral_constant<
+	  bool
+	 ,!(_is_string<T>::value || _is_bool<T>::value || _is_char<T>::value)
+>
+{};
+
+/***************************************************************************/
+
+// for string
+template<typename T>
+void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_string<T>::value>::type* = 0) {
+	s << '\"' << o << '\"';
+}
+// for bool
+template<typename T>
+void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_bool<T>::value>::type* = 0) {
+	 s << (o ? "true" : "false");
+}
+// for char
+template<typename T>
+void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_char<T>::value>::type* = 0) {
+	 if ( std::is_signed<T>::value )
+		  s << static_cast<std::int64_t>(o);
+	 else
+		  s << static_cast<std::uint64_t>(o);
+}
+// for other types
+template<typename T>
+void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_not_string_bool_char<T>::value>::type* = 0) {
+	s << o;
 }
 
+} // ns detail
+} // ns yarmi
+
 /***************************************************************************/
+
+#endif // _yarmi__generate_struct__jsonify_hpp

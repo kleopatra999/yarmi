@@ -30,7 +30,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _yarmi__generate_callers_hpp
-#define _yarmi__geberate_callers_hpp
+#define _yarmi__generate_callers_hpp
 
 /***************************************************************************/
 

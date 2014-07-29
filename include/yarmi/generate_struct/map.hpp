@@ -29,37 +29,43 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__generate_struct__map_hpp
+#define _yarmi__generate_struct__map_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <ostream>
+#include <map>
 
-#include <yarmi/server.hpp>
-
-#include <iostream>
+#include <yarmi/generate_struct/decorators.hpp>
+#include <yarmi/generate_struct/jsonify.hpp>
 
 /***************************************************************************/
 
-int main() {
-	global_context<user_context> gc;
+namespace yarmi {
+namespace detail {
 
-	boost::asio::io_service ios;
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
+template<typename Key, typename T, typename Comp, typename Allocator>
+std::ostream& operator<< (std::ostream &s, const std::map<Key, T, Comp, Allocator> &o) {
+	s << detail::object_open_symbol;
+	for ( auto cur = o.begin(), end = o.end(); cur != end; ++cur ) {
+		if ( std::is_integral<Key>::value )
+			s << "\"";
+		jsonify(s, cur->first);
+		if ( std::is_integral<Key>::value )
+			s << "\"";
 
-	ios.run();
+		s << ":";
+
+		jsonify(s, cur->second);
+		if ( std::next(cur) != end )
+			s << detail::default_delimiter;
+	}
+
+	return s << detail::object_close_symbol;
 }
 
+} // ns detail
+} // ns yarmi
+
 /***************************************************************************/
+
+#endif // _yarmi__generate_struct__map_hpp

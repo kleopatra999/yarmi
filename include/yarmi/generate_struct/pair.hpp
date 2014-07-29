@@ -29,37 +29,32 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__generate_struct__pair_hpp
+#define _yarmi__generate_struct__pair_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <ostream>
+#include <utility>
 
-#include <yarmi/server.hpp>
-
-#include <iostream>
+#include <yarmi/generate_struct/decorators.hpp>
+#include <yarmi/generate_struct/jsonify.hpp>
 
 /***************************************************************************/
 
-int main() {
-	global_context<user_context> gc;
+namespace yarmi {
+namespace detail {
 
-	boost::asio::io_service ios;
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
-
-	ios.run();
+template<typename T0, typename T1>
+std::ostream& operator<< (std::ostream &s, const std::pair<T0, T1> &o) {
+	s << detail::object_open_symbol << "\"first\":";
+	jsonify(s, o.first);
+	s << detail::default_delimiter << "\"second\":";
+	jsonify(s, o.second);
+	return s << detail::object_close_symbol;
 }
 
+} // ns detail
+} // ns yarmi
+
 /***************************************************************************/
+
+#endif // _yarmi__generate_struct__pair_hpp

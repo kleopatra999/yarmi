@@ -70,9 +70,7 @@ void user_context::on_received(const char *ptr, const std::size_t size) {
 /***************************************************************************/
 
 void user_context::on_ping(const std::string &msg) {
-	//std::cout << "received: \"" << msg << "\"" << std::endl;
 	pong(msg);
-	//throw std::runtime_error("remote exception");
 }
 
 /***************************************************************************/

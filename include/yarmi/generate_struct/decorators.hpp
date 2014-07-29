@@ -29,37 +29,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__generate_struct__decorators_hpp
+#define _yarmi__generate_struct__decorators_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+namespace yarmi {
+namespace detail {
 
-#include <yarmi/server.hpp>
+static const char default_delimiter = ',';
 
-#include <iostream>
+static const char pair_open_symbol = '(';
+static const char pair_close_symbol = ')';
 
-/***************************************************************************/
+static const char array_open_symbol = '[';
+static const char array_close_symbol = ']';
 
-int main() {
-	global_context<user_context> gc;
+static const char object_open_symbol = '{';
+static const char object_close_symbol = '}';
 
-	boost::asio::io_service ios;
-	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
-		,ios
-		,gc
-		,[](const boost::asio::ip::tcp::endpoint &){return true;}
-		,[](const std::string &msg) {std::cerr << msg << std::endl;}
-		,[](const yarmi::server_statistic &st) {
-			std::cout << "/***********************/" << std::endl;
-			st.print(std::cout);
-			std::cout<<std::endl;
-		 }
-	);
-	server.start();
+} // ns detail
+} // ns yarmi
 
-	ios.run();
-}
-
-/***************************************************************************/
+#endif // _yarmi__generate_struct__decorators_hpp

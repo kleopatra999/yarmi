@@ -64,15 +64,11 @@ struct global_context_base::impl {
 		,boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<
 				 boost::multi_index::tag<session_wrapper::by_session>
-				,boost::multi_index::member<
-					session_wrapper, session_base*, &session_wrapper::session
-				>
+				,boost::multi_index::member<session_wrapper, session_base*, &session_wrapper::session>
 			>
 			,boost::multi_index::ordered_unique<
 				 boost::multi_index::tag<session_wrapper::by_id>
-				,boost::multi_index::member<
-					session_wrapper, std::int64_t, &session_wrapper::id
-				>
+				,boost::multi_index::member<session_wrapper, std::int64_t, &session_wrapper::id>
 			>
 		>
 	> sessions_cont;
@@ -175,9 +171,9 @@ void global_context_base::send_to(std::int64_t id, const yas::shared_buffer &buf
 	it->session->send(buffer);
 }
 
-void global_context_base::send_to_all(const session_base *session, const yas::shared_buffer &buffer) {
+void global_context_base::send_to_all(const session_base *exclude, const yas::shared_buffer &buffer) {
 	for ( const auto &it: pimpl->sessions ) {
-		if ( it.session == session ) continue;
+		if ( it.session == exclude ) continue;
 		it.session->send(buffer);
 	}
 }

@@ -56,6 +56,9 @@ struct global_context_base: private boost::noncopyable {
 	/** add */
 	std::uint64_t add_session(session_base *session);
 
+	/** get */
+	session_base* get_session(std::int64_t id) const;
+
 	/** rm */
 	void del_session(session_base *session);
 	void del_session(std::int64_t id);
@@ -67,29 +70,20 @@ struct global_context_base: private boost::noncopyable {
 	bool has_session(session_base *session) const;
 	bool has_session(std::int64_t id) const;
 
-	/** get */
-	session_base* get_session(std::int64_t id) const;
-
 	/** info */
 	std::size_t sessions() const;
 
 	/** operations */
 	void send_to(std::int64_t id, const yas::shared_buffer &buffer);
 
-	template<typename Allocator, template<typename, typename> class Container>
-	void send_to(const Container<std::int64_t, Allocator> &cont, const yas::shared_buffer &buffer) {
-		for ( const auto &it: cont ) {
-			send_to(it, buffer);
-		}
-	}
-	template<typename T>
-	void send_to(const std::initializer_list<T> &list, const yas::shared_buffer &buffer) {
-		for ( const auto &it: list) {
-			send_to(it, buffer);
+	template<typename Iter>
+	void send_to(Iter beg, Iter end, const yas::shared_buffer &buffer) {
+		for ( ; beg != end; ++beg ) {
+			send_to(*beg, buffer);
 		}
 	}
 
-	void send_to_all(const session_base *session, const yas::shared_buffer &buffer);
+	void send_to_all(const session_base *exclude, const yas::shared_buffer &buffer);
 
 private:
 	struct impl;
