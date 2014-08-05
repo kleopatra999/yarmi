@@ -53,16 +53,16 @@
 namespace yarmi {
 
 template<typename Invoker, typename... Invokers>
-bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head, Invokers&... tail) {
+bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker &head, Invokers&... tail) {
 	istream_type istream(ptr, size);
 	iarchive_type iarchive(istream, yas::no_header);
-	id_type call_id = 0;
+	call_id_type call_id = 0;
 	iarchive & call_id;
 	if ( cid ) *cid = call_id;
 
 	bool flag  = false;
 	auto apply = [](...) {};
-	auto func  = [&flag](const id_type call_id, iarchive_type &iarchive, Invoker &invoker) {
+	auto func  = [&flag](const call_id_type call_id, iarchive_type &iarchive, Invoker &invoker) {
 		return flag=flag || invoker.invoke(call_id, iarchive);
 	};
 	apply(func(call_id, iarchive, head), func(call_id, iarchive, tail)...);

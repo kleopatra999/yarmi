@@ -65,7 +65,7 @@
 	);
 
 #define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, name, tuple) \
-	case static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
+	case static_cast<call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY(tuple) \
 			,(idx, name) \
@@ -84,7 +84,7 @@
 	)
 
 #define YARMI_GENERATE_INVOKERS(seq) \
-	bool invoke(const id_type call_id, ::yarmi::iarchive_type &ia) { \
+	bool invoke(const call_id_type call_id, ::yarmi::iarchive_type &ia) { \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
@@ -95,8 +95,8 @@
 		} \
 	} \
 	\
-	bool invoke(const char *ptr, const std::size_t size, id_type *cid = 0) { \
-		id_type call_id = 0; \
+	bool invoke(const char *ptr, const std::size_t size, call_id_type *cid = 0) { \
+		call_id_type call_id = 0; \
 		::yarmi::istream_type is(ptr, size); \
 		::yarmi::iarchive_type ia(is, yas::no_header); \
 		ia & call_id; \

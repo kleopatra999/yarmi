@@ -41,7 +41,7 @@ client_session::client_session(boost::asio::io_service &ios)
 /***************************************************************************/
 
 void client_session::on_received(const char *ptr, const std::size_t size) {
-	yarmi::id_type call_id = 0;
+	yarmi::call_id_type call_id = 0;
 	try {
 		const bool ok = yarmi::invoke(ptr, size, &call_id, *this);
 		if ( ! ok ) {

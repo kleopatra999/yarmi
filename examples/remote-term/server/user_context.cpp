@@ -79,7 +79,7 @@ void user_context::on_disconnected() {}
 /***************************************************************************/
 
 void user_context::on_received(const char *ptr, std::size_t size) {
-	yarmi::id_type call_id = 0;
+	yarmi::call_id_type call_id = 0;
 	try {
 		if ( !yarmi::invoke(ptr, size, &call_id, *this) ) {
 			std::cerr << "no handler for call_id=" << call_id << std::endl;

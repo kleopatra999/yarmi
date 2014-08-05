@@ -43,7 +43,7 @@
 	void name() { \
 		::yarmi::ostream_type os, os2; \
 		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
-		oa & static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)); \
+		oa & static_cast<call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)); \
 		pa & os.get_intrusive_buffer(); \
 		io.send(os2.get_shared_buffer()); \
 	}
@@ -61,7 +61,7 @@
 	) { \
 		::yarmi::ostream_type os, os2; \
 		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
-		oa & static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+		oa & static_cast<call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
 		\
 		BOOST_PP_REPEAT( \
 				 BOOST_PP_TUPLE_SIZE(tuple) \

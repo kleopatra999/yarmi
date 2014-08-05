@@ -103,7 +103,7 @@
 /***************************************************************************/
 
 #define YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL(idx, name) \
-	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+	BOOST_PP_IF(idx,:,) call_id == static_cast<call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
 		? _meta_requests_names[idx]
 
 #define YARMI_GENERATE_METACODE_HAS_REQUEST_AUX(unused, idx, seq) \
@@ -115,7 +115,7 @@
 /***************************************************************************/
 
 #define YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL(idx, name) \
-	BOOST_PP_IF(idx,:,) call_id == static_cast<id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
+	BOOST_PP_IF(idx,:,) call_id == static_cast<call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
 		? _meta_handlers_names[idx]
 
 #define YARMI_GENERATE_METACODE_HAS_HANDLER_AUX(unused, idx, seq) \
@@ -136,7 +136,7 @@
 			) \
 			0 \
 		}; \
-		enum class _meta_requests_ids: id_type { \
+		enum class _meta_requests_ids: call_id_type { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
 				,YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX \
@@ -144,7 +144,7 @@
 			) \
 		}; \
 		\
-		static constexpr const id_type _meta_requests_ids_array[] = { \
+		static constexpr const call_id_type _meta_requests_ids_array[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
 				,YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX \
@@ -160,7 +160,7 @@
 			) \
 			0 \
 		}; \
-		enum class _meta_handlers_ids: id_type { \
+		enum class _meta_handlers_ids: call_id_type { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
 				,YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX \
@@ -168,7 +168,7 @@
 			) \
 		}; \
 		\
-		static constexpr const id_type _meta_handlers_ids_array[] = { \
+		static constexpr const call_id_type _meta_handlers_ids_array[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
 				,YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX \
@@ -185,7 +185,7 @@
 	public: \
 		static constexpr const char* const* meta_requests() { return _meta_requests_names; } \
 		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
-		static constexpr const char*  meta_request_name(const id_type call_id) { \
+		static constexpr const char*  meta_request_name(const call_id_type call_id) { \
 			return ( \
 				BOOST_PP_REPEAT( \
 					 BOOST_PP_SEQ_SIZE(seq) \
@@ -195,13 +195,13 @@
 				: 0 \
 			); \
 		} \
-		static constexpr bool meta_has_request(const id_type call_id) { return meta_request_name(call_id) != 0; } \
+		static constexpr bool meta_has_request(const call_id_type call_id) { return meta_request_name(call_id) != 0; } \
 		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a(str)); } \
 		static void dump_requests(std::ostream &os) { dump(os, meta_requests()); } \
 		\
 		static constexpr const char* const* meta_handlers() { return _meta_handlers_names; } \
 		static constexpr std::size_t  meta_handlers_count() { return (sizeof(_meta_handlers_names)/sizeof(_meta_handlers_names[0]))-1; } \
-		static constexpr const char*  meta_handler_name(const id_type call_id) { \
+		static constexpr const char*  meta_handler_name(const call_id_type call_id) { \
 			return ( \
 				BOOST_PP_REPEAT( \
 					 BOOST_PP_SEQ_SIZE(opposeq) \
@@ -211,7 +211,7 @@
 				: 0 \
 			); \
 		} \
-		static constexpr bool meta_has_handler(const id_type call_id) { return meta_handler_name(call_id) != 0; } \
+		static constexpr bool meta_has_handler(const call_id_type call_id) { return meta_handler_name(call_id) != 0; } \
 		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a(str)); } \
 		static void dump_handlers(std::ostream &os) { dump(os, meta_handlers()); }
 

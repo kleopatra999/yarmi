@@ -54,7 +54,7 @@ struct client: yarmi::client_base, yarmi::client_side<client> {
 	{}
 
 	void on_received(const char *ptr, const std::size_t size) {
-		yarmi::id_type call_id = 0;
+		yarmi::call_id_type call_id = 0;
 		try {
 			const bool ok = yarmi::invoke(ptr, size, &call_id, *this);
 			if ( ! ok ) {

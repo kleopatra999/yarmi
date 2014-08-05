@@ -43,7 +43,7 @@ constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=
 
 } // ns detail
 
-using id_type = decltype(::yarmi::detail::fnv1a(""));
+using call_id_type = decltype(::yarmi::detail::fnv1a(""));
 
 } // ns yarmi
 
