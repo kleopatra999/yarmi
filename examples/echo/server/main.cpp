@@ -41,12 +41,13 @@
 /***************************************************************************/
 
 int main() {
+	boost::asio::io_service ios;
+
 	global_context<user_context> gc;
 
-	boost::asio::io_service ios;
+	yarmi::server_config config;
 	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		,44550
+		 config
 		,ios
 		,gc
 		,[](const boost::asio::ip::tcp::endpoint &){return true;}

@@ -1,0 +1,5 @@
+
+1. pool of buffers.
+2. checking for uniqueness proc IDs.
+3. header writer/reader.
+4. remove spaces from proc-names strings.

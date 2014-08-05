@@ -34,9 +34,6 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_GET_ID_VAR_NAME(idx, tuple) \
-	BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(1, tuple), _##idx)
-
 #define YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL(idx, name) \
 	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a(_meta_requests_names[idx]) \
 	,
@@ -55,6 +52,28 @@
 	YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL( \
 		 idx \
 		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL(idx, name) \
+	_meta_requests_ids::BOOST_PP_CAT(name, _##idx) \
+	,
+
+#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
+	)
+
+#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL(idx, name) \
+	_meta_handlers_ids::BOOST_PP_CAT(name, _##idx) \
+	,
+
+#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX(unused, idx, seq) \
+	YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL( \
+		 idx \
+		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
 	)
 
 /***************************************************************************/
@@ -125,6 +144,14 @@
 			) \
 		}; \
 		\
+		static constexpr const id_type _meta_requests_ids_array[] = { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX \
+				,seq \
+			) \
+		}; \
+		\
 		static constexpr const char *_meta_handlers_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
@@ -141,7 +168,15 @@
 			) \
 		}; \
 		\
-		static void dump(std::ostream &os, const char * const *list) { \
+		static constexpr const id_type _meta_handlers_ids_array[] = { \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(opposeq) \
+				,YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX \
+				,opposeq \
+			) \
+		}; \
+		\
+		static void dump(std::ostream &os, const char *const *list) { \
 			os << "invoker: \"" YARMI_NS_TO_STRING(ns, cn) "\"" << std::endl; \
 			for ( ; *list; ++list ) { \
 				os << "  " << *list << ": 0x" << std::hex << ::yarmi::detail::fnv1a(*list) << std::endl; \

@@ -37,13 +37,15 @@
 namespace yarmi {
 namespace detail {
 
-void get_resources_usage(
-	 std::size_t *virtual_memory_usage
-	,std::size_t *resident_memory_usage
-	,std::size_t *user_cpu_usage
-	,std::size_t *system_cpu_usage
-	,std::size_t *total_cpu_usage
-);
+struct resources {
+	std::size_t virtual_memory_usage;
+	std::size_t resident_memory_usage;
+	std::size_t user_cpu_usage;
+	std::size_t system_cpu_usage;
+	std::size_t total_cpu_usage;
+};
+
+resources get_resources_usage();
 
 } // ns detail
 } // ns yarmi

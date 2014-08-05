@@ -39,15 +39,12 @@
 /***************************************************************************/
 
 int main() {
-	static const char *ip = "127.0.0.1";
-	static const std::uint16_t port = 44550;
-
 	boost::asio::io_service ios;
 	global_context<user_context> gc;
 
+	yarmi::server_config config;
 	yarmi::server<user_context, global_context> server(
-		 ip
-		,port
+		 config
 		,ios
 		,gc
 	);

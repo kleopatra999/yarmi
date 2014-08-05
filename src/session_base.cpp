@@ -42,6 +42,12 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
+#define USE_TIMEOUTS
+
+#ifdef USE_TIMEOUTS
+#	include <boost/asio/deadline_timer.hpp>
+#endif
+
 #include <queue>
 #include <functional>
 
@@ -52,8 +58,13 @@ namespace yarmi {
 struct session_base::impl {
 	enum { header_size = sizeof(std::uint32_t)+yarmi::iarchive_type::header_size() };
 
+#ifdef USE_TIMEOUTS
+	enum { recv_timeout, send_timeout };
+#endif
+
 	impl(server_base &sb)
-		:stat(sb.get_server_statistic())
+		:config(sb.get_config())
+		,stat(sb.get_server_statistic())
 		,socket(sb.get_io_service())
 		,eh(sb.get_error_handler())
 		,buffers()
@@ -94,6 +105,11 @@ struct session_base::impl {
 		::yarmi::iarchive_type ia(is);
 		std::uint32_t body_size = 0;
 		ia & body_size;
+
+		if ( body_size > config.max_recv_size ) {
+			eh(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", body_size));
+			return;
+		}
 
 		read_body(body_size, self);
 	}
@@ -143,9 +159,6 @@ struct session_base::impl {
 	}
 
 	void send(session_base::session_ptr self, const yas::shared_buffer &buffer) {
-		if ( !buffer.data.get() || !buffer.size )
-			return;
-
 		++stat.write_queue_size;
 
 		if ( !in_process ) {
@@ -198,6 +211,7 @@ struct session_base::impl {
 	yarmi::handler_allocator<512> read_allocator;
 	yarmi::handler_allocator<512> write_allocator;
 
+	const server_config &config;
 	server_statistic &stat;
 	boost::asio::ip::tcp::socket socket;
 
@@ -242,6 +256,9 @@ yas::shared_buffer session_base::on_send(const yas::shared_buffer &buffer) {
 }
 
 void session_base::send(const yas::shared_buffer &buffer) {
+	if ( !buffer.size )
+		return;
+
 	pimpl->send(shared_from_this(), on_send(buffer));
 }
 

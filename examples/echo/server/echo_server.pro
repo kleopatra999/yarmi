@@ -111,4 +111,5 @@ HEADERS += \
 	../../../include/yarmi/generate_struct/unordered_set.hpp \
 	../../../include/yarmi/generate_struct/vector.hpp \
 	../../../include/yarmi/generate_enum.hpp \
-    ../../../include/yarmi/generate_invokers_sfinae.hpp
+	../../../include/yarmi/generate_invokers_sfinae.hpp \
+	../../../include/yarmi/generate_proc_helper.hpp

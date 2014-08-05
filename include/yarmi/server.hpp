@@ -44,15 +44,14 @@ namespace yarmi {
 template<typename UC, template<typename UC> class GC>
 struct server: server_base {
 	server(
-		 const std::string &ip
-		,const std::uint16_t port
+		 const server_config &config
 		,boost::asio::io_service &ios
 		,GC<UC> &gc
-		,connection_pred_type   cp = [](const boost::asio::ip::tcp::endpoint &){ return true; }
-		,error_handler_type     eh = [](const std::string &){}
-		,statistic_handler_type sh = statistic_handler_type()
+		,connection_pred_type   cp = [](const boost::asio::ip::tcp::endpoint &) {return true;}
+		,error_handler_type     eh = [](const std::string &) {}
+		,statistic_handler_type sh = [](const server_statistic &) {}
 	)
-		:server_base(ios, ip, port, gc, cp, eh, sh, [this, &gc](){ return new UC(*this, gc); })
+		:server_base(ios, config, gc, cp, eh, sh, [this, &gc](){ return new UC(*this, gc); })
 	{}
 };
 

@@ -133,28 +133,26 @@ void calc_cpu_usage(const pstat &cur_usage, const pstat &last_usage, std::size_t
 
 struct pstat ps1;
 
-void get_resources_usage(
-	 std::size_t *virtual_memory_usage
-	,std::size_t *resident_memory_usage
-	,std::size_t *user_cpu_usage
-	,std::size_t *system_cpu_usage
-	,std::size_t *total_cpu_usage
-) {
+resources get_resources_usage() {
+	resources res;
+
 	static bool inited = false;
 	if ( !inited ) {
 		get_usage(&ps1);
 		inited = true;
-		return;
+		return res;
 	}
 
 	struct pstat ps2;
 	get_usage(&ps2);
 
-	*virtual_memory_usage = ps2.vm;
-	*resident_memory_usage= ps2.rssm;
-	calc_cpu_usage(ps2, ps1, user_cpu_usage, system_cpu_usage, total_cpu_usage);
+	res.virtual_memory_usage = ps2.vm;
+	res.resident_memory_usage= ps2.rssm;
+	calc_cpu_usage(ps2, ps1, &res.user_cpu_usage, &res.system_cpu_usage, &res.total_cpu_usage);
 
 	memcpy(&ps1, &ps2, sizeof(ps1));
+
+	return res;
 }
 
 } // ns detail

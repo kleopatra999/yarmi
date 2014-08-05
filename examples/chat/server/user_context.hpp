@@ -42,9 +42,9 @@ template<typename>
 struct global_context;
 
 struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
-	user_context(boost::asio::io_service &ios, global_context<user_context> &gc);
+	user_context(yarmi::server_base &sb, global_context<user_context> &gc);
 
-	// inkomming
+	// incomming
 	void on_registration(const std::string &username);
 	void on_activation(const std::string &regkey, const std::string &useranme, const std::string &pass);
 	void on_login(const std::string &useranme, const std::string &pass);

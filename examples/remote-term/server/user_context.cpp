@@ -62,8 +62,8 @@ struct user_context::impl {
 
 /***************************************************************************/
 
-user_context::user_context(boost::asio::io_service &ios, global_context<user_context> &gc)
-	:yarmi::session_base(ios)
+user_context::user_context(yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(sb)
 	,yarmi::server_side<user_context>(*this, *this)
 	,pimpl(new impl(gc))
 {}

@@ -43,6 +43,24 @@ namespace yarmi {
 
 /***************************************************************************/
 
+struct server_config {
+	server_config()
+		:ip("127.0.0.1")
+		,port(44550)
+		,max_recv_size(1024*1024*10)
+		,recv_timeout(10)
+		,send_timeout(10)
+	{}
+
+	std::string ip;
+	std::uint16_t port;
+	std::size_t max_recv_size;
+	std::size_t recv_timeout;
+	std::size_t send_timeout;
+};
+
+/***************************************************************************/
+
 struct session_base;
 struct global_context_base;
 struct server_statistic;
@@ -57,18 +75,19 @@ struct server_base: boost::noncopyable {
 
 	server_base(
 		 boost::asio::io_service &ios
-		,const std::string &ip
-		,const std::uint16_t port
+		,const server_config &config
 		,global_context_base &gcb
-		,connection_pred_type cp
-		,error_handler_type eh
-		,statistic_handler_type sh
-		,session_factory_type sc
+		,connection_pred_type connection_pred
+		,error_handler_type error_handler
+		,statistic_handler_type stat_handler
+		,session_factory_type session_factory
 	);
 	virtual ~server_base();
 
 	boost::asio::io_service&
 	get_io_service();
+
+	const server_config& get_config() const;
 
 	void start();
 	void stop();

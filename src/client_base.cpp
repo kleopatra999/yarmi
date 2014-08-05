@@ -66,26 +66,6 @@ struct client_base::impl {
 		socket.close(ec);
 	}
 
-	void send(const yas::shared_buffer &buffer) {
-		if ( ! in_process ) {
-			in_process = true;
-
-			boost::asio::async_write(
-				 socket
-				,boost::asio::buffer(buffer.data.get(), buffer.size)
-				,std::bind(
-					&client_base::impl::sent
-					,this
-					,std::placeholders::_1
-					,std::placeholders::_2
-					,buffer
-				)
-			);
-		} else {
-			buffers.push_back(buffer);
-		}
-	}
-
 	void on_header_readed(const boost::system::error_code &ec, std::size_t rd) {
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
@@ -124,6 +104,25 @@ struct client_base::impl {
 		start();
 	}
 
+	void send(const yas::shared_buffer &buffer) {
+		if ( ! in_process ) {
+			in_process = true;
+
+			boost::asio::async_write(
+				 socket
+				,boost::asio::buffer(buffer.data.get(), buffer.size)
+				,std::bind(
+					&client_base::impl::sent
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,buffer
+				)
+			);
+		} else {
+			buffers.push_back(buffer);
+		}
+	}
 	void sent(const boost::system::error_code &ec, std::size_t wr, yas::shared_buffer buffer) {
 		in_process = false;
 

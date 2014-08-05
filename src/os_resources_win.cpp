@@ -29,25 +29,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cstdint>
+#include <yarmi/os_resources.hpp>
 
 namespace yarmi {
 namespace detail {
 
 /***************************************************************************/
 
-void get_resources_usage(
-	 std::size_t *virtual_memory_usage
-	,std::size_t *resident_memory_usage
-	,std::size_t *user_cpu_usage
-	,std::size_t *system_cpu_usage
-	,std::size_t *total_cpu_usage
-) {
-	*virtual_memory_usage  = -1;
-	*resident_memory_usage = -1;
-	*user_cpu_usage        = -1;
-	*system_cpu_usage      = -1;
-	*total_cpu_usage       = -1;
+resources get_resources_usage() {
+	resources res;
+
+	return res;
 }
 
 /***************************************************************************/

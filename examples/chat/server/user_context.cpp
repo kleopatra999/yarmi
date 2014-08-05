@@ -34,8 +34,8 @@
 
 /***************************************************************************/
 
-user_context::user_context(boost::asio::io_service &ios, global_context<user_context> &gc)
-	:yarmi::session_base(ios)
+user_context::user_context(yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(sb)
 	,yarmi::server_invoker<user_context>(*this, *this)
 	,gc(gc)
 {}

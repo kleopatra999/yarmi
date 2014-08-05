@@ -42,7 +42,7 @@ template<typename>
 struct global_context;
 
 struct user_context: yarmi::session_base, yarmi::server_side<user_context> {
-	user_context(boost::asio::io_service &ios, global_context<user_context> &);
+	user_context(yarmi::server_base &sb, global_context<user_context> &);
 	virtual ~user_context();
 
 	void on_connected();

@@ -34,7 +34,7 @@
 
 #include <cstdint>
 #include <iosfwd>
-#include <string>
+#include <ctime>
 
 namespace yarmi {
 
@@ -42,7 +42,7 @@ namespace yarmi {
 
 struct server_statistic {
 	server_statistic()
-		:seconds(0)
+		:uptime(0)
 		,connections(0)
 		,readed(0)
 		,writen(0)
@@ -58,8 +58,11 @@ struct server_statistic {
 		,total_cpu(0)
 	{}
 
-	std::string		datetime;
-	std::size_t		seconds;
+	void print(std::ostream &os) const;
+	void reset();
+
+	std::time_t		datetime;
+	std::size_t		uptime;
 	std::size_t		connections;
 	std::uint64_t	readed;
 	std::uint64_t	writen;
@@ -73,8 +76,6 @@ struct server_statistic {
 	std::size_t		user_cpu;
 	std::size_t		system_cpu;
 	std::size_t		total_cpu;
-
-	void print(std::ostream &os) const;
 };
 
 /***************************************************************************/

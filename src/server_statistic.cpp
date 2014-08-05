@@ -56,6 +56,16 @@ std::string format_size(std::uint64_t fs) {
 	return (boost::format("%d B") % fs).str();
 }
 
+static std::string datetime_as_string(const std::time_t time) {
+	struct tm *tm = 0;
+	char buf[128] = "\0";
+
+	tm = std::localtime(&time);
+	std::strftime(buf, sizeof(buf), "%d.%m.%Y %H:%M:%S", tm);
+
+	return buf;
+}
+
 /***************************************************************************/
 
 void server_statistic::print(std::ostream &os) const {
@@ -79,8 +89,8 @@ void server_statistic::print(std::ostream &os) const {
 
 	os
 	<< boost::format(fmt)
-		% datetime
-		% (seconds/(60*60)) % ((seconds/(60))%60) % (seconds%60)
+		% datetime_as_string(datetime)
+		% (uptime/(60*60)) % ((uptime/(60))%60) % (uptime%60)
 		% connections
 		% format_size(readed)
 		% format_size(writen)
@@ -95,6 +105,16 @@ void server_statistic::print(std::ostream &os) const {
 		% system_cpu
 		% total_cpu
 	;
+}
+
+/***************************************************************************/
+
+void server_statistic::reset() {
+	read_rate = 0;
+	write_rate = 0;
+	read_ops = 0;
+	write_ops = 0;
+	write_queue_size = 0;
 }
 
 /***************************************************************************/

@@ -46,6 +46,7 @@
 #include <yarmi/generate_invokers_sfinae.hpp>
 #include <yarmi/generate_struct.hpp>
 #include <yarmi/generate_enum.hpp>
+#include <yarmi/generate_proc_helper.hpp>
 
 /***************************************************************************/
 
@@ -61,8 +62,8 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 
 	bool flag  = false;
 	auto apply = [](...) {};
-	auto func = [&flag](const id_type call_id, iarchive_type &iarchive, Invoker &invoker)->bool {
-		return flag = flag || invoker.invoke(call_id, iarchive);
+	auto func  = [&flag](const id_type call_id, iarchive_type &iarchive, Invoker &invoker) {
+		return flag=flag || invoker.invoke(call_id, iarchive);
 	};
 	apply(func(call_id, iarchive, head), func(call_id, iarchive, tail)...);
 
@@ -110,12 +111,13 @@ bool invoke(const char *ptr, const std::size_t size, id_type *cid, Invoker &head
 		YARMI_GENERATE_INVOKERS(opposeq) \
 	\
 	private: \
-		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
-		\
-	private: \
 		Impl &impl; \
 		IO &io; \
+	\
+	private: \
+		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
 	}; \
+	\
 	template<typename Impl, typename IO> \
 	constexpr const char* cn<Impl, IO>::_meta_requests_names[]; \
 	template<typename Impl, typename IO> \

@@ -50,30 +50,31 @@ namespace yarmi {
 struct server_base::impl {
 	impl(
 		 boost::asio::io_service &ios
-		,const std::string &ip
-		,std::uint16_t port
+		,const server_config &config
 		,global_context_base &gcb
-		,connection_pred_type cp
-		,error_handler_type eh
-		,statistic_handler_type sh
-		,session_factory_type sc
+		,connection_pred_type connection_pred
+		,error_handler_type error_handler
+		,statistic_handler_type stat_handler
+		,session_factory_type session_factory
 	)
-		:allocator()
-		,acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(ip), port))
-		,timer(ios)
-		,cp(cp)
-		,eh(eh)
-		,sh(sh)
-		,sc(sc)
-		,start_time_in_seconds(std::time(0))
+		:ios(ios)
+		,config(config)
 		,gcb(gcb)
+		,allocator()
+		,acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(config.ip), config.port))
+		,stat_timer(ios)
+		,connection_pred(connection_pred)
+		,error_handler(error_handler)
+		,stat_handler(stat_handler)
+		,session_factory(session_factory)
+		,start_time_in_seconds(std::time(0))
 		,stat()
 	{
 		start_timer();
 	}
 
 	void start() {
-		session_base *session_ptr = sc();
+		session_base *session_ptr = session_factory();
 		session_base::session_ptr session(session_ptr, [this](session_base *session){ session_deleter(session); });
 
 		acceptor.async_accept(
@@ -95,17 +96,17 @@ struct server_base::impl {
 
 		YARMI_TRY(on_disconnected_flag)
 			session->on_disconnected();
-		YARMI_CATCH_LOG(on_disconnected_flag, os, eh(os.str());)
+		YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)
 
 		if ( ! gcb.has_session(session) ) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
 		} else {
 			gcb.del_session(session);
 		}
 
 		YARMI_TRY(delete_session_flag)
 			delete session;
-		YARMI_CATCH_LOG(delete_session_flag, os, eh(os.str());)
+		YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
 	}
 
 	void on_accepted(const boost::system::error_code &ec, session_base::session_ptr session) {
@@ -113,23 +114,23 @@ struct server_base::impl {
 			boost::system::error_code ec2;
 			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
 			if ( ec2 ) {
-				eh(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
+				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
 			}
 
-			if ( ! cp(ep) ) {
-				eh(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
+			if ( ! connection_pred(ep) ) {
+				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
 			} else {
 				std::ostringstream os;
 				YARMI_TRY(add_session_flag)
 					gcb.add_session(session.get());
 				YARMI_CATCH_LOG(add_session_flag, os,
-					eh(os.str());
+					error_handler(os.str());
 				);
 
 				YARMI_TRY(on_connected_flag)
 					session->on_connected();
 				YARMI_CATCH_LOG(on_connected_flag, os,
-					eh(os.str());
+					error_handler(os.str());
 				);
 
 				/** start session */
@@ -143,61 +144,48 @@ struct server_base::impl {
 
 	/************************************************************************/
 
-	static std::string datetime_as_string(const std::time_t time) {
-		struct tm *tm = 0;
-		char buf[128] = "\0";
-
-		tm = std::localtime(&time);
-		if ( !tm ) {
-			YARMI_FORMAT_MESSAGE_AS_STRING("\"t\" is NULL");
-		} else {
-			std::strftime(buf, sizeof(buf), "%d-%m-%Y %H:%M:%S", tm);
-		}
-
-		return buf;
-	}
-
 	void start_timer() {
-		timer.expires_from_now(boost::posix_time::seconds(1));
-		timer.async_wait([this](const boost::system::error_code &ec){on_timeout(ec);});
+		stat_timer.expires_from_now(boost::posix_time::seconds(1));
+		stat_timer.async_wait([this](const boost::system::error_code &ec){on_timeout(ec);});
 	}
 
 	void on_timeout(const boost::system::error_code &ec) {
 		stat.connections = gcb.sessions();
-		std::time_t time = std::time(0);
-		stat.seconds = time-start_time_in_seconds;
-		stat.datetime = datetime_as_string(time);
+		const std::time_t t = std::time(0);
+		stat.datetime = t;
+		stat.uptime = t-start_time_in_seconds;
 
-		detail::get_resources_usage(
-			 &stat.virt_memory
-			,&stat.data_memory
-			,&stat.user_cpu
-			,&stat.system_cpu
-			,&stat.total_cpu
-		);
+		detail::resources res = detail::get_resources_usage();
+		stat.data_memory = res.resident_memory_usage;
+		stat.virt_memory = res.virtual_memory_usage;
+		stat.user_cpu = res.user_cpu_usage;
+		stat.system_cpu = res.system_cpu_usage;
+		stat.total_cpu = res.total_cpu_usage;
 
-		if ( sh )
-			sh(stat);
+		if ( stat_handler )
+			stat_handler(stat);
 
-		stat.read_rate = 0;
-		stat.write_rate = 0;
-		stat.read_ops = 0;
-		stat.write_ops = 0;
-		stat.write_queue_size = 0;
+		stat.reset();
 
 		if ( !ec )
 			start_timer();
 	}
 
+	boost::asio::io_service &ios;
+	const server_config &config;
+	global_context_base &gcb;
+
 	yarmi::handler_allocator<512> allocator;
 	boost::asio::ip::tcp::acceptor acceptor;
-	boost::asio::deadline_timer timer;
-	connection_pred_type cp;
-	error_handler_type eh;
-	statistic_handler_type sh;
-	session_factory_type sc;
+
+	boost::asio::deadline_timer stat_timer;
+
+	connection_pred_type connection_pred;
+	error_handler_type error_handler;
+	statistic_handler_type stat_handler;
+	session_factory_type session_factory;
+
 	const time_t start_time_in_seconds;
-	global_context_base &gcb;
 	server_statistic stat;
 };
 
@@ -205,21 +193,22 @@ struct server_base::impl {
 
 server_base::server_base(
 	 boost::asio::io_service &ios
-	,const std::string &ip
-	,const std::uint16_t port
+	,const server_config &config
 	,global_context_base &gcb
-	,connection_pred_type cp
-	,error_handler_type eh
-	,statistic_handler_type sh
-	,session_factory_type sc
+	,connection_pred_type connection_pred
+	,error_handler_type error_handler
+	,statistic_handler_type stat_handler
+	,session_factory_type session_factory
 )
-	:pimpl(new impl(ios, ip, port, gcb, cp, eh, sh, sc))
+	:pimpl(new impl(ios, config, gcb, connection_pred, error_handler, stat_handler, session_factory))
 {}
 
 server_base::~server_base()
 { delete pimpl; }
 
-boost::asio::io_service &server_base::get_io_service() { return pimpl->acceptor.get_io_service(); }
+boost::asio::io_service &server_base::get_io_service() { return pimpl->ios; }
+
+const server_config &server_base::get_config() const { return pimpl->config; }
 
 /***************************************************************************/
 
@@ -230,7 +219,7 @@ void server_base::stop_accept() { pimpl->stop_accept(); }
 
 server_statistic &server_base::get_server_statistic() { return pimpl->stat; }
 
-const server_base::error_handler_type &server_base::get_error_handler() const { return pimpl->eh; }
+const server_base::error_handler_type &server_base::get_error_handler() const { return pimpl->error_handler; }
 
 /***************************************************************************/
 

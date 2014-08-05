@@ -48,9 +48,9 @@ int main() {
 		,"./messages.db"
 	);
 
+	yarmi::server_config config;
 	yarmi::server<user_context, global_context> server(
-		 "127.0.0.1"
-		 ,44550
+		  config
 		 ,ios
 		 ,gc
 	);
