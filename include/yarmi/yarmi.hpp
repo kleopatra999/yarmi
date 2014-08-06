@@ -32,6 +32,16 @@
 #ifndef _yarmi__yarmi_hpp
 #define _yarmi__yarmi_hpp
 
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/size.hpp>
+#include <boost/mpl/size_t.hpp>
+#include <boost/mpl/copy.hpp>
+#include <boost/mpl/back_inserter.hpp>
+#include <boost/mpl/sort.hpp>
+#include <boost/mpl/unique.hpp>
+
+#include <type_traits>
+
 #include <boost/preprocessor.hpp>
 
 #include <yarmi/fnv1a.hpp>
@@ -51,9 +61,48 @@
 /***************************************************************************/
 
 namespace yarmi {
+namespace detail {
+namespace mpl {
+
+template<typename V, typename... Vs>
+struct cat;
+
+template<typename T>
+struct cat<T> {
+	using type = typename T::_meta_handlers_ids_vec;
+};
+
+template<typename V, typename... Vs>
+struct cat {
+	using type = typename boost::mpl::copy<
+		 typename V::_meta_handlers_ids_vec
+		,boost::mpl::back_inserter<typename cat<Vs...>::type>
+	>::type;
+};
+
+template<typename V>
+struct unique {
+	using type = typename boost::mpl::unique<
+		 typename boost::mpl::sort<V>::type
+		,std::is_same<boost::mpl::_1, boost::mpl::_2>
+	>::type;
+};
+
+template<typename V>
+using size = boost::mpl::size<V>;
+
+} // ns mpl
+} // ns detail
 
 template<typename Invoker, typename... Invokers>
 bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker &head, Invokers&... tail) {
+	using ids    = typename detail::mpl::cat<Invoker, Invokers...>::type;
+	using unique = typename detail::mpl::unique<ids>::type;
+	static_assert(
+		 detail::mpl::size<ids>::value == detail::mpl::size<unique>::value
+		,"proc IDs collision is detected"
+	);
+
 	istream_type istream(ptr, size);
 	iarchive_type iarchive(istream, yas::no_header);
 	call_id_type call_id = 0;

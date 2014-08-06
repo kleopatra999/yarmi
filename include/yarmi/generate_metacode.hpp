@@ -56,23 +56,25 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL(idx, name) \
-	_meta_requests_ids::BOOST_PP_CAT(name, _##idx) \
-	,
+#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL(idx, size, name) \
+	::boost::mpl::size_t<static_cast<std::size_t>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))> \
+		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
 
 #define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX(unused, idx, seq) \
 	YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL( \
 		 idx \
+		,BOOST_PP_SEQ_SIZE(seq) \
 		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
 	)
 
-#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL(idx, name) \
-	_meta_handlers_ids::BOOST_PP_CAT(name, _##idx) \
-	,
+#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL(idx, size, name) \
+	::boost::mpl::size_t<static_cast<std::size_t>(_meta_handlers_ids::BOOST_PP_CAT(on_, BOOST_PP_CAT(name, _##idx)))> \
+		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
 
 #define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX(unused, idx, seq) \
 	YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL( \
 		 idx \
+		,BOOST_PP_SEQ_SIZE(seq) \
 		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
 	)
 
@@ -144,14 +146,6 @@
 			) \
 		}; \
 		\
-		static constexpr const call_id_type _meta_requests_ids_array[] = { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX \
-				,seq \
-			) \
-		}; \
-		\
 		static constexpr const char *_meta_handlers_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
@@ -168,20 +162,30 @@
 			) \
 		}; \
 		\
-		static constexpr const call_id_type _meta_handlers_ids_array[] = { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(opposeq) \
-				,YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX \
-				,opposeq \
-			) \
-		}; \
-		\
 		static void dump(std::ostream &os, const char *const *list) { \
 			os << "invoker: \"" YARMI_NS_TO_STRING(ns, cn) "\"" << std::endl; \
 			for ( ; *list; ++list ) { \
 				os << "  " << *list << ": 0x" << std::hex << ::yarmi::detail::fnv1a(*list) << std::endl; \
 			} \
 		} \
+		\
+	public: \
+		using _meta_requests_ids_vec = ::boost::mpl::vector< \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX \
+				,seq \
+			) \
+		>; \
+		\
+		using _meta_handlers_ids_vec = ::boost::mpl::vector< \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(opposeq) \
+				,YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX \
+				,opposeq \
+			) \
+		>; \
+		\
 	public: \
 		static constexpr const char* const* meta_requests() { return _meta_requests_names; } \
 		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
