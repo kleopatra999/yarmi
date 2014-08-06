@@ -66,7 +66,7 @@ struct session_base::impl {
 		:config(sb.get_config())
 		,stat(sb.get_server_statistic())
 		,socket(sb.get_io_service())
-		,eh(sb.get_error_handler())
+		,error_handler(sb.get_error_handler())
 		,buffers()
 		,in_process(false)
 	{}
@@ -94,7 +94,7 @@ struct session_base::impl {
 		,session_base::session_ptr self
 	) {
 		if ( ec || rd != header_size ) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("header read error: \"%1%\"", ec.message()));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("header read error: \"%1%\"", ec.message()));
 			return;
 		}
 
@@ -107,7 +107,7 @@ struct session_base::impl {
 		ia & body_size;
 
 		if ( body_size > config.max_recv_size ) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", body_size));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", body_size));
 			return;
 		}
 
@@ -141,7 +141,7 @@ struct session_base::impl {
 		,std::size_t buffer_size
 	) {
 		if ( ec || rd != buffer_size ) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("body read error: \"%1%\"", ec.message()));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body read error: \"%1%\"", ec.message()));
 			return;
 		}
 
@@ -152,7 +152,7 @@ struct session_base::impl {
 		try {
 			self->on_received(buffer.get(), rd);
 		} catch (const std::exception &ex) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("exception is thrown when invoking: \"%1%\"", ex.what()));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("exception is thrown when invoking: \"%1%\"", ex.what()));
 		}
 
 		read_header(self);
@@ -192,15 +192,17 @@ struct session_base::impl {
 		in_process = false;
 
 		if ( ec || wr != buffer.size ) {
-			eh(YARMI_FORMAT_MESSAGE_AS_STRING("write error: \"%1%\"", ec.message()));
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("write error: \"%1%\"", ec.message()));
+			return;
 		}
 
 		stat.writen += wr;
 		stat.write_rate += wr;
 		++stat.write_ops;
-		--stat.write_queue_size;
+		if ( stat.write_queue_size )
+			--stat.write_queue_size;
 
-		if ( ! buffers.empty() ) {
+		if ( !buffers.empty() ) {
 			yas::shared_buffer buffer = buffers.front();
 			buffers.pop();
 
@@ -215,7 +217,7 @@ struct session_base::impl {
 	server_statistic &stat;
 	boost::asio::ip::tcp::socket socket;
 
-	server_base::error_handler_type eh;
+	server_base::error_handler_type error_handler;
 
 	/** buffers list */
 	std::queue<yas::shared_buffer> buffers;
