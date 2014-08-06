@@ -110,14 +110,22 @@ struct server_base::impl {
 	}
 
 	void on_accepted(const boost::system::error_code &ec, session_base::session_ptr session) {
-		if ( ! ec ) {
+		if ( !ec ) {
+			if ( gcb.sessions() == config.max_connections ) {
+				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("more connections than are set by 'max_connections'(%1%)", config.max_connections));
+
+				/** start accepting next connection */
+				start();
+				return;
+			}
+
 			boost::system::error_code ec2;
 			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
 			if ( ec2 ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
 			}
 
-			if ( ! connection_pred(ep) ) {
+			if ( !connection_pred(ep) ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
 			} else {
 				std::ostringstream os;
@@ -136,10 +144,10 @@ struct server_base::impl {
 				/** start session */
 				session->start();
 			}
-
-			/** start accepting next connection */
-			start();
 		}
+
+		/** start accepting next connection */
+		start();
 	}
 
 	/************************************************************************/

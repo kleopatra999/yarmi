@@ -47,6 +47,7 @@ struct server_config {
 	server_config()
 		:ip("127.0.0.1")
 		,port(44550)
+		,max_connections(10000)
 		,max_recv_size(1024*1024*10)
 		,recv_timeout(10)
 		,send_timeout(10)
@@ -54,6 +55,7 @@ struct server_config {
 
 	std::string ip;
 	std::uint16_t port;
+	std::size_t max_connections;
 	std::size_t max_recv_size;
 	std::size_t recv_timeout;
 	std::size_t send_timeout;
