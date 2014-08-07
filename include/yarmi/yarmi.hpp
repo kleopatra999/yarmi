@@ -92,7 +92,50 @@ template<typename V>
 using size = boost::mpl::size<V>;
 
 } // ns mpl
+
+enum class request_or_handler { request, handler };
+
+template<typename Invoker, typename... Invokers>
+const char* get_proc_name(request_or_handler d, call_id_type call_id, const Invoker &head, const Invokers&... tail) {
+	const char *res = 0;
+	bool flag  = false;
+	auto apply = [](...) {};
+	auto func  = [&flag, &res, d](call_id_type call_id, const Invoker &invoker) {
+		return flag=flag || (
+			d==request_or_handler::request
+				? (res=invoker.meta_request_name(call_id))
+				: (res=invoker.meta_handler_name(call_id))
+		);
+	};
+	apply(func(call_id, head), func(call_id, tail)...);
+
+	return res;
+}
+
 } // ns detail
+
+/***************************************************************************/
+
+template<typename Invoker, typename... Invokers>
+const char* get_request_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	return detail::get_proc_name(detail::request_or_handler::request, call_id, invoker, invokers...);
+}
+
+template<typename Invoker, typename... Invokers>
+const char* get_handler_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	return detail::get_proc_name(detail::request_or_handler::handler, call_id, invoker, invokers...);
+}
+
+template<typename Invoker, typename... Invokers>
+const char* get_proc_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	const char *r = get_request_name(call_id, invoker, invokers...);
+	if ( r ) return r;
+
+	const char *h = get_handler_name(call_id, invoker, invokers...);
+	return h;
+}
+
+/***************************************************************************/
 
 template<typename Invoker, typename... Invokers>
 bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker &head, Invokers&... tail) {

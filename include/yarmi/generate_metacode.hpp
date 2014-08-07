@@ -186,7 +186,6 @@
 			) \
 		>; \
 		\
-	public: \
 		static constexpr const char* const* meta_requests() { return _meta_requests_names; } \
 		static constexpr std::size_t  meta_requests_count() { return (sizeof(_meta_requests_names)/sizeof(_meta_requests_names[0]))-1; } \
 		static constexpr const char*  meta_request_name(const call_id_type call_id) { \

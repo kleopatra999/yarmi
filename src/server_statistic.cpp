@@ -82,9 +82,9 @@ void server_statistic::print(std::ostream &os) const {
 "send queue size : %d\n"
 "data memory     : %d\n"
 "virtual memory  : %d\n"
-"CPU user usage  : %d%%\n"
+"CPU user   usage: %d%%\n"
 "CPU system usage: %d%%\n"
-"CPU total usage : %d%%"
+"CPU total  usage: %d%%"
 ;
 
 	os

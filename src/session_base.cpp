@@ -42,12 +42,6 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#define USE_TIMEOUTS
-
-#ifdef USE_TIMEOUTS
-#	include <boost/asio/deadline_timer.hpp>
-#endif
-
 #include <queue>
 #include <functional>
 
@@ -57,10 +51,6 @@ namespace yarmi {
 
 struct session_base::impl {
 	enum { header_size = sizeof(std::uint32_t)+yarmi::iarchive_type::header_size() };
-
-#ifdef USE_TIMEOUTS
-	enum { recv_timeout, send_timeout };
-#endif
 
 	impl(server_base &sb)
 		:config(sb.get_config())
