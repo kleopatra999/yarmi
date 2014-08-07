@@ -190,6 +190,7 @@ struct session_base::impl {
 		,yas::shared_buffer buffer
 	) {
 		in_process = false;
+		--stat.write_queue_size;
 
 		if ( ec || wr != buffer.size ) {
 			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("write error: \"%1%\"", ec.message()));
@@ -199,8 +200,6 @@ struct session_base::impl {
 		stat.writen += wr;
 		stat.write_rate += wr;
 		++stat.write_ops;
-		if ( stat.write_queue_size )
-			--stat.write_queue_size;
 
 		if ( !buffers.empty() ) {
 			yas::shared_buffer buffer = buffers.front();

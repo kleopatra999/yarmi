@@ -114,7 +114,6 @@ void server_statistic::reset() {
 	write_rate = 0;
 	read_ops = 0;
 	write_ops = 0;
-	write_queue_size = 0;
 }
 
 /***************************************************************************/
