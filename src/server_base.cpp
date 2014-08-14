@@ -70,7 +70,15 @@ struct server_base::impl {
 		,start_time_in_seconds(std::time(0))
 		,stat()
 	{
+		boost::system::error_code ec;
+		on_timeout(ec);
 		start_timer();
+	}
+
+	void stop() { acceptor.get_io_service().stop(); }
+	void stop_accept() {
+		boost::system::error_code ec;
+		acceptor.cancel(ec);
 	}
 
 	void start() {
@@ -83,30 +91,6 @@ struct server_base::impl {
 			)
 		);
 	}
-	void stop() { acceptor.get_io_service().stop(); }
-	void stop_accept() {
-		boost::system::error_code ec;
-		acceptor.cancel(ec);
-	}
-
-	void session_deleter(session_base *session) {
-		std::ostringstream os;
-
-		YARMI_TRY(on_disconnected_flag) {
-			session->on_disconnected();
-		} YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)
-
-		if ( ! gcb.has_session(session) ) {
-			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
-		} else {
-			gcb.del_session(session);
-		}
-
-		YARMI_TRY(delete_session_flag) {
-			delete session;
-		} YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
-	}
-
 	void on_accepted(const boost::system::error_code &ec, const yarmi::socket_ptr &socket) {
 		if ( !ec ) {
 			if ( gcb.sessions() == config.max_connections ) {
@@ -158,6 +142,24 @@ struct server_base::impl {
 
 		/** start accepting next connection */
 		start();
+	}
+
+	void session_deleter(session_base *session) {
+		std::ostringstream os;
+
+		YARMI_TRY(on_disconnected_flag) {
+			session->on_disconnected();
+		} YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)
+
+		if ( ! gcb.has_session(session) ) {
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
+		} else {
+			gcb.del_session(session);
+		}
+
+		YARMI_TRY(delete_session_flag) {
+			delete session;
+		} YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
 	}
 
 	/************************************************************************/
