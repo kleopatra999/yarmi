@@ -32,7 +32,7 @@
 #include "client_second_invoker.hpp"
 #include "client.hpp"
 
-#include <iostream>
+//#include <iostream>
 
 struct client_second_invoker_impl::impl {
 	impl(client &c)

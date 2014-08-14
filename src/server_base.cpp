@@ -92,9 +92,9 @@ struct server_base::impl {
 	void session_deleter(session_base *session) {
 		std::ostringstream os;
 
-		YARMI_TRY(on_disconnected_flag)
+		YARMI_TRY(on_disconnected_flag) {
 			session->on_disconnected();
-		YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)
+		} YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)
 
 		if ( ! gcb.has_session(session) ) {
 			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("session \"%1%\" not in connected sessions list", session));
@@ -102,9 +102,9 @@ struct server_base::impl {
 			gcb.del_session(session);
 		}
 
-		YARMI_TRY(delete_session_flag)
+		YARMI_TRY(delete_session_flag) {
 			delete session;
-		YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
+		} YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
 	}
 
 	void on_accepted(const boost::system::error_code &ec, const yarmi::socket_ptr &socket) {
@@ -129,9 +129,9 @@ struct server_base::impl {
 				std::ostringstream os;
 				yarmi::session_ptr session;
 
-				YARMI_TRY(allocate_session_flag)
+				YARMI_TRY(allocate_session_flag) {
 					session.reset(session_factory(socket), [this](session_base *session){ session_deleter(session); });
-				YARMI_CATCH_LOG(allocate_session_flag, os,
+				} YARMI_CATCH_LOG(allocate_session_flag, os,
 					error_handler(os.str());
 				);
 				if ( allocate_session_flag ) {
@@ -139,15 +139,15 @@ struct server_base::impl {
 					return;
 				}
 
-				YARMI_TRY(add_session_flag)
+				YARMI_TRY(add_session_flag) {
 					gcb.add_session(session.get());
-				YARMI_CATCH_LOG(add_session_flag, os,
+				} YARMI_CATCH_LOG(add_session_flag, os,
 					error_handler(os.str());
 				);
 
-				YARMI_TRY(on_connected_flag)
+				YARMI_TRY(on_connected_flag) {
 					session->on_connected();
-				YARMI_CATCH_LOG(on_connected_flag, os,
+				} YARMI_CATCH_LOG(on_connected_flag, os,
 					error_handler(os.str());
 				);
 

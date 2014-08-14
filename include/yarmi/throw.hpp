@@ -134,17 +134,17 @@
 /***************************************************************************/
 
 /* usage:
- * YARMI_TRY(exception_is_thrown)
+ * YARMI_TRY(exception_is_thrown) {
  *    ...code...
- * YARMI_CATCH(exception_is_thrown)
+ * } YARMI_CATCH(exception_is_thrown)
  * if ( exception_is_thrown ) {
  *    ...processing...
  * }
  *
  * usage:
- * YARMI_TRY(exception_is_thrown)
+ * YARMI_TRY(exception_is_thrown) {
  *    ...code...
- * YARMI_CATCH_LOG(exception_is_thrown, std::cerr)
+ * } YARMI_CATCH_LOG(exception_is_thrown, std::cerr)
  * if ( exception_is_thrown ) {
  *    ...processing...
  * }
@@ -153,10 +153,10 @@
 #define YARMI_TRY(flagname) \
 	bool flagname = false; \
 	((void)flagname); \
-	try {
+	try
 
 #define YARMI_CATCH(flagname, ...) \
-	} catch (const std::exception &) { \
+	catch (const std::exception &) { \
 		flagname = true; \
 		{ __VA_ARGS__; } \
 	} catch (...) { \
@@ -165,7 +165,7 @@
 	}
 
 #define YARMI_CATCH_LOG(flagname, logstream, ...) \
-	} catch (const std::exception &ex) { \
+	catch (const std::exception &ex) { \
 		flagname = true; \
 		logstream << YARMI_FORMAT_MESSAGE("[exception]: %1%", ex.what()) << std::endl; \
 		{ __VA_ARGS__; } \
@@ -174,6 +174,20 @@
 		logstream << YARMI_FORMAT_MESSAGE("[exception]: unknown exception") << std::endl; \
 		{ __VA_ARGS__; } \
 	}
+
+/***************************************************************************/
+
+#define YARMI_TEST_TYPED_THROW(expr, type) \
+	do { \
+		if ( !(expr) ) { \
+			throw type( \
+				YARMI_FORMAT_MESSAGE_AS_STRING("[test failed]: expression: \"" #expr "\"") \
+			); \
+		} \
+	} while(0)
+
+#define YARMI_TEST_THROW(expr) \
+	YARMI_TEST_TYPED_THROW(expr, std::runtime_error)
 
 /***************************************************************************/
 

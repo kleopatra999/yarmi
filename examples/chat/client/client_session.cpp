@@ -31,6 +31,8 @@
 
 #include "client_session.hpp"
 
+#include <iostream>
+
 /***************************************************************************/
 
 client_session::client_session(boost::asio::io_service &ios)
@@ -42,14 +44,12 @@ client_session::client_session(boost::asio::io_service &ios)
 
 void client_session::on_received(const yarmi::buffer_pair &buffer) {
 	yarmi::call_id_type call_id = 0;
-	try {
+	YARMI_TRY(invoke_flag) {
 		const bool ok = yarmi::invoke(buffer, &call_id, *this);
 		if ( ! ok ) {
 			std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
 		}
-	} catch (const std::exception &ex) {
-		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
-	}
+	} YARMI_CATCH_LOG(invoke_flag, std::cerr)
 }
 
 /***************************************************************************/

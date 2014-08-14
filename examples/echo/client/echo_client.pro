@@ -35,7 +35,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-	-std=c++11
+	-std=c++1y
 
 INCLUDEPATH += \
 	../ \
@@ -94,18 +94,18 @@ HEADERS += \
 	 ../../../include/yarmi/server_base.hpp \
 	 ../../../include/yarmi/server_statistic.hpp \
 	 ../../../include/yarmi/throw.hpp \
-    ../../../include/yarmi/generate_struct/decorators.hpp \
-    ../../../include/yarmi/generate_struct/jsonify.hpp \
-    ../../../include/yarmi/generate_struct/list.hpp \
-    ../../../include/yarmi/generate_struct/map.hpp \
-    ../../../include/yarmi/generate_struct/pair.hpp \
-    ../../../include/yarmi/generate_struct/set.hpp \
-    ../../../include/yarmi/generate_struct/tuple.hpp \
-    ../../../include/yarmi/generate_struct/unordered_map.hpp \
-    ../../../include/yarmi/generate_struct/unordered_set.hpp \
-    ../../../include/yarmi/generate_struct/vector.hpp \
-    ../../../include/yarmi/generate_invokers_sfinae.hpp \
-    ../../../include/yarmi/generate_proc_helper.hpp \
-    ../../../include/yarmi/generate_struct.hpp \
-    ../../../include/yarmi/os_resources.hpp \
-    ../../../include/yarmi/qt_client_base.hpp
+	../../../include/yarmi/generate_struct/decorators.hpp \
+	../../../include/yarmi/generate_struct/jsonify.hpp \
+	../../../include/yarmi/generate_struct/list.hpp \
+	../../../include/yarmi/generate_struct/map.hpp \
+	../../../include/yarmi/generate_struct/pair.hpp \
+	../../../include/yarmi/generate_struct/set.hpp \
+	../../../include/yarmi/generate_struct/tuple.hpp \
+	../../../include/yarmi/generate_struct/unordered_map.hpp \
+	../../../include/yarmi/generate_struct/unordered_set.hpp \
+	../../../include/yarmi/generate_struct/vector.hpp \
+	../../../include/yarmi/generate_invokers_sfinae.hpp \
+	../../../include/yarmi/generate_proc_helper.hpp \
+	../../../include/yarmi/generate_struct.hpp \
+	../../../include/yarmi/os_resources.hpp \
+	../../../include/yarmi/qt_client_base.hpp

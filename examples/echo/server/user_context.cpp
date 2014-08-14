@@ -29,10 +29,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/throw.hpp>
-
 #include "user_context.hpp"
 #include "global_context.hpp"
+
+#include <yarmi/throw.hpp>
+
+#include <iostream>
 
 /***************************************************************************/
 
@@ -56,7 +58,7 @@ void user_context::on_disconnected() {
 }
 
 void user_context::on_received(const yarmi::buffer_pair &buffer) {
-	YARMI_TRY(invoke_flag)
+	YARMI_TRY(invoke_flag) {
 		yarmi::call_id_type call_id = 0;
 		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
 			std::cerr << YARMI_FORMAT_MESSAGE(
@@ -64,7 +66,7 @@ void user_context::on_received(const yarmi::buffer_pair &buffer) {
 				,call_id
 			) << std::endl;
 		}
-	YARMI_CATCH_LOG(invoke_flag, std::cerr)
+	} YARMI_CATCH_LOG(invoke_flag, std::cerr)
 }
 
 /***************************************************************************/

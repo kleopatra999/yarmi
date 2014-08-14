@@ -90,14 +90,18 @@ struct session_base::impl {
 		stat.readed += rd;
 		stat.read_rate += rd;
 
-		std::uint32_t body_size = *((std::uint32_t*)header_buffer);
+		union {
+			char c[sizeof(std::uint32_t)];
+			std::uint32_t i;
+		} body_size;
+		std::memcpy(body_size.c, header_buffer, header_size);
 
-		if ( body_size > config.max_recv_size ) {
-			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", body_size));
+		if ( body_size.i > config.max_recv_size ) {
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", body_size.i));
 			return;
 		}
 
-		read_body(body_size, self);
+		read_body(body_size.i, self);
 	}
 	void read_body(const std::size_t body_size, const yarmi::session_ptr &self) {
 		::yarmi::buffer_pair buffer;

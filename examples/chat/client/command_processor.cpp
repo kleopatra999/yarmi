@@ -35,6 +35,8 @@
 #include <unordered_map>
 #include <functional>
 
+#include <iostream>
+
 /***************************************************************************/
 
 struct command_processor::pimpl {

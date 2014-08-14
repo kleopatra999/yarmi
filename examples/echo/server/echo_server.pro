@@ -35,7 +35,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-	-std=c++11
+	-std=c++1y
 
 INCLUDEPATH += \
 	../ \
@@ -85,8 +85,6 @@ HEADERS += \
 	 ../../../include/yarmi/formatters/unordered_set.hpp \
 	 ../../../include/yarmi/formatters/vector.hpp \
 	 ../../../include/yarmi/fnv1a.hpp \
-	 ../../../include/yarmi/serialization.hpp \
-	 ../../../include/yarmi/object_constructor.hpp \
 	 ../../../include/yarmi/generate_callers.hpp \
 	 ../../../include/yarmi/generate_helpers.hpp \
 	 ../../../include/yarmi/generate_invoker.hpp \
@@ -113,6 +111,6 @@ HEADERS += \
 	../../../include/yarmi/generate_enum.hpp \
 	../../../include/yarmi/generate_invokers_sfinae.hpp \
 	../../../include/yarmi/generate_proc_helper.hpp \
-    ../../../include/yarmi/yarmi_fwd.hpp \
-    ../../../include/yarmi/invoke.hpp \
-    ../../../include/yarmi/get_proc_name.hpp
+	../../../include/yarmi/yarmi_fwd.hpp \
+	../../../include/yarmi/invoke.hpp \
+	../../../include/yarmi/get_proc_name.hpp

@@ -35,10 +35,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-	-std=c++1y \
-	-flto
-QMAKE_LFLAGS += \
-	-flto
+	-std=c++1y
 
 INCLUDEPATH += \
 	../ \

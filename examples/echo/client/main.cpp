@@ -67,14 +67,12 @@ struct client: yarmi::client_base {
 
 	void on_received(const yarmi::buffer_pair &buffer) {
 		yarmi::call_id_type call_id = 0;
-		try {
+		YARMI_TRY(invoke_flag) {
 			const bool ok = yarmi::invoke(buffer, &call_id, invoker);
 			if ( ! ok ) {
 				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
 			}
-		} catch (const std::exception &ex) {
-			std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
-		}
+		} YARMI_CATCH_LOG(invoke_flag, std::cerr);
 	}
 
 	client_impl invoker;

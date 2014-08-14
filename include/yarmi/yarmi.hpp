@@ -50,6 +50,7 @@
 #include <yarmi/generate_proc_helper.hpp>
 #include <yarmi/get_proc_name.hpp>
 #include <yarmi/invoke.hpp>
+#include <yarmi/throw.hpp>
 
 /***************************************************************************/
 
@@ -85,8 +86,6 @@
 			:impl(impl) \
 			,io(io) \
 		{} \
-		\
-		void send(const ::yarmi::buffer_pair &buffer) { io.send(buffer); } \
 		\
 		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \

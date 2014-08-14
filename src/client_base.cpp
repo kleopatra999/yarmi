@@ -72,11 +72,15 @@ struct client_base::impl {
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-		std::uint32_t body_length = *((std::uint32_t*)header_buffer);
+		union {
+			char c[sizeof(std::uint32_t)];
+			std::uint32_t i;
+		} body_length;
+		std::memcpy(body_length.c, header_buffer, header_size);
 
 		::yarmi::buffer_pair buffer;
-		buffer.first.reset(new char[body_length], [](char *ptr){delete []ptr;});
-		buffer.second = body_length;
+		buffer.first.reset(new char[body_length.i], [](char *ptr){delete []ptr;});
+		buffer.second = body_length.i;
 
 		boost::asio::async_read(
 			 socket

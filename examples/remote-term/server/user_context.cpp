@@ -39,6 +39,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include <fnmatch.h>
 
@@ -80,13 +81,11 @@ void user_context::on_disconnected() {}
 
 void user_context::on_received(const yarmi::buffer_pair &buffer) {
 	yarmi::call_id_type call_id = 0;
-	try {
+	YARMI_TRY(invoke_flag) {
 		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
 			std::cerr << "no handler for call_id=" << call_id << std::endl;
 		}
-	} catch (const std::exception &ex) {
-		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
-	}
+	} YARMI_CATCH_LOG(invoke_flag, std::cerr)
 }
 
 /***************************************************************************/
