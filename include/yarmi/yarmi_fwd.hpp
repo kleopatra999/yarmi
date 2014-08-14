@@ -29,19 +29,32 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#ifndef _yarmi__yarmi_fwd_hpp
+#define _yarmi__yarmi_fwd_hpp
 
-#include <cstdint>
+#include <yarmi/fnv1a.hpp>
+
+#include <memory>
+
+#include <boost/asio/ip/tcp.hpp>
 
 namespace yarmi {
-namespace detail {
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
-}
+using call_id_type = decltype(::yarmi::detail::fnv1a(""));
+using buffer_ptr   = std::shared_ptr<char>;
+using buffer_pair  = std::pair<buffer_ptr, std::size_t>;
 
-} // ns detail
+struct server_base;
+struct server_statistic;
+struct session_base;
+struct global_context_base;
+
+using socket_ptr  = std::shared_ptr<boost::asio::ip::tcp::socket>;
+using session_ptr = std::shared_ptr<session_base>;
+
+struct _serialize_only {};
+static const _serialize_only serialize_only;
+
 } // ns yarmi
 
-#endif // _yarmi__fnv1a_hpp
+#endif // _yarmi__yarmi_fwd_hpp

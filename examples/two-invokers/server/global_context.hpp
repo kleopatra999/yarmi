@@ -29,19 +29,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#ifndef _yarmi__two_invokers__global_context_hpp
+#define _yarmi__two_invokers__global_context_hpp
 
-#include <cstdint>
+#include <yarmi/global_context_base.hpp>
 
-namespace yarmi {
-namespace detail {
+template<typename UC>
+struct global_context: yarmi::global_context_base {
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
-}
+};
 
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp
+#endif // _yarmi__two_invokers__global_context_hpp

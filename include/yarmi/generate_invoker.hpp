@@ -40,32 +40,20 @@
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
 	BOOST_PP_TUPLE_ELEM(idx, tuple) arg##idx;
 
-#define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS_DESERIALIZER(unused, idx, tuple) \
-	& arg##idx
-
-#define YARMI_GENERATE_INVOKERS_GENERATE_ARGS_FOR_INVOKING(unused, idx, size) \
-	arg##idx YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
-
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS(idx, name, tuple) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_TUPLE_SIZE(tuple) \
 		,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS \
 		,tuple \
 	) \
-	ia \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_TUPLE_SIZE(tuple) \
-			,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS_DESERIALIZER \
-			,tuple \
-		) \
-	; \
+	ser.deserialize(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg)); \
 	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)( \
 		 impl\
 		,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
 	);
 
 #define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, name, tuple) \
-	case static_cast<call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
+	case static_cast<::yarmi::call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY(tuple) \
 			,(idx, name) \
@@ -84,7 +72,7 @@
 	)
 
 #define YARMI_GENERATE_INVOKERS(seq) \
-	bool invoke(const call_id_type call_id, ::yarmi::iarchive_type &ia) { \
+	bool invoke(const ::yarmi::call_id_type call_id, Ser &ser) { \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
@@ -95,16 +83,14 @@
 		} \
 	} \
 	\
-	bool invoke(const char *ptr, const std::size_t size, call_id_type *cid = 0) { \
-		call_id_type call_id = 0; \
-		::yarmi::istream_type is(ptr, size); \
-		::yarmi::iarchive_type ia(is, yas::no_header); \
-		ia & call_id; \
+	bool invoke(const ::yarmi::buffer_pair &buffer, ::yarmi::call_id_type *cid = 0) { \
+		Ser ser(buffer); \
+		::yarmi::call_id_type call_id = ser.get_call_id(); \
 		\
 		if ( cid ) \
 			*cid = call_id; \
 		\
-		return invoke(call_id, ia); \
+		return invoke(call_id, ser); \
 	} \
 
 /***************************************************************************/

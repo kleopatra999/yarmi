@@ -32,7 +32,24 @@
 #ifndef _yarmi__qt_client_base_hpp
 #define _yarmi__qt_client_base_hpp
 
+#include <boost/noncopyable.hpp>
+
+#include <QtNetwork/QTcpSocket>
+
 namespace yarmi {
+
+struct QtClientBase: private boost::noncopyable {
+	QtClientBase(QObject *parent=0);
+	virtual ~QtClientBase();
+
+	void connect(const QString &ip, const quint16 port);
+	bool connected() const;
+	void disconnect();
+
+private:
+	struct impl;
+	impl *pimpl;
+};
 
 } // ns yarmi
 

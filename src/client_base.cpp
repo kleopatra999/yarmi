@@ -36,12 +36,14 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
+#include <list>
+
 namespace yarmi {
 
 /***************************************************************************/
 
 struct client_base::impl {
-	impl(boost::asio::io_service &ios, yarmi::client_base *self)
+	impl(boost::asio::io_service &ios, yarmi::client_base &self)
 		:socket(ios)
 		,self(self)
 		,buffers()
@@ -53,7 +55,7 @@ struct client_base::impl {
 			 socket
 			,boost::asio::buffer(header_buffer)
 			,std::bind(
-				&client_base::impl::on_header_readed
+				 &client_base::impl::on_header_readed
 				,this
 				,std::placeholders::_1
 				,std::placeholders::_2
@@ -70,47 +72,45 @@ struct client_base::impl {
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-		::yarmi::istream_type is(header_buffer, header_size);
-		::yarmi::iarchive_type ia(is);
-		std::uint32_t body_length = 0;
-		ia & body_length;
+		std::uint32_t body_length = *((std::uint32_t*)header_buffer);
 
-		std::shared_ptr<char> body_buffer(new char[body_length], [](char *ptr){delete []ptr;});
+		::yarmi::buffer_pair buffer;
+		buffer.first.reset(new char[body_length], [](char *ptr){delete []ptr;});
+		buffer.second = body_length;
+
 		boost::asio::async_read(
 			 socket
-			,boost::asio::buffer(body_buffer.get(), body_length)
+			,boost::asio::buffer(buffer.first.get(), buffer.second)
 			,std::bind(
 				&client_base::impl::on_body_readed
 				,this
 				,std::placeholders::_1
 				,std::placeholders::_2
-				,body_buffer
-				,body_length
+				,buffer
 			)
 		);
 	}
 
 	void on_body_readed(
 		 const boost::system::error_code &ec
-		,std::size_t rd
-		,std::shared_ptr<char> body_buffer
-		,std::size_t body_length
+		,const std::size_t rd
+		,const yarmi::buffer_pair &buffer
 	) {
-		if ( ec || rd != body_length )
+		if ( ec || rd != buffer.second )
 			throw std::runtime_error("on_body_readed(): "+ec.message());
 
-		self->on_received(body_buffer.get(), body_length);
+		self.on_received(buffer);
 
 		start();
 	}
 
-	void send(const yas::shared_buffer &buffer) {
+	void send(const buffer_pair &buffer) {
 		if ( ! in_process ) {
 			in_process = true;
 
 			boost::asio::async_write(
 				 socket
-				,boost::asio::buffer(buffer.data.get(), buffer.size)
+				,boost::asio::buffer(buffer.first.get(), buffer.second)
 				,std::bind(
 					&client_base::impl::sent
 					,this
@@ -123,14 +123,18 @@ struct client_base::impl {
 			buffers.push_back(buffer);
 		}
 	}
-	void sent(const boost::system::error_code &ec, std::size_t wr, yas::shared_buffer buffer) {
+	void sent(
+		 const boost::system::error_code &ec
+		,const std::size_t wr
+		,const buffer_pair &buffer
+	) {
 		in_process = false;
 
-		if ( ec || wr != buffer.size )
+		if ( ec || wr != buffer.second )
 			throw std::runtime_error("client_base::sent(): "+ec.message());
 
 		if ( ! buffers.empty() ) {
-			yas::shared_buffer buf = buffers.front();
+			buffer_pair buf = buffers.front();
 			buffers.pop_front();
 
 			send(buf);
@@ -138,19 +142,19 @@ struct client_base::impl {
 	}
 
 	boost::asio::ip::tcp::socket socket;
-	yarmi::client_base *self;
+	yarmi::client_base &self;
 
-	std::list<yas::shared_buffer> buffers;
+	std::list<buffer_pair> buffers;
 	bool in_process;
 
-	enum { header_size = sizeof(std::uint32_t)+::yarmi::iarchive_type::header_size() };
+	enum { header_size = sizeof(std::uint32_t) };
 	char header_buffer[header_size];
 };
 
 /***************************************************************************/
 
 client_base::client_base(boost::asio::io_service &ios)
-	:pimpl(new impl(ios, this))
+	:pimpl(new impl(ios, *this))
 {}
 
 client_base::~client_base()
@@ -184,7 +188,7 @@ void client_base::disconnect() {
 	pimpl->disconnect();
 }
 
-void client_base::send(const yas::shared_buffer &buffer) {
+void client_base::send(const buffer_pair &buffer) {
 	pimpl->send(buffer);
 }
 

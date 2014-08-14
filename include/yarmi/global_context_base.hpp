@@ -74,16 +74,16 @@ struct global_context_base: private boost::noncopyable {
 	std::size_t sessions() const;
 
 	/** operations */
-	void send_to(std::int64_t id, const yas::shared_buffer &buffer);
+	void send_to(std::int64_t id, const buffer_pair &buffer);
 
 	template<typename Iter>
-	void send_to(Iter beg, Iter end, const yas::shared_buffer &buffer) {
+	void send_to(Iter beg, Iter end, const buffer_pair &buffer) {
 		for ( ; beg != end; ++beg ) {
 			send_to(*beg, buffer);
 		}
 	}
 
-	void send_to_all(const session_base *exclude, const yas::shared_buffer &buffer);
+	void send_to_all(const session_base *exclude, const buffer_pair &buffer);
 
 private:
 	struct impl;

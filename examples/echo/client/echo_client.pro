@@ -1,5 +1,5 @@
 
-# Copyright (c) 2013, niXman (i dotty nixman doggy gmail dotty com)
+# Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
 # All rights reserved.
 #
 # This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -49,7 +49,8 @@ LIBS += \
 	-lboost_system
 
 win32:LIBS += \
-	-lws2_32
+	-lws2_32 \
+	-lmswsock
 
 HEADERS += \
 	 ../protocol.hpp \
@@ -92,4 +93,19 @@ HEADERS += \
 	 ../../../include/yarmi/invoker.hpp \
 	 ../../../include/yarmi/server_base.hpp \
 	 ../../../include/yarmi/server_statistic.hpp \
-	 ../../../include/yarmi/throw.hpp
+	 ../../../include/yarmi/throw.hpp \
+    ../../../include/yarmi/generate_struct/decorators.hpp \
+    ../../../include/yarmi/generate_struct/jsonify.hpp \
+    ../../../include/yarmi/generate_struct/list.hpp \
+    ../../../include/yarmi/generate_struct/map.hpp \
+    ../../../include/yarmi/generate_struct/pair.hpp \
+    ../../../include/yarmi/generate_struct/set.hpp \
+    ../../../include/yarmi/generate_struct/tuple.hpp \
+    ../../../include/yarmi/generate_struct/unordered_map.hpp \
+    ../../../include/yarmi/generate_struct/unordered_set.hpp \
+    ../../../include/yarmi/generate_struct/vector.hpp \
+    ../../../include/yarmi/generate_invokers_sfinae.hpp \
+    ../../../include/yarmi/generate_proc_helper.hpp \
+    ../../../include/yarmi/generate_struct.hpp \
+    ../../../include/yarmi/os_resources.hpp \
+    ../../../include/yarmi/qt_client_base.hpp

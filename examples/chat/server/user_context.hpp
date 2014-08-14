@@ -42,7 +42,7 @@ template<typename>
 struct global_context;
 
 struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
-	user_context(yarmi::server_base &sb, global_context<user_context> &gc);
+	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
 
 	// incomming
 	void on_registration(const std::string &username);
@@ -55,7 +55,7 @@ struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
 private:
 	void on_connected();
 	void on_disconnected();
-	void on_received(const char *ptr, std::size_t size);
+	void on_received(const yarmi::buffer_pair &buffer);
 
 private:
 	global_context<user_context> &gc;

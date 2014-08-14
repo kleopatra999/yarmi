@@ -34,24 +34,36 @@
 
 /***************************************************************************/
 
+#define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
+	::yarmi::buffer_pair name(::yarmi::_serialize_only) { \
+		return Ser::serialize(static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))) \
+	} \
+	void name() { \
+		io.send(name(::yarmi::serialize_only)); \
+	}
+
 #define YARMI_GENERATE_REMOTE_CALL_PARAMS(unused, idx, tuple) \
 	const BOOST_PP_TUPLE_ELEM(BOOST_PP_TUPLE_SIZE(tuple), idx, tuple) &arg##idx \
 		YARMI_COMMA_IF_NOT_LAST_ITERATION(BOOST_PP_TUPLE_SIZE(tuple), idx)
 
-
-#define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
-	void name() { \
-		::yarmi::ostream_type os, os2; \
-		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
-		oa & static_cast<call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)); \
-		pa & os.get_intrusive_buffer(); \
-		io.send(os2.get_shared_buffer()); \
-	}
-
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE(unused, idx, data) \
-	& arg##idx
+	BOOST_PP_CAT(data, idx)
 
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS(idx, name, opponame, tuple) \
+	::yarmi::buffer_pair name( \
+		BOOST_PP_REPEAT( \
+			BOOST_PP_TUPLE_SIZE(tuple), \
+			YARMI_GENERATE_REMOTE_CALL_PARAMS, \
+			tuple \
+		) \
+		,::yarmi::_serialize_only \
+	) { \
+		return Ser::serialize( \
+			 static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+			,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
+		); \
+	} \
+	\
 	void name( \
 		BOOST_PP_REPEAT( \
 			BOOST_PP_TUPLE_SIZE(tuple), \
@@ -59,18 +71,7 @@
 			tuple \
 		) \
 	) { \
-		::yarmi::ostream_type os, os2; \
-		::yarmi::oarchive_type oa(os, yas::no_header), pa(os2); \
-		oa & static_cast<call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
-		\
-		BOOST_PP_REPEAT( \
-				 BOOST_PP_TUPLE_SIZE(tuple) \
-				,YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE \
-				,~ \
-			) \
-		; \
-		pa & os.get_intrusive_buffer(); \
-		io.send(os2.get_shared_buffer()); \
+		io.send(name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg), ::yarmi::serialize_only)); \
 	}
 
 #define YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL(idx, name, opponame, tuple) \

@@ -32,20 +32,11 @@
 #ifndef _yarmi__yarmi_hpp
 #define _yarmi__yarmi_hpp
 
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/size.hpp>
-#include <boost/mpl/size_t.hpp>
-#include <boost/mpl/copy.hpp>
-#include <boost/mpl/back_inserter.hpp>
-#include <boost/mpl/sort.hpp>
-#include <boost/mpl/unique.hpp>
-
-#include <type_traits>
-
 #include <boost/preprocessor.hpp>
 
+#include <yarmi/yarmi_fwd.hpp>
 #include <yarmi/fnv1a.hpp>
-#include <yarmi/serialization.hpp>
+#include <yarmi/yas_serialization.hpp>
 #include <yarmi/generate_ns.hpp>
 #include <yarmi/generate_lazy_if.hpp>
 #include <yarmi/generate_tuple_is_empty.hpp>
@@ -57,112 +48,8 @@
 #include <yarmi/generate_struct.hpp>
 #include <yarmi/generate_enum.hpp>
 #include <yarmi/generate_proc_helper.hpp>
-
-/***************************************************************************/
-
-namespace yarmi {
-namespace detail {
-namespace mpl {
-
-template<typename V, typename... Vs>
-struct cat;
-
-template<typename T>
-struct cat<T> {
-	using type = typename T::_meta_handlers_ids_vec;
-};
-
-template<typename V, typename... Vs>
-struct cat {
-	using type = typename boost::mpl::copy<
-		 typename V::_meta_handlers_ids_vec
-		,boost::mpl::back_inserter<typename cat<Vs...>::type>
-	>::type;
-};
-
-template<typename V>
-struct unique {
-	using type = typename boost::mpl::unique<
-		 typename boost::mpl::sort<V>::type
-		,std::is_same<boost::mpl::_1, boost::mpl::_2>
-	>::type;
-};
-
-template<typename V>
-using size = boost::mpl::size<V>;
-
-} // ns mpl
-
-enum class request_or_handler { request, handler };
-
-template<typename Invoker, typename... Invokers>
-const char* get_proc_name(request_or_handler d, call_id_type call_id, const Invoker &head, const Invokers&... tail) {
-	const char *res = 0;
-	bool flag  = false;
-	auto apply = [](...) {};
-	auto func  = [&flag, &res, d](call_id_type call_id, const Invoker &invoker) {
-		return flag=flag || (
-			d==request_or_handler::request
-				? (res=invoker.meta_request_name(call_id))
-				: (res=invoker.meta_handler_name(call_id))
-		);
-	};
-	apply(func(call_id, head), func(call_id, tail)...);
-
-	return res;
-}
-
-} // ns detail
-
-/***************************************************************************/
-
-template<typename Invoker, typename... Invokers>
-const char* get_request_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	return detail::get_proc_name(detail::request_or_handler::request, call_id, invoker, invokers...);
-}
-
-template<typename Invoker, typename... Invokers>
-const char* get_handler_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	return detail::get_proc_name(detail::request_or_handler::handler, call_id, invoker, invokers...);
-}
-
-template<typename Invoker, typename... Invokers>
-const char* get_proc_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	const char *r = get_request_name(call_id, invoker, invokers...);
-	if ( r ) return r;
-
-	const char *h = get_handler_name(call_id, invoker, invokers...);
-	return h;
-}
-
-/***************************************************************************/
-
-template<typename Invoker, typename... Invokers>
-bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker &head, Invokers&... tail) {
-	using ids    = typename detail::mpl::cat<Invoker, Invokers...>::type;
-	using unique = typename detail::mpl::unique<ids>::type;
-	static_assert(
-		 detail::mpl::size<ids>::value == detail::mpl::size<unique>::value
-		,"proc IDs collision is detected"
-	);
-
-	istream_type istream(ptr, size);
-	iarchive_type iarchive(istream, yas::no_header);
-	call_id_type call_id = 0;
-	iarchive & call_id;
-	if ( cid ) *cid = call_id;
-
-	bool flag  = false;
-	auto apply = [](...) {};
-	auto func  = [&flag](const call_id_type call_id, iarchive_type &iarchive, Invoker &invoker) {
-		return flag=flag || invoker.invoke(call_id, iarchive);
-	};
-	apply(func(call_id, iarchive, head), func(call_id, iarchive, tail)...);
-
-	return flag;
-}
-
-} // ns yarmi
+#include <yarmi/get_proc_name.hpp>
+#include <yarmi/invoke.hpp>
 
 /***************************************************************************/
 
@@ -177,7 +64,7 @@ bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker 
 /***************************************************************************/
 
 #define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
-	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(idx, BOOST_PP_SUB(size, 1)))
+	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(BOOST_PP_ADD(idx, 1), size))
 
 /***************************************************************************/
 
@@ -189,31 +76,34 @@ bool invoke(const char *ptr, const std::size_t size, call_id_type *cid, Invoker 
 	,seq     /* procedures sequence */ \
 	,opposeq /* opposite procedures sequence */ \
 ) \
-	template<typename Impl, typename IO = Impl> \
+	template<typename Impl, typename IO = Impl, typename Ser = ::yarmi::yas_serializer> \
 	struct cn { \
-		using this_type = cn<Impl, IO>; \
+		using this_type = cn<Impl, IO, Ser>; \
+		using serializer = Ser; \
 		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
 		\
+		void send(const ::yarmi::buffer_pair &buffer) { io.send(buffer); } \
+		\
 		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
 		YARMI_GENERATE_INVOKERS(opposeq) \
-	\
+		\
 	private: \
 		Impl &impl; \
 		IO &io; \
-	\
+		\
 	private: \
 		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
 	}; \
 	\
-	template<typename Impl, typename IO> \
-	constexpr const char* cn<Impl, IO>::_meta_requests_names[]; \
-	template<typename Impl, typename IO> \
-	constexpr const char* cn<Impl, IO>::_meta_handlers_names[];
+	template<typename Impl, typename IO, typename Ser> \
+	constexpr const char* cn<Impl, IO, Ser>::_meta_requests_names[]; \
+	template<typename Impl, typename IO, typename Ser> \
+	constexpr const char* cn<Impl, IO, Ser>::_meta_handlers_names[];
 
 /***************************************************************************/
 

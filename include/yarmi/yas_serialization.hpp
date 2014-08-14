@@ -29,19 +29,67 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#ifndef _yarmi__yas_serialization_hpp
+#define _yarmi__yas_serialization_hpp
 
-#include <cstdint>
+#include <yas/mem_streams.hpp>
+#include <yas/binary_iarchive.hpp>
+#include <yas/binary_oarchive.hpp>
+#include <yas/serializers/std_types_serializers.hpp>
+
+#include <yarmi/yarmi_fwd.hpp>
 
 namespace yarmi {
-namespace detail {
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
-}
+/***************************************************************************/
 
-} // ns detail
+struct yas_serializer {
+	yas_serializer(const buffer_pair &buffer)
+		:is(buffer.first.get(), buffer.second)
+		,ia(is)
+	{}
+
+	template<typename... Args>
+	static buffer_pair serialize(const yarmi::call_id_type call_id, const Args&... args) {
+		static const std::uint32_t body_size = 0;
+
+		yas::mem_ostream os;
+		os.write(&body_size, sizeof(body_size));
+
+		yas::binary_oarchive<yas::mem_ostream> oa(os);
+		oa & call_id;
+		if ( sizeof...(Args) ) {
+			oa & std::make_tuple(std::cref(args)...);
+		}
+
+		const yas::intrusive_buffer &intrusive_buffer = os.get_intrusive_buffer();
+		std::uint32_t *size = (std::uint32_t*)((char*)intrusive_buffer.data);
+		*size = intrusive_buffer.size-sizeof(body_size);
+
+		const yas::shared_buffer &shared_buffer = os.get_shared_buffer();
+		return {shared_buffer.data, shared_buffer.size};
+	}
+
+	call_id_type get_call_id() {
+		call_id_type call_id = 0;
+		ia & call_id;
+		return call_id;
+	}
+	template<typename... Args>
+	void deserialize(Args&... args) {
+		if ( sizeof...(Args) ) {
+			auto tuple = std::make_tuple(std::ref(args)...);
+			ia & tuple;
+		}
+	}
+
+private:
+	yas::mem_istream is;
+	yas::binary_iarchive<yas::mem_istream> ia;
+};
+
+/***************************************************************************/
+
 } // ns yarmi
 
-#endif // _yarmi__fnv1a_hpp
+#endif // _yarmi__yas_serialization_hpp

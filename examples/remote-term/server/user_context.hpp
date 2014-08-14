@@ -42,12 +42,12 @@ template<typename>
 struct global_context;
 
 struct user_context: yarmi::session_base, yarmi::server_side<user_context> {
-	user_context(yarmi::server_base &sb, global_context<user_context> &);
+	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &);
 	virtual ~user_context();
 
 	void on_connected();
 	void on_disconnected();
-	void on_received(const char *ptr, std::size_t size);
+	void on_received(const yarmi::buffer_pair &buffer);
 
 	void on_pwd();
 	void on_mkdir(const std::string &);

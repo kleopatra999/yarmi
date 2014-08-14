@@ -29,19 +29,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include "user_context.hpp"
+#include "global_context.hpp"
 
-#include <cstdint>
+#include <yarmi/server.hpp>
 
-namespace yarmi {
-namespace detail {
+#include <iostream>
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+/***************************************************************************/
+
+int main() {
+	boost::asio::io_service ios;
+	global_context<user_context> gc;
+
+	yarmi::server_config config;
+	yarmi::server<user_context, global_context> server(
+		 config
+		,ios
+		,gc
+		,[](const boost::asio::ip::tcp::endpoint &) { return true; }
+		,[](const std::string &str) { std::cerr << str << std::endl; }
+		,[](const yarmi::server_statistic &st) { st.print(std::cout); std::cout << std::endl << std::endl; }
+	);
+	server.start();
+
+	ios.run();
 }
 
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp
+/***************************************************************************/

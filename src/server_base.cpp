@@ -74,14 +74,12 @@ struct server_base::impl {
 	}
 
 	void start() {
-		session_base *session_ptr = session_factory();
-		session_base::session_ptr session(session_ptr, [this](session_base *session){ session_deleter(session); });
-
+		yarmi::socket_ptr socket = std::make_shared<typename socket_ptr::element_type>(ios);
 		acceptor.async_accept(
-			 session->get_socket()
+			 *socket
 			,yarmi::make_preallocated_handler(
 				 allocator
-				,[this, session](const boost::system::error_code &ec) { on_accepted(ec, session); }
+				,[this, socket](const boost::system::error_code &ec) { on_accepted(ec, socket); }
 			)
 		);
 	}
@@ -109,7 +107,7 @@ struct server_base::impl {
 		YARMI_CATCH_LOG(delete_session_flag, os, error_handler(os.str());)
 	}
 
-	void on_accepted(const boost::system::error_code &ec, session_base::session_ptr session) {
+	void on_accepted(const boost::system::error_code &ec, const yarmi::socket_ptr &socket) {
 		if ( !ec ) {
 			if ( gcb.sessions() == config.max_connections ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("more connections than are set by 'max_connections'(%1%)", config.max_connections));
@@ -120,7 +118,7 @@ struct server_base::impl {
 			}
 
 			boost::system::error_code ec2;
-			const boost::asio::ip::tcp::endpoint &ep = session->get_socket().remote_endpoint(ec2);
+			const boost::asio::ip::tcp::endpoint &ep = socket->remote_endpoint(ec2);
 			if ( ec2 ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
 			}
@@ -129,6 +127,18 @@ struct server_base::impl {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
 			} else {
 				std::ostringstream os;
+				yarmi::session_ptr session;
+
+				YARMI_TRY(allocate_session_flag)
+					session.reset(session_factory(socket), [this](session_base *session){ session_deleter(session); });
+				YARMI_CATCH_LOG(allocate_session_flag, os,
+					error_handler(os.str());
+				);
+				if ( allocate_session_flag ) {
+					error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("stop accepting"));
+					return;
+				}
+
 				YARMI_TRY(add_session_flag)
 					gcb.add_session(session.get());
 				YARMI_CATCH_LOG(add_session_flag, os,

@@ -29,19 +29,45 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include "server_second_invoker.hpp"
+#include "global_context.hpp"
+#include "user_context.hpp"
 
-#include <cstdint>
+#include <yarmi/session_base.hpp>
 
-namespace yarmi {
-namespace detail {
+#include <iostream>
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+namespace two_invokers {
+
+/***************************************************************************/
+
+struct server_second_invoker_impl::impl {
+	impl(user_context &uc, global_context<user_context> &gc)
+		:uc(uc)
+		,gc(gc)
+	{}
+
+	user_context &uc;
+	global_context<user_context> &gc;
+}; // struct server_second_invoker_impl::impl
+
+/***************************************************************************/
+
+server_second_invoker_impl::server_second_invoker_impl(user_context &uc, global_context<user_context> &gc)
+	:server_second_invoker<server_second_invoker_impl, yarmi::session_base>(*this, uc)
+	,pimpl(new impl(uc, gc))
+{}
+
+server_second_invoker_impl::~server_second_invoker_impl()
+{ delete pimpl; }
+
+/***************************************************************************/
+
+void server_second_invoker_impl::on_ping(const std::string &str) {
+//	std::cout << "server_second_invoker_impl::on_ping(" << str << ")" << std::endl;
+	pimpl->uc.first.pong(str);
 }
 
-} // ns detail
-} // ns yarmi
+/***************************************************************************/
 
-#endif // _yarmi__fnv1a_hpp
+} // ns two_invokers

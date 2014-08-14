@@ -29,19 +29,28 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include "client_second_invoker.hpp"
+#include "client.hpp"
 
-#include <cstdint>
+#include <iostream>
 
-namespace yarmi {
-namespace detail {
+struct client_second_invoker_impl::impl {
+	impl(client &c)
+		:c(c)
+	{}
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+	client &c;
+}; // struct client_second_invoker_impl::impl
+
+client_second_invoker_impl::client_second_invoker_impl(client &c)
+	:two_invokers::client_second_invoker<client_second_invoker_impl, client>(*this, c)
+	,pimpl(new impl(c))
+{}
+
+client_second_invoker_impl::~client_second_invoker_impl()
+{ delete pimpl; }
+
+void client_second_invoker_impl::on_pong(const std::string &str) {
+	//std::cout << "client_second_invoker_impl::on_pong(" << str << ")" << std::endl;
+	ping(str);
 }
-
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp

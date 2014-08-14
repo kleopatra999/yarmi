@@ -48,11 +48,11 @@ struct server_base;
 /***************************************************************************/
 
 struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
-	user_context(yarmi::server_base &sb, global_context<user_context> &gc);
+	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
 
 	void on_connected();
 	void on_disconnected();
-	void on_received(const char *ptr, const std::size_t size);
+	void on_received(const yarmi::buffer_pair &buffer);
 
 	void on_ping(const std::string &msg);
 

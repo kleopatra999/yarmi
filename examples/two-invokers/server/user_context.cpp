@@ -29,19 +29,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include "user_context.hpp"
+#include "server_first_invoker.hpp"
+#include "server_second_invoker.hpp"
 
-#include <cstdint>
+#include <yarmi/throw.hpp>
 
-namespace yarmi {
-namespace detail {
+#include <iostream>
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+/***************************************************************************/
+
+user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(socket, sb)
+	,gc(gc)
+	,first(*this, gc)
+	,second(*this, gc)
+{}
+
+user_context::~user_context()
+{}
+
+/***************************************************************************/
+
+void user_context::on_received(const yarmi::buffer_pair &buffer) {
+	YARMI_TRY(invoke_flag)
+		yarmi::call_id_type call_id = 0;
+		if ( !yarmi::invoke(buffer, &call_id, first, second) ) {
+			std::cerr << YARMI_FORMAT_MESSAGE("no handler for call_id \"%1%\"", call_id) << std::endl;
+		}
+	YARMI_CATCH_LOG(invoke_flag, std::cerr)
 }
 
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp
+/***************************************************************************/

@@ -36,8 +36,8 @@
 
 /***************************************************************************/
 
-user_context::user_context(yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(sb)
+user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(socket, sb)
 	,yarmi::server_invoker<user_context>(*this, *this)
 	,gc(gc)
 {}
@@ -47,7 +47,7 @@ user_context::user_context(yarmi::server_base &sb, global_context<user_context> 
 void user_context::on_connected() {
 	std::cout << YARMI_FORMAT_MESSAGE(
 		 "on_connected(%1%) called"
-		,get_socket().remote_endpoint().address().to_string()
+		,get_socket()->remote_endpoint().address().to_string()
 	) << std::endl;
 }
 
@@ -55,10 +55,10 @@ void user_context::on_disconnected() {
 	std::cout << YARMI_FORMAT_MESSAGE("on_disconnected() called") << std::endl;
 }
 
-void user_context::on_received(const char *ptr, const std::size_t size) {
+void user_context::on_received(const yarmi::buffer_pair &buffer) {
 	YARMI_TRY(invoke_flag)
 		yarmi::call_id_type call_id = 0;
-		if ( !yarmi::invoke(ptr, size, &call_id, *this) ) {
+		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
 			std::cerr << YARMI_FORMAT_MESSAGE(
 				 "no handler for call_id \"%1%\""
 				,call_id

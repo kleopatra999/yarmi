@@ -29,19 +29,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#ifndef _yarmi__two_invokers__server_second_invoker_hpp
+#define _yarmi__two_invokers__server_second_invoker_hpp
 
-#include <cstdint>
+#include "second_proto.hpp"
+#include "protocol_fwd.hpp"
 
-namespace yarmi {
-namespace detail {
+/***************************************************************************/
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
-}
+namespace two_invokers {
 
-} // ns detail
-} // ns yarmi
+struct server_second_invoker_impl: server_second_invoker<server_second_invoker_impl, yarmi::session_base> {
+	server_second_invoker_impl(user_context &uc, global_context<user_context> &gc);
+	virtual ~server_second_invoker_impl();
 
-#endif // _yarmi__fnv1a_hpp
+	void on_ping(const std::string &str);
+
+private:
+	struct impl;
+	impl *pimpl;
+};
+
+} // ns two_invokers
+
+/***************************************************************************/
+
+#endif // _yarmi__two_invokers__server_second_invoker_hpp

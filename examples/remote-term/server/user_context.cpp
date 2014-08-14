@@ -62,8 +62,8 @@ struct user_context::impl {
 
 /***************************************************************************/
 
-user_context::user_context(yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(sb)
+user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(socket, sb)
 	,yarmi::server_side<user_context>(*this, *this)
 	,pimpl(new impl(gc))
 {}
@@ -78,10 +78,10 @@ void user_context::on_disconnected() {}
 
 /***************************************************************************/
 
-void user_context::on_received(const char *ptr, std::size_t size) {
+void user_context::on_received(const yarmi::buffer_pair &buffer) {
 	yarmi::call_id_type call_id = 0;
 	try {
-		if ( !yarmi::invoke(ptr, size, &call_id, *this) ) {
+		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
 			std::cerr << "no handler for call_id=" << call_id << std::endl;
 		}
 	} catch (const std::exception &ex) {

@@ -49,9 +49,9 @@ struct server: server_base {
 		,GC<UC> &gc
 		,connection_pred_type   cp = [](const boost::asio::ip::tcp::endpoint &) {return true;}
 		,error_handler_type     eh = [](const std::string &) {}
-		,statistic_handler_type sh = [](const server_statistic &) {}
+		,statistic_handler_type sh = [](const yarmi::server_statistic &) {}
 	)
-		:server_base(ios, config, gc, cp, eh, sh, [this, &gc](){ return new UC(*this, gc); })
+		:server_base(ios, config, gc, cp, eh, sh, [this, &gc](const socket_ptr &socket){ return new UC(socket, *this, gc); })
 	{}
 };
 

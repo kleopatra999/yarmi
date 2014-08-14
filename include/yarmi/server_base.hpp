@@ -32,6 +32,7 @@
 #ifndef _yarmi__server_base_hpp
 #define _yarmi__server_base_hpp
 
+#include <yarmi/yarmi_fwd.hpp>
 #include <yarmi/server_statistic.hpp>
 
 #include <boost/noncopyable.hpp>
@@ -63,17 +64,13 @@ struct server_config {
 
 /***************************************************************************/
 
-struct session_base;
-struct global_context_base;
-struct server_statistic;
-
 struct server_base: boost::noncopyable {
 	friend struct session_base;
 
 	using connection_pred_type   = std::function<bool(const boost::asio::ip::tcp::endpoint &)>;
 	using error_handler_type     = std::function<void(const std::string &)>;
 	using statistic_handler_type = std::function<void(const server_statistic &)>;
-	using session_factory_type   = std::function<session_base*()>;
+	using session_factory_type   = std::function<session_base* (const socket_ptr &)>;
 
 	server_base(
 		 boost::asio::io_service &ios

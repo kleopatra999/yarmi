@@ -29,19 +29,22 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include <iostream>
 
-#include <cstdint>
+#include "client.hpp"
 
-namespace yarmi {
-namespace detail {
+/***************************************************************************/
+int main() {
+	static const char *ip = "127.0.0.1";
+	static const std::uint16_t port = 44550;
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+	boost::asio::io_service ios;
+	client c(ios);
+	c.connect(ip, port);
+	c.start();
+	c.first.ping("message 0");
+
+	ios.run();
 }
 
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp
+/***************************************************************************/

@@ -32,8 +32,7 @@
 #ifndef _yarmi__client_base_hpp
 #define _yarmi__client_base_hpp
 
-#include <yarmi/fnv1a.hpp>
-#include <yarmi/serialization.hpp>
+#include <yarmi/yarmi_fwd.hpp>
 
 #include <boost/noncopyable.hpp>
 #include <boost/asio/io_service.hpp>
@@ -41,8 +40,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <list>
-#include <functional>
 
 namespace yarmi {
 
@@ -67,9 +64,9 @@ struct client_base: private boost::noncopyable {
 
 	void start();
 	void disconnect();
-	void send(const yas::shared_buffer &buffer);
+	void send(const buffer_pair &buffer);
 
-	virtual void on_received(const char *ptr, const std::size_t size) = 0;
+	virtual void on_received(const buffer_pair &buffer) = 0;
 
 private:
 	struct impl;

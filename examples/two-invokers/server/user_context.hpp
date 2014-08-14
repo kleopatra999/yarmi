@@ -29,19 +29,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#ifndef _yarmi__two_invokers__user_context_hpp
+#define _yarmi__two_invokers__user_context_hpp
 
-#include <cstdint>
+#include "server_first_invoker.hpp"
+#include "server_second_invoker.hpp"
 
-namespace yarmi {
-namespace detail {
+#include <yarmi/session_base.hpp>
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
-}
+template<typename>
+struct global_context;
 
-} // ns detail
-} // ns yarmi
+/***************************************************************************/
 
-#endif // _yarmi__fnv1a_hpp
+struct user_context: yarmi::session_base {
+	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
+	virtual ~user_context();
+
+	void on_received(const yarmi::buffer_pair &buffer);
+
+	global_context<user_context> &gc;
+	two_invokers::server_first_invoker_impl first;
+	two_invokers::server_second_invoker_impl second;
+};
+
+/***************************************************************************/
+
+#endif // _yarmi__two_invokers__user_context_hpp

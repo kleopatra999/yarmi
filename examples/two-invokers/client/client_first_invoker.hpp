@@ -29,53 +29,22 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__serialization_hpp
-#define _yarmi__serialization_hpp
+#ifndef _yarmi__client_first_invoker_hpp
+#define _yarmi__client_first_invoker_hpp
 
-/***************************************************************************/
+#include "first_proto.hpp"
 
-#if !defined(YARMI_USE_BINARY_SERIALIZATION) && \
-	 !defined(YARMI_USE_TEXT_SERIALIZATION)
-# define YARMI_USE_BINARY_SERIALIZATION (1)
-//# define YARMI_USE_TEXT_SERIALIZATION (1)
-#endif
+struct client;
 
-/***************************************************************************/
+struct client_first_invoker_impl: two_invokers::client_first_invoker<client_first_invoker_impl, client> {
+	client_first_invoker_impl(client &c);
+	virtual ~client_first_invoker_impl();
 
-#include <yas/mem_streams.hpp>
+	void on_pong(const std::string &str);
 
-#if YARMI_USE_BINARY_SERIALIZATION
-#	include <yas/binary_iarchive.hpp>
-#	include <yas/binary_oarchive.hpp>
+private:
+	struct impl;
+	impl *pimpl;
+};
 
-namespace yarmi {
-
-using istream_type = yas::mem_istream;
-using ostream_type = yas::mem_ostream;
-using iarchive_type= yas::binary_iarchive<istream_type>;
-using oarchive_type= yas::binary_oarchive<ostream_type>;
-
-} // ns yarmi
-
-#elif YARMI_USE_TEXT_SERIALIZATION
-#	include <yas/text_iarchive.hpp>
-#	include <yas/text_oarchive.hpp>
-
-namespace yarmi {
-
-using istream_type = yas::mem_istream;
-using ostream_type = yas::mem_ostream;
-using iarchive_type= yas::text_iarchive<istream_type>;
-using oarchive_type= yas::text_oarchive<ostream_type>;
-
-} // ns yarmi
-
-#endif // YARMI_USE_BINARY_SERIALIZATION
-
-/***************************************************************************/
-
-#include <yas/serializers/std_types_serializers.hpp>
-
-/***************************************************************************/
-
-#endif // _yarmi__serialization_hpp
+#endif // _yarmi__client_first_invoker_hpp

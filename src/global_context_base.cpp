@@ -165,13 +165,13 @@ std::size_t global_context_base::sessions() const {
 
 /***************************************************************************/
 
-void global_context_base::send_to(std::int64_t id, const yas::shared_buffer &buffer) {
+void global_context_base::send_to(std::int64_t id, const buffer_pair &buffer) {
 	const auto it = pimpl->sessions.get<session_wrapper::by_id>().find(id);
 	if ( it == pimpl->sessions.get<session_wrapper::by_id>().end() ) return;
 	it->session->send(buffer);
 }
 
-void global_context_base::send_to_all(const session_base *exclude, const yas::shared_buffer &buffer) {
+void global_context_base::send_to_all(const session_base *exclude, const buffer_pair &buffer) {
 	for ( const auto &it: pimpl->sessions ) {
 		if ( it.session == exclude ) continue;
 		it.session->send(buffer);

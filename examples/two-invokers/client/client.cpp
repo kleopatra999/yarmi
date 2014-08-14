@@ -29,19 +29,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__fnv1a_hpp
-#define _yarmi__fnv1a_hpp
+#include "client.hpp"
 
-#include <cstdint>
+#include <iostream>
 
-namespace yarmi {
-namespace detail {
+client::client(boost::asio::io_service &ios)
+	:yarmi::client_base(ios)
+	,first(*this)
+	,second(*this)
+{}
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t i=0, std::uint32_t h=0x811c9dc5) {
-	return (s[i]==0)?h:fnv1a(s, i+1, ((h^s[i])*0x01000193));
+void client::on_received(const yarmi::buffer_pair &buffer) {
+	yarmi::call_id_type call_id = 0;
+	try {
+		if ( !yarmi::invoke(buffer, &call_id, first, second) ) {
+			std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
+		}
+	} catch (const std::exception &ex) {
+		std::cerr << "[exception]: " << __PRETTY_FUNCTION__ << ": " << ex.what() << std::endl;
+	}
 }
-
-} // ns detail
-} // ns yarmi
-
-#endif // _yarmi__fnv1a_hpp

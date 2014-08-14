@@ -34,8 +34,8 @@
 
 /***************************************************************************/
 
-user_context::user_context(yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(sb)
+user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session_base(socket, sb)
 	,yarmi::server_invoker<user_context>(*this, *this)
 	,gc(gc)
 {}
@@ -54,8 +54,8 @@ void user_context::on_disconnected() {
 
 /***************************************************************************/
 
-void user_context::on_received(const char *ptr, std::size_t size) {
-	invoke(ptr, size);
+void user_context::on_received(const yarmi::buffer_pair &buffer) {
+	invoke(buffer);
 }
 
 /***************************************************************************/
