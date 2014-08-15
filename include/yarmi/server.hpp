@@ -41,7 +41,7 @@ namespace yarmi {
 
 /***************************************************************************/
 
-template<typename UC, template<typename UC> class GC>
+template<typename UC, template<typename> class GC>
 struct server: server_base {
 	server(
 		 const server_config &config

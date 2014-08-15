@@ -41,6 +41,13 @@ INCLUDEPATH += \
 	../ \
 	../../../include
 
+gcc: {
+} else:msvc {
+} else {
+	DEFINES += \
+		BOOST_PP_VARIADICS=1
+}
+
 LIBS += \
 	-lboost_system
 

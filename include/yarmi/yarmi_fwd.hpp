@@ -40,7 +40,7 @@
 
 namespace yarmi {
 
-using call_id_type = decltype(::yarmi::detail::fnv1a(""));
+using call_id_type = decltype(yarmi::detail::fnv1a(""));
 using buffer_ptr   = std::shared_ptr<char>;
 using buffer_pair  = std::pair<buffer_ptr, std::size_t>;
 
@@ -52,7 +52,7 @@ struct global_context_base;
 using socket_ptr  = std::shared_ptr<boost::asio::ip::tcp::socket>;
 using session_ptr = std::shared_ptr<session_base>;
 
-struct _serialize_only {};
+struct _serialize_only { _serialize_only() {} };
 static const _serialize_only serialize_only;
 
 } // ns yarmi
