@@ -33,14 +33,15 @@
 #include "server_first_invoker.hpp"
 #include "server_second_invoker.hpp"
 
-#include <yarmi/throw.hpp>
+#include <yarmi/detail/throw/throw.hpp>
+#include <yarmi/invoke.hpp>
 
 #include <iostream>
 
 /***************************************************************************/
 
 user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(socket, sb)
+	:yarmi::session(socket, sb)
 	,gc(gc)
 	,first(*this, gc)
 	,second(*this, gc)

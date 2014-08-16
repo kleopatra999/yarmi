@@ -32,14 +32,14 @@
 #include "user_context.hpp"
 #include "global_context.hpp"
 
-#include <yarmi/throw.hpp>
+#include <yarmi/invoke.hpp>
 
 #include <iostream>
 
 /***************************************************************************/
 
 user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(socket, sb)
+	:yarmi::session(socket, sb)
 	,yarmi::server_invoker<user_context>(*this, *this)
 	,gc(gc)
 {}
@@ -49,7 +49,7 @@ user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &
 void user_context::on_connected() {
 	std::cout << YARMI_FORMAT_MESSAGE(
 		 "on_connected(%1%) called"
-		,get_socket()->remote_endpoint().address().to_string()
+		,get_socket().remote_endpoint().address().to_string()
 	) << std::endl;
 }
 

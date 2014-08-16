@@ -32,7 +32,7 @@
 #ifndef __yarmi__remote_fs__global_context_hpp
 #define __yarmi__remote_fs__global_context_hpp
 
-#include <yarmi/global_context_base.hpp>
+#include <yarmi/server/global_context_base.hpp>
 
 /***************************************************************************/
 

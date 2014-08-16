@@ -32,6 +32,7 @@
 #include "client.hpp"
 
 /***************************************************************************/
+
 int main() {
 	static const char *ip = "127.0.0.1";
 	static const std::uint16_t port = 44550;

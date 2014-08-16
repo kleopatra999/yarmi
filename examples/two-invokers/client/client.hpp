@@ -35,7 +35,7 @@
 #include "client_first_invoker.hpp"
 #include "client_second_invoker.hpp"
 
-#include <yarmi/client_base.hpp>
+#include <yarmi/client/client_base.hpp>
 
 struct client: yarmi::client_base {
 	client(boost::asio::io_service &ios);

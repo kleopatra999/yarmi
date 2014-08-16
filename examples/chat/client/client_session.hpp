@@ -33,7 +33,7 @@
 #define _yarmi__client_session_hpp
 
 #include <protocol.hpp>
-#include <yarmi/client_base.hpp>
+#include <yarmi/client/client_base.hpp>
 
 #include <boost/noncopyable.hpp>
 

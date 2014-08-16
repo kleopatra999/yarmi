@@ -61,9 +61,9 @@ SOURCES += \
 	../../../src/global_context_base.cpp \
 	../../../src/server_base.cpp \
 	../../../src/server_statistic.cpp \
-	../../../src/session_base.cpp \
 	server_first_invoker.cpp \
-	server_second_invoker.cpp
+	server_second_invoker.cpp \
+    ../../../src/session.cpp
 
 win32:SOURCES += \
 	../../../src/os_resources_win.cpp
@@ -71,49 +71,45 @@ unix:SOURCES += \
 	../../../src/os_resources_nix.cpp
 
 HEADERS += \
-	user_context.hpp \
-	global_context.hpp \
-	../../../include/yarmi/generate_struct/decorators.hpp \
-	../../../include/yarmi/generate_struct/jsonify.hpp \
-	../../../include/yarmi/generate_struct/list.hpp \
-	../../../include/yarmi/generate_struct/map.hpp \
-	../../../include/yarmi/generate_struct/pair.hpp \
-	../../../include/yarmi/generate_struct/set.hpp \
-	../../../include/yarmi/generate_struct/tuple.hpp \
-	../../../include/yarmi/generate_struct/unordered_map.hpp \
-	../../../include/yarmi/generate_struct/unordered_set.hpp \
-	../../../include/yarmi/generate_struct/vector.hpp \
-	../../../include/yarmi/client_base.hpp \
-	../../../include/yarmi/fnv1a.hpp \
-	../../../include/yarmi/generate_callers.hpp \
+	../../../include/yarmi/client/client_base.hpp \
+	../../../include/yarmi/client/qt_client_base.hpp \
+	../../../include/yarmi/detail/cthash/crc32.hpp \
+	../../../include/yarmi/detail/cthash/fnv1a.hpp \
+	../../../include/yarmi/detail/generate_struct/decorators.hpp \
+	../../../include/yarmi/detail/generate_struct/jsonify.hpp \
+	../../../include/yarmi/detail/generate_struct/list.hpp \
+	../../../include/yarmi/detail/generate_struct/map.hpp \
+	../../../include/yarmi/detail/generate_struct/pair.hpp \
+	../../../include/yarmi/detail/generate_struct/set.hpp \
+	../../../include/yarmi/detail/generate_struct/tuple.hpp \
+	../../../include/yarmi/detail/generate_struct/unordered_map.hpp \
+	../../../include/yarmi/detail/generate_struct/unordered_set.hpp \
+	../../../include/yarmi/detail/generate_struct/vector.hpp \
+	../../../include/yarmi/detail/pp/generate_callers.hpp \
+	../../../include/yarmi/detail/pp/generate_invoker.hpp \
+	../../../include/yarmi/detail/pp/generate_invokers_sfinae.hpp \
+	../../../include/yarmi/detail/pp/generate_lazy_if.hpp \
+	../../../include/yarmi/detail/pp/generate_metacode.hpp \
+	../../../include/yarmi/detail/pp/generate_ns.hpp \
+	../../../include/yarmi/detail/pp/generate_ns_to_string.hpp \
+	../../../include/yarmi/detail/pp/generate_proc_helper.hpp \
+	../../../include/yarmi/detail/pp/generate_tuple_is_empty.hpp \
+	../../../include/yarmi/detail/throw/throw.hpp \
+	../../../include/yarmi/serializers/boost_serialization.hpp \
+	../../../include/yarmi/serializers/yas_serialization.hpp \
+	../../../include/yarmi/server/global_context_base.hpp \
+	../../../include/yarmi/server/handler_allocator.hpp \
+	../../../include/yarmi/server/make_preallocated_handler.hpp \
+	../../../include/yarmi/server/os_resources.hpp \
+	../../../include/yarmi/server/preallocated_handler_invoker.hpp \
+	../../../include/yarmi/server/server.hpp \
+	../../../include/yarmi/server/server_base.hpp \
+	../../../include/yarmi/server/server_statistic.hpp \
+	../../../include/yarmi/server/session.hpp \
 	../../../include/yarmi/generate_enum.hpp \
-	../../../include/yarmi/generate_invoker.hpp \
-	../../../include/yarmi/generate_invokers_sfinae.hpp \
-	../../../include/yarmi/generate_lazy_if.hpp \
-	../../../include/yarmi/generate_metacode.hpp \
-	../../../include/yarmi/generate_ns.hpp \
-	../../../include/yarmi/generate_ns_to_string.hpp \
-	../../../include/yarmi/generate_proc_helper.hpp \
 	../../../include/yarmi/generate_struct.hpp \
-	../../../include/yarmi/generate_tuple_is_empty.hpp \
-	../../../include/yarmi/global_context_base.hpp \
-	../../../include/yarmi/handler_allocator.hpp \
-	../../../include/yarmi/make_preallocated_handler.hpp \
-	../../../include/yarmi/os_resources.hpp \
-	../../../include/yarmi/preallocated_handler_invoker.hpp \
-	../../../include/yarmi/qt_client_base.hpp \
-	../../../include/yarmi/serialization.hpp \
-	../../../include/yarmi/server.hpp \
-	../../../include/yarmi/server_base.hpp \
-	../../../include/yarmi/server_statistic.hpp \
-	../../../include/yarmi/session_base.hpp \
-	../../../include/yarmi/throw.hpp \
+	../../../include/yarmi/invoke.hpp \
+	../../../include/yarmi/procname.hpp \
 	../../../include/yarmi/yarmi.hpp \
-	server_first_invoker.hpp \
-	server_second_invoker.hpp \
-	../../../include/yarmi/yas_serialization.hpp \
 	../../../include/yarmi/yarmi_fwd.hpp \
-	../first_proto.hpp \
-	../second_proto.hpp \
-	../../../include/yarmi/get_proc_name.hpp \
-	../../../include/yarmi/invoke.hpp
+    ../../../include/yarmi/detail/endian/endian.hpp

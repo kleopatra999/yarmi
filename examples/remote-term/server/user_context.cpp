@@ -32,6 +32,8 @@
 #include "user_context.hpp"
 #include "global_context.hpp"
 
+#include <yarmi/invoke.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <vector>
@@ -64,7 +66,7 @@ struct user_context::impl {
 /***************************************************************************/
 
 user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(socket, sb)
+	:yarmi::session(socket, sb)
 	,yarmi::server_side<user_context>(*this, *this)
 	,pimpl(new impl(gc))
 {}

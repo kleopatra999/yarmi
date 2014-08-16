@@ -39,7 +39,7 @@
 
 namespace two_invokers {
 
-struct server_second_invoker_impl: server_second_invoker<server_second_invoker_impl, yarmi::session_base> {
+struct server_second_invoker_impl: server_second_invoker<server_second_invoker_impl, yarmi::session> {
 	server_second_invoker_impl(user_context &uc, global_context<user_context> &gc);
 	virtual ~server_second_invoker_impl();
 

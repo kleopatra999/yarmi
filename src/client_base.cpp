@@ -29,7 +29,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/client_base.hpp>
+#include <yarmi/client/client_base.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -43,6 +43,8 @@ namespace yarmi {
 /***************************************************************************/
 
 struct client_base::impl {
+	enum { header_size = sizeof(std::uint32_t) };
+
 	impl(boost::asio::io_service &ios, yarmi::client_base &self)
 		:socket(ios)
 		,self(self)
@@ -53,7 +55,7 @@ struct client_base::impl {
 	void start() {
 		boost::asio::async_read(
 			 socket
-			,boost::asio::buffer(header_buffer)
+			,boost::asio::buffer(header_buffer.buffer)
 			,std::bind(
 				 &client_base::impl::on_header_readed
 				,this
@@ -72,16 +74,10 @@ struct client_base::impl {
 		if ( ec || rd != header_size )
 			throw std::runtime_error("on_header_readed(): "+ec.message());
 
-		union {
-			char c[sizeof(std::uint32_t)];
-			std::uint32_t i;
-		} body_length;
-		std::memcpy(body_length.c, header_buffer, header_size);
+		// convert to host byte order
+		header_buffer.size = network_to_host(header_buffer.size);
 
-		::yarmi::buffer_pair buffer;
-		buffer.first.reset(new char[body_length.i], [](char *ptr){delete []ptr;});
-		buffer.second = body_length.i;
-
+		::yarmi::buffer_pair buffer = allocate_buffer(header_buffer.size);
 		boost::asio::async_read(
 			 socket
 			,boost::asio::buffer(buffer.first.get(), buffer.second)
@@ -151,8 +147,10 @@ struct client_base::impl {
 	std::list<buffer_pair> buffers;
 	bool in_process;
 
-	enum { header_size = sizeof(std::uint32_t) };
-	char header_buffer[header_size];
+	union {
+		char buffer[header_size];
+		std::uint32_t size;
+	} header_buffer;
 };
 
 /***************************************************************************/

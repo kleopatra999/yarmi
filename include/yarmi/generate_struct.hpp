@@ -32,16 +32,16 @@
 #ifndef _yarmi__generate_struct_hpp
 #define _yarmi__generate_struct_hpp
 
-#include <yarmi/generate_struct/decorators.hpp>
-#include <yarmi/generate_struct/list.hpp>
-#include <yarmi/generate_struct/map.hpp>
-#include <yarmi/generate_struct/pair.hpp>
-#include <yarmi/generate_struct/jsonify.hpp>
-#include <yarmi/generate_struct/set.hpp>
-#include <yarmi/generate_struct/tuple.hpp>
-#include <yarmi/generate_struct/unordered_map.hpp>
-#include <yarmi/generate_struct/unordered_set.hpp>
-#include <yarmi/generate_struct/vector.hpp>
+#include <yarmi/detail/generate_struct/decorators.hpp>
+#include <yarmi/detail/generate_struct/list.hpp>
+#include <yarmi/detail/generate_struct/map.hpp>
+#include <yarmi/detail/generate_struct/pair.hpp>
+#include <yarmi/detail/generate_struct/jsonify.hpp>
+#include <yarmi/detail/generate_struct/set.hpp>
+#include <yarmi/detail/generate_struct/tuple.hpp>
+#include <yarmi/detail/generate_struct/unordered_map.hpp>
+#include <yarmi/detail/generate_struct/unordered_set.hpp>
+#include <yarmi/detail/generate_struct/vector.hpp>
 
 /***************************************************************************/
 

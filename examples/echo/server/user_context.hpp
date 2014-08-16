@@ -34,7 +34,7 @@
 
 #include "protocol.hpp"
 
-#include <yarmi/session_base.hpp>
+#include <yarmi/server/session.hpp>
 
 template<typename>
 struct global_context;
@@ -47,7 +47,7 @@ struct server_base;
 
 /***************************************************************************/
 
-struct user_context: yarmi::session_base, yarmi::server_invoker<user_context> {
+struct user_context: yarmi::session, yarmi::server_invoker<user_context> {
 	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
 
 	void on_connected();

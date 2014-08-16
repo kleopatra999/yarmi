@@ -32,7 +32,6 @@
 #ifndef _yarmi__invoke_hpp
 #define _yarmi__invoke_hpp
 
-#include <boost/mpl/vector.hpp>
 #include <boost/mpl/size.hpp>
 #include <boost/mpl/size_t.hpp>
 #include <boost/mpl/copy.hpp>
@@ -93,7 +92,7 @@ bool invoke(const buffer_pair &buffer, call_id_type *cid, Invoker &head, Invoker
 
 	bool flag  = false;
 	auto apply = [](...) {};
-	auto func  = [&flag](call_id_type call_id, auto &ia, auto &inv) {
+	auto func  = [&flag](const call_id_type call_id, auto &ia, auto &inv) {
 		return flag=flag || inv.invoke(call_id, ia);
 	};
 	apply(func(call_id, ia, head), func(call_id, ia, tail)...);

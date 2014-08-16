@@ -35,7 +35,7 @@
 /***************************************************************************/
 
 user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session_base(socket, sb)
+	:yarmi::session(socket, sb)
 	,yarmi::server_invoker<user_context>(*this, *this)
 	,gc(gc)
 {}

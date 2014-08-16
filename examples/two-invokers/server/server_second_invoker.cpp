@@ -33,7 +33,7 @@
 #include "global_context.hpp"
 #include "user_context.hpp"
 
-#include <yarmi/session_base.hpp>
+#include <yarmi/server/session.hpp>
 
 //#include <iostream>
 
@@ -54,7 +54,7 @@ struct server_second_invoker_impl::impl {
 /***************************************************************************/
 
 server_second_invoker_impl::server_second_invoker_impl(user_context &uc, global_context<user_context> &gc)
-	:server_second_invoker<server_second_invoker_impl, yarmi::session_base>(*this, uc)
+	:server_second_invoker<server_second_invoker_impl, yarmi::session>(*this, uc)
 	,pimpl(new impl(uc, gc))
 {}
 

@@ -33,6 +33,7 @@
 #define _yarmi__two_invokers__first_proto_hpp
 
 #include <yarmi/yarmi.hpp>
+#include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
 	(two_invokers),

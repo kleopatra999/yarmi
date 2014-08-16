@@ -31,7 +31,8 @@
 
 #include <protocol.hpp>
 
-#include <yarmi/client_base.hpp>
+#include <yarmi/client/client_base.hpp>
+#include <yarmi/invoke.hpp>
 
 #include <iostream>
 

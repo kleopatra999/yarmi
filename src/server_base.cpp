@@ -29,14 +29,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/handler_allocator.hpp>
-#include <yarmi/make_preallocated_handler.hpp>
-#include <yarmi/server_base.hpp>
-#include <yarmi/session_base.hpp>
-#include <yarmi/server_statistic.hpp>
-#include <yarmi/global_context_base.hpp>
-#include <yarmi/throw.hpp>
-#include <yarmi/os_resources.hpp>
+#include <yarmi/server/handler_allocator.hpp>
+#include <yarmi/server/make_preallocated_handler.hpp>
+#include <yarmi/server/server_base.hpp>
+#include <yarmi/server/session.hpp>
+#include <yarmi/server/server_statistic.hpp>
+#include <yarmi/server/global_context_base.hpp>
+#include <yarmi/server/os_resources.hpp>
+
+#include <yarmi/detail/throw/throw.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -111,10 +112,10 @@ struct server_base::impl {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
 			} else {
 				std::ostringstream os;
-				yarmi::session_ptr session;
+				yarmi::session_ptr session_ptr;
 
 				YARMI_TRY(allocate_session_flag) {
-					session.reset(session_factory(socket), [this](session_base *session){ session_deleter(session); });
+					session_ptr.reset(session_factory(socket), [this](session *session_ptr){ session_deleter(session_ptr); });
 				} YARMI_CATCH_LOG(allocate_session_flag, os,
 					error_handler(os.str());
 				);
@@ -124,19 +125,19 @@ struct server_base::impl {
 				}
 
 				YARMI_TRY(add_session_flag) {
-					gcb.add_session(session.get());
+					gcb.add_session(session_ptr.get());
 				} YARMI_CATCH_LOG(add_session_flag, os,
 					error_handler(os.str());
 				);
 
 				YARMI_TRY(on_connected_flag) {
-					session->on_connected();
+					session_ptr->on_connected();
 				} YARMI_CATCH_LOG(on_connected_flag, os,
 					error_handler(os.str());
 				);
 
 				/** start session */
-				session->start();
+				session_ptr->start();
 			}
 		}
 
@@ -144,7 +145,7 @@ struct server_base::impl {
 		start();
 	}
 
-	void session_deleter(session_base *session) {
+	void session_deleter(session *session) {
 		std::ostringstream os;
 
 		YARMI_TRY(on_disconnected_flag) {

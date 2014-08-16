@@ -29,9 +29,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/global_context_base.hpp>
-#include <yarmi/session_base.hpp>
-#include <yarmi/throw.hpp>
+#include <yarmi/server/global_context_base.hpp>
+#include <yarmi/server/session.hpp>
+#include <yarmi/detail/throw/throw.hpp>
 
 #include <stdexcept>
 #include <sstream>
@@ -46,7 +46,7 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session_wrapper {
-	session_base *session;
+	session *sptr;
 	std::int64_t id;
 
 	struct by_session;
@@ -64,7 +64,7 @@ struct global_context_base::impl {
 		,boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<
 				 boost::multi_index::tag<session_wrapper::by_session>
-				,boost::multi_index::member<session_wrapper, session_base*, &session_wrapper::session>
+				,boost::multi_index::member<session_wrapper, session*, &session_wrapper::sptr>
 			>
 			,boost::multi_index::ordered_unique<
 				 boost::multi_index::tag<session_wrapper::by_id>
@@ -92,7 +92,7 @@ const global_context_base &global_context_base::get_global_context_base() const 
 
 /***************************************************************************/
 
-std::uint64_t global_context_base::add_session(session_base *session) {
+std::uint64_t global_context_base::add_session(session *session) {
 	if ( has_session(session) ) {
 		YARMI_THROW("session \"%1%\" already in sessions list", session);
 	}
@@ -103,7 +103,7 @@ std::uint64_t global_context_base::add_session(session_base *session) {
 	return idx;
 }
 
-void global_context_base::del_session(session_base *session) {
+void global_context_base::del_session(session *session) {
 	if ( !has_session(session) ) {
 		YARMI_THROW("session \"%1%\" not in sessions list", session);
 	}
@@ -125,7 +125,7 @@ void global_context_base::del_session(std::int64_t id) {
 
 /***************************************************************************/
 
-void global_context_base::set_id(session_base *session, std::int64_t id) {
+void global_context_base::set_id(session *session, std::int64_t id) {
 	auto &index = pimpl->sessions.get<session_wrapper::by_session>();
 
 	auto it = index.find(session);
@@ -140,7 +140,7 @@ void global_context_base::set_id(session_base *session, std::int64_t id) {
 
 /***************************************************************************/
 
-bool global_context_base::has_session(session_base *session) const {
+bool global_context_base::has_session(session *session) const {
 	const auto &index = pimpl->sessions.get<session_wrapper::by_session>();
 	return index.find(session) != index.end();
 }
@@ -150,11 +150,11 @@ bool global_context_base::has_session(std::int64_t id) const {
 	return index.find(id) != index.end();
 }
 
-session_base* global_context_base::get_session(std::int64_t id) const {
+session* global_context_base::get_session(std::int64_t id) const {
 	if ( ! has_session(id) ) return 0;
 
 	const auto it = pimpl->sessions.get<session_wrapper::by_id>().find(id);
-	return it->session;
+	return it->sptr;
 }
 
 /***************************************************************************/
@@ -168,13 +168,13 @@ std::size_t global_context_base::sessions() const {
 void global_context_base::send_to(std::int64_t id, const buffer_pair &buffer) {
 	const auto it = pimpl->sessions.get<session_wrapper::by_id>().find(id);
 	if ( it == pimpl->sessions.get<session_wrapper::by_id>().end() ) return;
-	it->session->send(buffer);
+	it->sptr->send(buffer);
 }
 
-void global_context_base::send_to_all(const session_base *exclude, const buffer_pair &buffer) {
+void global_context_base::send_to_all(const session *exclude, const buffer_pair &buffer) {
 	for ( const auto &it: pimpl->sessions ) {
-		if ( it.session == exclude ) continue;
-		it.session->send(buffer);
+		if ( it.sptr == exclude ) continue;
+		it.sptr->send(buffer);
 	}
 }
 

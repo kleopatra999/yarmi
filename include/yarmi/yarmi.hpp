@@ -35,22 +35,21 @@
 #include <boost/preprocessor.hpp>
 
 #include <yarmi/yarmi_fwd.hpp>
-#include <yarmi/fnv1a.hpp>
-#include <yarmi/yas_serialization.hpp>
-#include <yarmi/generate_ns.hpp>
-#include <yarmi/generate_lazy_if.hpp>
-#include <yarmi/generate_tuple_is_empty.hpp>
-#include <yarmi/generate_ns_to_string.hpp>
-#include <yarmi/generate_metacode.hpp>
-#include <yarmi/generate_callers.hpp>
-#include <yarmi/generate_invoker.hpp>
-#include <yarmi/generate_invokers_sfinae.hpp>
+
+#include <yarmi/detail/pp/generate_ns.hpp>
+#include <yarmi/detail/pp/generate_lazy_if.hpp>
+#include <yarmi/detail/pp/generate_tuple_is_empty.hpp>
+#include <yarmi/detail/pp/generate_ns_to_string.hpp>
+#include <yarmi/detail/pp/generate_metacode.hpp>
+#include <yarmi/detail/pp/generate_callers.hpp>
+#include <yarmi/detail/pp/generate_invoker.hpp>
+#include <yarmi/detail/pp/generate_invokers_sfinae.hpp>
+#include <yarmi/detail/pp/generate_proc_helper.hpp>
+
+#include <yarmi/detail/throw/throw.hpp>
+
 #include <yarmi/generate_struct.hpp>
 #include <yarmi/generate_enum.hpp>
-#include <yarmi/generate_proc_helper.hpp>
-#include <yarmi/get_proc_name.hpp>
-#include <yarmi/invoke.hpp>
-#include <yarmi/throw.hpp>
 
 /***************************************************************************/
 

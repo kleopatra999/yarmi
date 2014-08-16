@@ -32,7 +32,7 @@
 #ifndef _yarmi__two_invokers__global_context_hpp
 #define _yarmi__two_invokers__global_context_hpp
 
-#include <yarmi/global_context_base.hpp>
+#include <yarmi/server/global_context_base.hpp>
 
 template<typename UC>
 struct global_context: yarmi::global_context_base {

@@ -31,6 +31,8 @@
 
 #include "client_session.hpp"
 
+#include <yarmi/invoke.hpp>
+
 #include <iostream>
 
 /***************************************************************************/

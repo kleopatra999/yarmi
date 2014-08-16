@@ -29,8 +29,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/throw.hpp>
-#include <yarmi/os_resources.hpp>
+#include <yarmi/detail/throw/throw.hpp>
+#include <yarmi/server/os_resources.hpp>
 
 #include <vector>
 #include <cstdlib>
@@ -154,6 +154,8 @@ resources get_resources_usage() {
 
 	return res;
 }
+
+/***************************************************************************/
 
 } // ns detail
 } // ns yarmi

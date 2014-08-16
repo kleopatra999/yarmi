@@ -33,6 +33,7 @@
 #define _yarmi__chat__protocol_hpp
 
 #include <yarmi/yarmi.hpp>
+#include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
 	(yarmi),        // client invoker namespace

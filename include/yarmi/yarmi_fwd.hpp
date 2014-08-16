@@ -32,7 +32,8 @@
 #ifndef _yarmi__yarmi_fwd_hpp
 #define _yarmi__yarmi_fwd_hpp
 
-#include <yarmi/fnv1a.hpp>
+#include <yarmi/detail/cthash/fnv1a.hpp>
+#include <yarmi/detail/endian/endian.hpp>
 
 #include <memory>
 
@@ -42,15 +43,20 @@ namespace yarmi {
 
 using call_id_type = decltype(yarmi::detail::fnv1a(""));
 using buffer_ptr   = std::shared_ptr<char>;
+
 using buffer_pair  = std::pair<buffer_ptr, std::size_t>;
+inline buffer_pair allocate_buffer(const std::size_t size) {
+	buffer_ptr buffer(new char[size], [](char *p){delete[] p;});
+	return {std::move(buffer), size};
+}
 
 struct server_base;
 struct server_statistic;
-struct session_base;
+struct session;
 struct global_context_base;
 
 using socket_ptr  = std::shared_ptr<boost::asio::ip::tcp::socket>;
-using session_ptr = std::shared_ptr<session_base>;
+using session_ptr = std::shared_ptr<session>;
 
 struct _serialize_only { _serialize_only() {} };
 static const _serialize_only serialize_only;

@@ -32,7 +32,7 @@
 #ifndef _yarmi__two_invokers__protocol_fwd_hpp
 #define _yarmi__two_invokers__protocol_fwd_hpp
 
-namespace yarmi { struct session_base; }
+namespace yarmi { struct session; }
 
 struct user_context;
 

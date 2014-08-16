@@ -31,6 +31,8 @@
 
 #include "client.hpp"
 
+#include <yarmi/invoke.hpp>
+
 #include <iostream>
 
 client::client(boost::asio::io_service &ios)

@@ -34,7 +34,7 @@
 #include "global_context.hpp"
 #include "user_context.hpp"
 
-#include <yarmi/server.hpp>
+#include <yarmi/server/server.hpp>
 
 #include <iostream>
 
