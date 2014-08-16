@@ -36,11 +36,11 @@
 #include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
-	(two_invokers),
+	(two_invokers), ::yarmi::yas_serializer
+	,
 	client_first_invoker,
 	(ping, on_ping, (std::string))
 	,
-	(two_invokers),
 	server_first_invoker,
 	(pong, on_pong, (std::string))
 )

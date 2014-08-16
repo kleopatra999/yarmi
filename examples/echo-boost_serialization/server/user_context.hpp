@@ -29,34 +29,37 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __yarmi__remote_term__protocol_hpp
-#define __yarmi__remote_term__protocol_hpp
+#ifndef _yarmi__user_context_hpp
+#define _yarmi__user_context_hpp
 
-#include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
+#include "protocol.hpp"
 
-/***************************************************************************/
+#include <yarmi/server/session.hpp>
 
-YARMI_CONSTRUCT(
-	(yarmi),
-	yas_serializer,
-	client_side,
-	(pwd	, on_pwd		, ())
-	(mkdir, on_mkdir	, (std::string)) /* dir name */
-	(touch, on_touch	, (std::string)) /* file name */
-	(rm	, on_rm		, (std::string)) /* file name */
-	(ls	, on_ls		, (std::string)) /* dir name */
-	(cd	, on_cd		, (std::string)) /* dir name */
-	,
-	server_side,
-	(pwd	, on_pwd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(mkdir, on_mkdir	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(touch, on_touch	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(rm	, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(ls	, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(cd	, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-)
+template<typename>
+struct global_context;
 
 /***************************************************************************/
 
-#endif // __yarmi__remote_term__protocol_hpp
+namespace yarmi {
+struct server_base;
+} // ns yarmi
+
+/***************************************************************************/
+
+struct user_context: yarmi::session, yarmi::server_invoker<user_context> {
+	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
+
+	void on_connected();
+	void on_disconnected();
+	void on_received(const yarmi::buffer_pair &buffer);
+
+	void on_ping(const std::string &msg);
+
+private:
+	global_context<user_context> &gc;
+};
+
+/***************************************************************************/
+
+#endif // _yarmi__user_context_hpp

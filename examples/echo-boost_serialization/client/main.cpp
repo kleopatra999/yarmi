@@ -29,31 +29,80 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__detail__pp__generate_ns_hpp
-#define _yarmi__detail__pp__generate_ns_hpp
+#include <protocol.hpp>
+
+#include <yarmi/client/client_base.hpp>
+#include <yarmi/invoke.hpp>
+
+#include <iostream>
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_OPEN_NS_ITEM(unused1, unused2, elem) \
-	namespace elem {
+struct client_impl: yarmi::client_invoker<client_impl, yarmi::client_base> {
+	client_impl(yarmi::client_base &base)
+		:yarmi::client_invoker<client_impl, yarmi::client_base>(*this, base)
+		,msg_index(0)
+	{}
 
-#define YARMI_GENERATE_OPEN_NS(seq) \
-	BOOST_PP_SEQ_FOR_EACH( \
-		 YARMI_GENERATE_OPEN_NS_ITEM \
-		,~ \
-		,seq \
-	)
+	void on_pong(const std::string &msg) {
+		//std::cout << "received: \"" << msg << "\"" << std::endl;
+		this->ping("my message "+std::to_string(++msg_index));
 
-#define YARMI_GENERATE_CLOSE_NS_ITEM(unused1, unused2, unused3) \
+		static std::size_t i = 0;
+		if ( ++i == 1024 ) {
+			i = 0;
+			std::cout << "received: \"" << msg << "\"" << std::endl;
+		}
 	}
 
-#define YARMI_GENERATE_CLOSE_NS(seq) \
-	BOOST_PP_REPEAT( \
-		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_GENERATE_CLOSE_NS_ITEM \
-		,~ \
-	)
+	std::size_t msg_index;
+};
 
 /***************************************************************************/
 
-#endif // _yarmi__detail__pp__generate_ns_hpp
+struct client: yarmi::client_base {
+	client(boost::asio::io_service &ios)
+		:yarmi::client_base(ios)
+		,invoker(*this)
+	{}
+
+	void on_received(const yarmi::buffer_pair &buffer) {
+		yarmi::call_id_type call_id = 0;
+		YARMI_TRY(invoke_flag) {
+			const bool ok = yarmi::invoke(buffer, &call_id, invoker);
+			if ( ! ok ) {
+				std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
+			}
+		} YARMI_CATCH_LOG(invoke_flag, std::cerr);
+	}
+
+	client_impl invoker;
+};
+
+/***************************************************************************/
+
+int main() {
+	static const char *ip = "127.0.0.1";
+	static const std::uint16_t port = 44550;
+
+	boost::asio::io_service ios;
+	client c(ios);
+	c.async_connect(
+		 ip
+		,port
+		,[&c](const boost::system::error_code &ec) {
+			if ( ec ) {
+				std::cout << "async_connect handler: " << ec.message() << std::endl;
+				return;
+			}
+			c.start();
+			c.invoker.ping("message");
+		}
+	);
+
+	ios.run();
+
+	return 0;
+}
+
+/***************************************************************************/

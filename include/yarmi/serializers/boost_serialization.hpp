@@ -34,20 +34,101 @@
 
 #include <yarmi/yarmi_fwd.hpp>
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/noncopyable.hpp>
 
-namespace yarmi {
+#include <sstream>
+#include <tuple>
 
 /***************************************************************************/
 
-struct boost_serialization: private boost::noncopyable {
-	boost_serialization(const buffer_pair &buffer)
+namespace yarmi {
+namespace detail {
+
+template<uint N>
+struct Serialize {
+	template<class Archive, typename... Args>
+	static void serialize(Archive & ar, std::tuple<Args...> & t, const unsigned int version) {
+	  ar & std::get<N-1>(t);
+	  Serialize<N-1>::serialize(ar, t, version);
+	}
+};
+
+template<>
+struct Serialize<0> {
+	template<class Archive, typename... Args>
+	static void serialize(Archive &, std::tuple<Args...> &, const unsigned int)
+	{}
+};
+
+} // ns detail
+} // ns yarmi
+
+namespace boost {
+namespace serialization {
+
+template<class Archive, typename... Args>
+void serialize(Archive &ar, std::tuple<Args...> &t, const unsigned int version) {
+	::yarmi::detail::Serialize<sizeof...(Args)>::serialize(ar, t, version);
+}
+
+} // ns serialization
+} // ns boost
+
+/***************************************************************************/
+
+namespace yarmi {
+
+struct boost_serializer: private boost::noncopyable {
+	boost_serializer(const buffer_pair &buffer)
+		:is(std::string(buffer.first.get(), buffer.second))
+		,ia(is, boost::archive::no_header)
 	{}
 
 	template<typename... Args>
 	static buffer_pair serialize(const call_id_type call_id, const Args&... args) {
 		static const std::uint32_t body_size = 0;
+
+		std::ostringstream os;
+		os.write((char*)&body_size, sizeof(body_size));
+
+		{
+			boost::archive::binary_oarchive oa(os, boost::archive::no_header);
+			oa & call_id;
+			if ( sizeof...(Args) ) {
+				const auto tuple = std::make_tuple(std::cref(args)...);
+				oa & tuple;
+			}
+		}
+
+		const std::string &str = os.str();
+		std::uint32_t *size = (std::uint32_t*)str.c_str();
+		*size = (std::uint32_t)(str.size()-sizeof(body_size));
+
+		const buffer_pair buffer = allocate_buffer(str.size());
+		std::memcpy(buffer.first.get(), str.c_str(), str.size());
+
+		return buffer;
 	}
+
+	call_id_type get_call_id() {
+		call_id_type call_id = 0;
+		ia & call_id;
+		return call_id;
+	}
+
+	template<typename... Args>
+	void deserialize(Args&... args) {
+		if ( sizeof...(Args) ) {
+			auto tuple = std::make_tuple(std::ref(args)...);
+			ia & tuple;
+		}
+	}
+
+private:
+	std::istringstream is;
+	boost::archive::binary_iarchive ia;
 };
 
 /***************************************************************************/

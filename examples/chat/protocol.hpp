@@ -36,7 +36,8 @@
 #include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
-	(yarmi),        // client invoker namespace
+	(yarmi),        // invokers namespace
+	yas_serializer, // used serializer name
 	client_invoker, // name of the client invoker
 	(registration , on_registration, (std::string)                           ) // username
 	(activation   , on_activation  , (std::string, std::string, std::string) ) // registration key : username : password
@@ -45,7 +46,6 @@ YARMI_CONSTRUCT(
 	(users_online , on_users_online, ()                                      ) // without args
 	(users_online , on_users_online, (std::string)                           ) // substring of username
 	,
-	(yarmi),        // server invoker namespace
 	server_invoker, // name of the server invoker
 	(registration , on_registration, (std::string, std::string)              ) // message : registration key
 	(activation   , on_activation  , (std::string)                           ) // message

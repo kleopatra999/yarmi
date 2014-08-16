@@ -130,13 +130,13 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
+#define YARMI_GENERATE_METACODE(ns, cn, oppocn, seq, opposeq) \
 	private: \
 		static constexpr const char *_meta_requests_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
 				,YARMI_GENERATE_METACODE_REQUESTS_NAMES_AUX \
-				,(oppons, oppocn, seq) \
+				,(ns, oppocn, seq) \
 			) \
 			0 \
 		}; \

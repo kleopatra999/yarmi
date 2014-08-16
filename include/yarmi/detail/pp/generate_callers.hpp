@@ -36,7 +36,7 @@
 
 #define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
 	::yarmi::buffer_pair name(::yarmi::_serialize_only) { \
-		return Ser::serialize(static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))); \
+		return serializer::serialize(static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))); \
 	} \
 	void name() { \
 		io.send(name(::yarmi::serialize_only)); \
@@ -58,7 +58,7 @@
 		) \
 		,::yarmi::_serialize_only \
 	) { \
-		return Ser::serialize( \
+		return serializer::serialize( \
 			 static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
 			,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
 		); \

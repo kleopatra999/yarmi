@@ -29,34 +29,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __yarmi__remote_term__protocol_hpp
-#define __yarmi__remote_term__protocol_hpp
-
-#include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
+#ifndef _yarmi__detail__pp__generate_tools_hpp
+#define _yarmi__detail__pp__generate_tools_hpp
 
 /***************************************************************************/
 
-YARMI_CONSTRUCT(
-	(yarmi),
-	yas_serializer,
-	client_side,
-	(pwd	, on_pwd		, ())
-	(mkdir, on_mkdir	, (std::string)) /* dir name */
-	(touch, on_touch	, (std::string)) /* file name */
-	(rm	, on_rm		, (std::string)) /* file name */
-	(ls	, on_ls		, (std::string)) /* dir name */
-	(cd	, on_cd		, (std::string)) /* dir name */
-	,
-	server_side,
-	(pwd	, on_pwd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(mkdir, on_mkdir	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(touch, on_touch	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(rm	, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(ls	, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(cd	, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-)
+#define YARMI_WRAP_SEQUENCE_X(...) \
+	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_Y
+#define YARMI_WRAP_SEQUENCE_Y(...) \
+	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_X
+
+#define YARMI_WRAP_SEQUENCE_X0
+#define YARMI_WRAP_SEQUENCE_Y0
 
 /***************************************************************************/
 
-#endif // __yarmi__remote_term__protocol_hpp
+#define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
+	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(BOOST_PP_ADD(idx, 1), size))
+
+/***************************************************************************/
+
+#endif // _yarmi__detail__pp__generate_tools_hpp

@@ -72,7 +72,7 @@
 	)
 
 #define YARMI_GENERATE_INVOKERS(seq) \
-	bool invoke(const ::yarmi::call_id_type call_id, Ser &ser) { \
+	bool invoke(const ::yarmi::call_id_type call_id, serializer &ser) { \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
@@ -84,7 +84,7 @@
 	} \
 	\
 	bool invoke(const ::yarmi::buffer_pair &buffer, ::yarmi::call_id_type *cid = 0) { \
-		Ser ser(buffer); \
+		serializer ser(buffer); \
 		::yarmi::call_id_type call_id = ser.get_call_id(); \
 		\
 		if ( cid ) \

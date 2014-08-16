@@ -36,6 +36,7 @@
 
 #include <yarmi/yarmi_fwd.hpp>
 
+#include <yarmi/detail/pp/generate_tools.hpp>
 #include <yarmi/detail/pp/generate_ns.hpp>
 #include <yarmi/detail/pp/generate_lazy_if.hpp>
 #include <yarmi/detail/pp/generate_tuple_is_empty.hpp>
@@ -53,40 +54,25 @@
 
 /***************************************************************************/
 
-#define YARMI_WRAP_SEQUENCE_X(...) \
-	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_Y
-#define YARMI_WRAP_SEQUENCE_Y(...) \
-	((__VA_ARGS__)) YARMI_WRAP_SEQUENCE_X
-
-#define YARMI_WRAP_SEQUENCE_X0
-#define YARMI_WRAP_SEQUENCE_Y0
-
-/***************************************************************************/
-
-#define YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx) \
-	BOOST_PP_COMMA_IF(BOOST_PP_NOT_EQUAL(BOOST_PP_ADD(idx, 1), size))
-
-/***************************************************************************/
-
 #define YARMI_CONSTRUCT_INVOKER( \
-	 ns      /* namespace */ \
-	,cn      /* class name */ \
-	,oppons  /* namespace for opposite class */ \
-	,oppocn  /* name of opposite class */ \
-	,seq     /* procedures sequence */ \
-	,opposeq /* opposite procedures sequence */ \
+	 ser		/* serializer name */ \
+	,ns		/* namespace */ \
+	,cn		/* class name */ \
+	,oppocn	/* name of opposite class */ \
+	,seq		/* procedures sequence */ \
+	,opposeq	/* opposite procedures sequence */ \
 ) \
-	template<typename Impl, typename IO = Impl, typename Ser = ::yarmi::yas_serializer> \
+	template<typename Impl, typename IO = Impl> \
 	struct cn { \
-		using this_type = cn<Impl, IO, Ser>; \
-		using serializer = Ser; \
+		using this_type = cn<Impl, IO>; \
+		using serializer = ser; \
 		\
 		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
 		{} \
 		\
-		YARMI_GENERATE_METACODE(ns, cn, oppons, oppocn, seq, opposeq) \
+		YARMI_GENERATE_METACODE(ns, cn, oppocn, seq, opposeq) \
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
 		YARMI_GENERATE_INVOKERS(opposeq) \
 		\
@@ -98,52 +84,43 @@
 		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
 	}; \
 	\
-	template<typename Impl, typename IO, typename Ser> \
-	constexpr const char* cn<Impl, IO, Ser>::_meta_requests_names[]; \
-	template<typename Impl, typename IO, typename Ser> \
-	constexpr const char* cn<Impl, IO, Ser>::_meta_handlers_names[];
+	template<typename Impl, typename IO> \
+	constexpr const char* cn<Impl, IO>::_meta_requests_names[]; \
+	template<typename Impl, typename IO> \
+	constexpr const char* cn<Impl, IO>::_meta_handlers_names[];
 
 /***************************************************************************/
 
 #define YARMI_CONSTRUCT( \
-	 client_invoker_ns \
+	 invokers_ns \
+	,serializer \
 	,client_invoker_name \
 	,client_apis_seq \
-	,server_invoker_ns \
 	,server_invoker_name \
 	,server_apis_seq \
 	,... \
 ) \
-	namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns) \
-	{ \
+	YARMI_GENERATE_OPEN_NS(invokers_ns) \
 		__VA_ARGS__; \
-	} /* ns */ \
-	\
-	YARMI_GENERATE_OPEN_NS(client_invoker_ns) \
-		using namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns); \
 		\
 		YARMI_CONSTRUCT_INVOKER( \
-			 client_invoker_ns \
+			 serializer \
+			,invokers_ns \
 			,client_invoker_name \
-			,server_invoker_ns \
 			,server_invoker_name \
 			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X client_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X server_apis_seq, 0) \
 		) \
-	YARMI_GENERATE_CLOSE_NS(client_invoker_ns) \
-	\
-	YARMI_GENERATE_OPEN_NS(server_invoker_ns) \
-		using namespace YARMI_GENERATE_NS_NAME(client_invoker_ns, server_invoker_ns); \
 		\
 		YARMI_CONSTRUCT_INVOKER( \
-			 server_invoker_ns \
+			 serializer \
+			,invokers_ns \
 			,server_invoker_name \
-			,client_invoker_ns \
 			,client_invoker_name \
 			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X server_apis_seq, 0) \
 			,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X client_apis_seq, 0) \
 		) \
-	YARMI_GENERATE_CLOSE_NS(server_invoker_ns)
+	YARMI_GENERATE_CLOSE_NS(invokers_ns)
 
 /***************************************************************************/
 

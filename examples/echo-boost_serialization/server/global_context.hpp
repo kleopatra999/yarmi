@@ -29,34 +29,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __yarmi__remote_term__protocol_hpp
-#define __yarmi__remote_term__protocol_hpp
+#ifndef _yarmi__global_context_hpp
+#define _yarmi__global_context_hpp
 
-#include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
-
-/***************************************************************************/
-
-YARMI_CONSTRUCT(
-	(yarmi),
-	yas_serializer,
-	client_side,
-	(pwd	, on_pwd		, ())
-	(mkdir, on_mkdir	, (std::string)) /* dir name */
-	(touch, on_touch	, (std::string)) /* file name */
-	(rm	, on_rm		, (std::string)) /* file name */
-	(ls	, on_ls		, (std::string)) /* dir name */
-	(cd	, on_cd		, (std::string)) /* dir name */
-	,
-	server_side,
-	(pwd	, on_pwd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(mkdir, on_mkdir	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(touch, on_touch	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(rm	, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(ls	, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(cd	, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-)
+#include <yarmi/server/global_context_base.hpp>
 
 /***************************************************************************/
 
-#endif // __yarmi__remote_term__protocol_hpp
+template<typename UC>
+struct global_context: yarmi::global_context_base {
+};
+
+/***************************************************************************/
+
+#endif // _yarmi__global_context_hpp

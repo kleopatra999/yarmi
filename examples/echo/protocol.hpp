@@ -36,11 +36,11 @@
 #include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
-	(yarmi),
+	(yarmi),        // invokers namespace
+	yas_serializer, // used serializer name
 	client_invoker, // name of the client invoker
 	(ping, on_ping, (std::string))
 	,
-	(yarmi),
 	server_invoker, // name of the server invoker
 	(pong, on_pong, (std::string))
 );

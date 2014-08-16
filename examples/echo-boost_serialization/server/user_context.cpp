@@ -29,34 +29,50 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __yarmi__remote_term__protocol_hpp
-#define __yarmi__remote_term__protocol_hpp
+#include "user_context.hpp"
+#include "global_context.hpp"
 
-#include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
+#include <yarmi/invoke.hpp>
 
-/***************************************************************************/
-
-YARMI_CONSTRUCT(
-	(yarmi),
-	yas_serializer,
-	client_side,
-	(pwd	, on_pwd		, ())
-	(mkdir, on_mkdir	, (std::string)) /* dir name */
-	(touch, on_touch	, (std::string)) /* file name */
-	(rm	, on_rm		, (std::string)) /* file name */
-	(ls	, on_ls		, (std::string)) /* dir name */
-	(cd	, on_cd		, (std::string)) /* dir name */
-	,
-	server_side,
-	(pwd	, on_pwd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(mkdir, on_mkdir	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(touch, on_touch	, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(rm	, on_rm		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(ls	, on_ls		, (int, std::string, std::string)) /* error code, error message, cmd output */
-	(cd	, on_cd		, (int, std::string, std::string)) /* error code, error message, cmd output */
-)
+#include <iostream>
 
 /***************************************************************************/
 
-#endif // __yarmi__remote_term__protocol_hpp
+user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session(socket, sb)
+	,yarmi::server_invoker<user_context>(*this, *this)
+	,gc(gc)
+{}
+
+/***************************************************************************/
+
+void user_context::on_connected() {
+	std::cout << YARMI_FORMAT_MESSAGE(
+		 "on_connected(%1%) called"
+		,get_socket().remote_endpoint().address().to_string()
+	) << std::endl;
+}
+
+void user_context::on_disconnected() {
+	std::cout << YARMI_FORMAT_MESSAGE("on_disconnected() called") << std::endl;
+}
+
+void user_context::on_received(const yarmi::buffer_pair &buffer) {
+	YARMI_TRY(invoke_flag) {
+		yarmi::call_id_type call_id = 0;
+		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
+			std::cerr << YARMI_FORMAT_MESSAGE(
+				 "no handler for call_id \"%1%\""
+				,call_id
+			) << std::endl;
+		}
+	} YARMI_CATCH_LOG(invoke_flag, std::cerr)
+}
+
+/***************************************************************************/
+
+void user_context::on_ping(const std::string &msg) {
+	pong(msg);
+}
+
+/***************************************************************************/
