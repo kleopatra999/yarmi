@@ -256,7 +256,7 @@ void session::stop() {
 	stop(ec);
 
 	if ( ec )
-		YARMI_THROW("ec=%1%, messgae=%2%", ec.value(), ec.message());
+		YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 }
 
 void session::stop(boost::system::error_code &ec) {
@@ -268,7 +268,7 @@ void session::close() {
 	close(ec);
 
 	if ( ec )
-		YARMI_THROW("ec=%1%, messgae=%2%", ec.value(), ec.message());
+		YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 }
 
 void session::close(boost::system::error_code &ec) {

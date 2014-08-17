@@ -30,6 +30,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <yarmi/client/client_base.hpp>
+#include <yarmi/detail/throw/throw.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -65,14 +66,15 @@ struct client_base::impl {
 		);
 	}
 
-	void disconnect() {
-		boost::system::error_code ec;
+	void disconnect(boost::system::error_code &ec) {
+		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		if ( ec ) return;
 		socket.close(ec);
 	}
 
 	void on_header_readed(const boost::system::error_code &ec, std::size_t rd) {
 		if ( ec || rd != header_size )
-			throw std::runtime_error("on_header_readed(): "+ec.message());
+			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
 		// convert to host byte order
 		header_buffer.size = network_to_host(header_buffer.size);
@@ -97,7 +99,7 @@ struct client_base::impl {
 		,const yarmi::buffer_pair &buffer
 	) {
 		if ( ec || rd != buffer.second )
-			throw std::runtime_error("on_body_readed(): "+ec.message());
+			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
 		self.on_received(buffer);
 
@@ -131,7 +133,7 @@ struct client_base::impl {
 		in_process = false;
 
 		if ( ec || wr != buffer.second )
-			throw std::runtime_error("client_base::sent(): "+ec.message());
+			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
 		if ( ! buffers.empty() ) {
 			buffer_pair buf = buffers.front();
@@ -159,8 +161,12 @@ client_base::client_base(boost::asio::io_service &ios)
 	:pimpl(new impl(ios, *this))
 {}
 
-client_base::~client_base()
-{ delete pimpl; }
+client_base::~client_base() {
+	boost::system::error_code ec;
+	disconnect(ec);
+
+	delete pimpl;
+}
 
 /***************************************************************************/
 
@@ -174,7 +180,7 @@ void client_base::connect(const std::string &ip, const std::uint16_t port) {
 	connect(ip, port, ec);
 
 	if ( ec )
-		throw std::runtime_error("client_base::on_connect(): "+ec.message());
+		YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 }
 
 void client_base::connect(const std::string &ip, const std::uint16_t port, boost::system::error_code &ec) {
@@ -187,7 +193,14 @@ void client_base::start() {
 }
 
 void client_base::disconnect() {
-	pimpl->disconnect();
+	boost::system::error_code ec;
+	pimpl->disconnect(ec);
+	if ( ec )
+		YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
+}
+
+void client_base::disconnect(boost::system::error_code &ec) {
+	pimpl->disconnect(ec);
 }
 
 void client_base::send(const buffer_pair &buffer) {

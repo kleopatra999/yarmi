@@ -53,7 +53,7 @@ struct client_base: private boost::noncopyable {
 	const boost::asio::ip::tcp::socket& get_socket() const;
 	boost::asio::io_service& get_io_service();
 
-	void connect(const std::string &ip, const std::uint16_t port); // may throw if connection error
+	void connect(const std::string &ip, const std::uint16_t port); // may throw if error
 	void connect(const std::string &ip, const std::uint16_t port, boost::system::error_code &ec);
 
 	template<typename F>
@@ -63,9 +63,10 @@ struct client_base: private boost::noncopyable {
 	}
 
 	void start();
-	void disconnect();
-	void send(const buffer_pair &buffer);
+	void disconnect(); // may throw if error
+	void disconnect(boost::system::error_code &ec);
 
+	void send(const buffer_pair &buffer);
 	virtual void on_received(const buffer_pair &buffer) = 0;
 
 private:
