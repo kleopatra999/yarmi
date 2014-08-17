@@ -53,7 +53,9 @@ struct session: std::enable_shared_from_this<session> {
 
 	void start();
 	void stop();
+	void stop(boost::system::error_code &ec);
 	void close();
+	void close(boost::system::error_code &ec);
 
 	void send(const buffer_pair &buffer);
 

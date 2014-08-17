@@ -231,8 +231,12 @@ session::session(const socket_ptr &socket, server_base &sb)
 	:pimpl(new impl(socket, sb))
 {}
 
-session::~session()
-{ delete pimpl; }
+session::~session() {
+	boost::system::error_code ec;
+	close(ec);
+
+	delete pimpl;
+}
 
 /***************************************************************************/
 
@@ -247,8 +251,30 @@ void session::start() {
 
 /***************************************************************************/
 
-void session::stop() { pimpl->socket->cancel(); }
-void session::close() { pimpl->socket->close(); }
+void session::stop() {
+	boost::system::error_code ec;
+	stop(ec);
+
+	if ( ec )
+		YARMI_THROW("ec=%1%, messgae=%2%", ec.value(), ec.message());
+}
+
+void session::stop(boost::system::error_code &ec) {
+	pimpl->socket->cancel(ec);
+}
+
+void session::close() {
+	boost::system::error_code ec;
+	close(ec);
+
+	if ( ec )
+		YARMI_THROW("ec=%1%, messgae=%2%", ec.value(), ec.message());
+}
+
+void session::close(boost::system::error_code &ec) {
+	pimpl->socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+	pimpl->socket->close(ec);
+}
 
 /***************************************************************************/
 
