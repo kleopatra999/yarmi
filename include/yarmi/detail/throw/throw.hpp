@@ -156,7 +156,8 @@
 	try
 
 #define YARMI_CATCH(flagname, ...) \
-	catch (const std::exception &) { \
+	catch (const std::exception &ex) { \
+		((void)ex); \
 		flagname = true; \
 		{ __VA_ARGS__; } \
 	} catch (...) { \

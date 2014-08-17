@@ -29,34 +29,36 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <protocol.hpp>
+#ifndef _yarmi__server__run_hpp
+#define _yarmi__server__run_hpp
 
-#include "global_context.hpp"
-#include "user_context.hpp"
+#include <boost/asio/io_service.hpp>
 
-#include <yarmi/server/server.hpp>
+#include <yarmi/detail/throw/throw.hpp>
 
-#include <iostream>
+#include <sstream>
+
+namespace yarmi {
 
 /***************************************************************************/
 
-int main() {
-	boost::asio::io_service ios;
-
-	global_context<user_context> gc(
-		 "./users.db"
-		,"./messages.db"
-	);
-
-	yarmi::server_config config;
-	yarmi::server<user_context, global_context> server(
-		  config
-		 ,ios
-		 ,gc
-	);
-	server.start();
-
-	yarmi::run(ios, [](const std::string &msg){std::cerr << "yarmi::run(): " << msg << std::endl;});
+template<typename F>
+void run(boost::asio::io_service &ios, F func) {
+	while ( !ios.stopped() ) {
+		std::ostringstream os;
+		YARMI_TRY(run_flag) {
+			ios.run();
+			break;
+		} YARMI_CATCH_LOG(
+			run_flag,
+			os,
+			func(os.str());
+		);
+	}
 }
 
 /***************************************************************************/
+
+} // ns yarmi
+
+#endif // _yarmi__server__run_hpp

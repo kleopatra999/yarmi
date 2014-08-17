@@ -112,4 +112,5 @@ HEADERS += \
 	../../../include/yarmi/procname.hpp \
 	../../../include/yarmi/yarmi.hpp \
 	../../../include/yarmi/yarmi_fwd.hpp \
-    ../../../include/yarmi/detail/endian/endian.hpp
+    ../../../include/yarmi/detail/endian/endian.hpp \
+    ../../../include/yarmi/server/run.hpp

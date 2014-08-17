@@ -50,7 +50,7 @@ int main() {
 	);
 	server.start();
 
-	ios.run();
+	yarmi::run(ios, [](const std::string &msg){std::cerr << "yarmi::run(): " << msg << std::endl;});
 }
 
 /***************************************************************************/

@@ -272,7 +272,8 @@ void session::close() {
 }
 
 void session::close(boost::system::error_code &ec) {
-	pimpl->socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+	pimpl->socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+	if ( ec ) return;
 	pimpl->socket->close(ec);
 }
 
@@ -283,7 +284,7 @@ buffer_pair session::on_send(const buffer_pair &buffer) {
 }
 
 void session::send(const buffer_pair &buffer) {
-	BOOST_ASSERT_MSG(pimpl->on_destruction_state == true, "session already ON_DESTRUCTION_STATE!");
+	BOOST_ASSERT_MSG(pimpl->on_destruction_state != true, "session already ON_DESTRUCTION_STATE!");
 
 	if ( !buffer.first.get() || !buffer.second )
 		return;

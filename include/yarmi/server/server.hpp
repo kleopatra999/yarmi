@@ -33,6 +33,7 @@
 #define _yarmi__server__server_hpp
 
 #include <yarmi/server/server_base.hpp>
+#include <yarmi/server/run.hpp>
 
 #include <cstdint>
 #include <string>
