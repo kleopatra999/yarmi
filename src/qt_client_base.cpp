@@ -29,4 +29,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/qt_client_base.hpp>
+#include <yarmi/client/qt_client_base.hpp>
+
+namespace yarmi {
+
+/***************************************************************************/
+
+QtClientBase::QtClientBase(QObject *parent) {
+}
+
+QtClientBase::~QtClientBase() {
+}
+
+/***************************************************************************/
+
+void QtClientBase::connect(const QString &ip, const quint16 port) {
+}
+
+void QtClientBase::connect(const QString &ip, const quint16 port, boost::system::error_code &ec) {
+}
+
+/***************************************************************************/
+
+void QtClientBase::start() {
+}
+
+/***************************************************************************/
+
+} // ns yarmi

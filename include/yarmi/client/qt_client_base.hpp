@@ -32,7 +32,10 @@
 #ifndef _yarmi__client__qt_client_base_hpp
 #define _yarmi__client__qt_client_base_hpp
 
+#include <yarmi/yarmi_fwd.hpp>
+
 #include <boost/noncopyable.hpp>
+#include <boost/system/error_code.hpp>
 
 #include <QtNetwork/QTcpSocket>
 
@@ -44,9 +47,15 @@ struct QtClientBase: private boost::noncopyable {
 	QtClientBase(QObject *parent=0);
 	virtual ~QtClientBase();
 
-	void connect(const QString &ip, const quint16 port);
-	bool connected() const;
-	void disconnect();
+	void connect(const QString &ip, const quint16 port); // may throw if error
+	void connect(const QString &ip, const quint16 port, boost::system::error_code &ec);
+
+	void start();
+	void disconnect(); // may throw if error
+	void disconnect(boost::system::error_code &ec);
+
+	void send(const buffer_pair &buffer);
+	virtual void on_received(const buffer_pair &buffer) = 0;
 
 private:
 	struct impl;

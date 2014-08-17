@@ -50,7 +50,6 @@ struct client_base: private boost::noncopyable {
 	virtual ~client_base();
 
 	boost::asio::ip::tcp::socket& get_socket();
-	const boost::asio::ip::tcp::socket& get_socket() const;
 	boost::asio::io_service& get_io_service();
 
 	void connect(const std::string &ip, const std::uint16_t port); // may throw if error

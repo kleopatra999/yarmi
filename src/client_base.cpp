@@ -171,9 +171,9 @@ client_base::~client_base() {
 /***************************************************************************/
 
 boost::asio::ip::tcp::socket& client_base::get_socket() { return pimpl->socket; }
-const boost::asio::ip::tcp::socket& client_base::get_socket() const { return pimpl->socket; }
-
 boost::asio::io_service& client_base::get_io_service() { return pimpl->socket.get_io_service(); }
+
+/***************************************************************************/
 
 void client_base::connect(const std::string &ip, const std::uint16_t port) {
 	boost::system::error_code ec;
@@ -188,9 +188,13 @@ void client_base::connect(const std::string &ip, const std::uint16_t port, boost
 	pimpl->socket.connect(ep, ec);
 }
 
+/***************************************************************************/
+
 void client_base::start() {
 	pimpl->start();
 }
+
+/***************************************************************************/
 
 void client_base::disconnect() {
 	boost::system::error_code ec;
@@ -202,6 +206,8 @@ void client_base::disconnect() {
 void client_base::disconnect(boost::system::error_code &ec) {
 	pimpl->disconnect(ec);
 }
+
+/***************************************************************************/
 
 void client_base::send(const buffer_pair &buffer) {
 	pimpl->send(buffer);
