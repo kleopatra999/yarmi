@@ -33,6 +33,7 @@
 #define _yarmi__detail__endian__endian_hpp
 
 #include <cstdint>
+#include <cstring>
 
 #if defined (__GLIBC__)
 #	include <endian.h>
@@ -121,33 +122,120 @@
 namespace yarmi {
 namespace detail {
 
+template<typename, typename>
+struct is_same { static constexpr bool value = false; };
+template<typename T>
+struct is_same<T, T> { static constexpr bool value = true; };
+
+template<bool ok, typename TRUE_TYPE, typename FALSE_TYPE>
+struct if_ { using type = TRUE_TYPE; };
+template<typename TRUE_TYPE, typename FALSE_TYPE>
+struct if_<false, TRUE_TYPE, FALSE_TYPE> { using type = FALSE_TYPE; };
+
+/***************************************************************************/
+
 template<std::size_t S>
 struct endian;
 
 template<>
 struct endian<sizeof(std::uint16_t)> {
-	static std::uint16_t host_to_network(const std::uint16_t v) { return YARMI_HOST_TO_NETWORK_16(v); }
-	static std::uint16_t network_to_host(const std::uint16_t v) { return YARMI_NETWORK_TO_HOST_16(v); }
+	static std::uint16_t host_to_network(const std::uint16_t &v) { return YARMI_HOST_TO_NETWORK_16(v); }
+	static std::uint16_t network_to_host(const std::uint16_t &v) { return YARMI_NETWORK_TO_HOST_16(v); }
 };
 template<>
 struct endian<sizeof(std::uint32_t)> {
-	static std::uint32_t host_to_network(const std::uint32_t v) { return YARMI_HOST_TO_NETWORK_32(v); }
-	static std::uint32_t network_to_host(const std::uint32_t v) { return YARMI_NETWORK_TO_HOST_32(v); }
+	static std::uint32_t host_to_network(const std::uint32_t &v) { return YARMI_HOST_TO_NETWORK_32(v); }
+	static std::uint32_t network_to_host(const std::uint32_t &v) { return YARMI_NETWORK_TO_HOST_32(v); }
 };
 template<>
 struct endian<sizeof(std::uint64_t)> {
-	static std::uint64_t host_to_network(const std::uint64_t v) { return YARMI_HOST_TO_NETWORK_64(v); }
-	static std::uint64_t network_to_host(const std::uint64_t v) { return YARMI_NETWORK_TO_HOST_64(v); }
+	static std::uint64_t host_to_network(const std::uint64_t &v) { return YARMI_HOST_TO_NETWORK_64(v); }
+	static std::uint64_t network_to_host(const std::uint64_t &v) { return YARMI_NETWORK_TO_HOST_64(v); }
+};
+
+} // ns detail
+
+// for integral types
+template<typename T>
+T host_to_network(const T &v) { return detail::endian<sizeof(T)>::host_to_network(v); }
+template<typename T>
+T network_to_host(const T &v) { return detail::endian<sizeof(T)>::network_to_host(v); }
+
+/***************************************************************************/
+
+namespace detail {
+
+template<bool LE>
+struct endian_convertor;
+
+template<>
+struct endian_convertor<true> {
+	template<typename T>
+	struct storage_type {
+		enum {
+			 is_float  = is_same<T, float>::value
+			,is_double = is_same<T, double>::value
+		};
+		static_assert(is_float||is_double,"only double or float types is allowed");
+
+		using type = typename if_<
+			 is_float
+			,std::uint32_t
+			,std::uint64_t
+		>::type;
+	};
+
+	template<typename T>
+	static void host_to_network(std::uint8_t *dst, const T &v) {
+		union {
+			typename storage_type<T>::type u;
+			T v;
+		} u;
+		u.v = v;
+
+		u.u = ::yarmi::host_to_network(u.u);
+		std::memcpy(dst, &u.u, sizeof(T));
+	}
+
+	template<typename T>
+	static void network_to_host(T &v, const std::uint8_t *src) {
+		union {
+			typename storage_type<T>::type u;
+			T v;
+		} u;
+
+		std::memcpy(&u.u, src, sizeof(v));
+		u.u = ::yarmi::network_to_host(u.u);
+		v = u.v;
+	}
+};
+
+template<>
+struct endian_convertor<false> {
+	template<typename T>
+	static void host_to_network(std::uint8_t *dst, const T &v) {
+		*((T*)dst) = v;
+	}
+
+	template<typename T>
+	static void network_to_host(T &v, const std::uint8_t *src) {
+		v = *((T*)src);
+	}
 };
 
 } // ns detail
 
 /***************************************************************************/
 
+// for floating types
 template<typename T>
-T host_to_network(const T v) { return detail::endian<sizeof(T)>::host_to_network(v); }
+void host_to_network(std::uint8_t *dst, const T &v) {
+	detail::endian_convertor<YARMI_LITTLE_ENDIAN>::host_to_network(dst, v);
+}
 template<typename T>
-T network_to_host(const T v) { return detail::endian<sizeof(T)>::network_to_host(v); }
+void network_to_host(T &v, const std::uint8_t *src) {
+	detail::endian_convertor<YARMI_LITTLE_ENDIAN>::network_to_host(v, src);
+}
 
 } // ns yarmi
 
