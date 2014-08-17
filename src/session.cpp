@@ -257,7 +257,7 @@ buffer_pair session::on_send(const buffer_pair &buffer) {
 }
 
 void session::send(const buffer_pair &buffer) {
-	BOOST_ASSERT_MSG(pimpl->on_destruction_state == false, "session already ON_DESTRUCTION_STATE!");
+	BOOST_ASSERT_MSG(pimpl->on_destruction_state == true, "session already ON_DESTRUCTION_STATE!");
 
 	if ( !buffer.first.get() || !buffer.second )
 		return;
@@ -266,6 +266,8 @@ void session::send(const buffer_pair &buffer) {
 }
 
 /***************************************************************************/
+
+bool session::on_destruction_state() const { return pimpl->on_destruction_state; }
 
 void session::set_on_destruction_state() {
 	boost::system::error_code ec;
