@@ -148,6 +148,8 @@ struct server_base::impl {
 	void session_deleter(session *session) {
 		std::ostringstream os;
 
+		session->set_on_destruction_state();
+
 		YARMI_TRY(on_disconnected_flag) {
 			session->on_disconnected();
 		} YARMI_CATCH_LOG(on_disconnected_flag, os, error_handler(os.str());)

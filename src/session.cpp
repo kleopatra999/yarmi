@@ -58,6 +58,7 @@ struct session::impl {
 		,error_handler(sb.get_error_handler())
 		,buffers()
 		,in_process(false)
+		,on_destruction_state(false)
 	{}
 
 	void read_header(const yarmi::session_ptr &self) {
@@ -82,6 +83,9 @@ struct session::impl {
 		,const std::size_t rd
 		,const yarmi::session_ptr &self
 	) {
+		if ( ec == boost::asio::error::operation_aborted )
+			return;
+
 		if ( ec || rd != header_size ) {
 			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("header read error: \"%1%\"", ec.message()));
 			return;
@@ -125,6 +129,9 @@ struct session::impl {
 		,const yarmi::session_ptr &self
 		,const yarmi::buffer_pair &buffer
 	) {
+		if ( ec == boost::asio::error::operation_aborted )
+			return;
+
 		if ( ec || rd != buffer.second ) {
 			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body read error: \"%1%\"", ec.message()));
 			return;
@@ -175,16 +182,19 @@ struct session::impl {
 		,const buffer_pair &buffer
 	) {
 		in_process = false;
+
 		--stat.write_queue_size;
+		stat.writen += wr;
+		stat.write_rate += wr;
+		++stat.write_ops;
+
+		if ( ec == boost::asio::error::operation_aborted )
+			return;
 
 		if ( ec || wr != buffer.second ) {
 			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("write error: \"%1%\"", ec.message()));
 			return;
 		}
-
-		stat.writen += wr;
-		stat.write_rate += wr;
-		++stat.write_ops;
 
 		if ( !buffers.empty() ) {
 			buffer_pair buffer = buffers.front();
@@ -211,6 +221,8 @@ struct session::impl {
 		char buffer[header_size];
 		std::uint32_t size;
 	} header_buffer;
+
+	bool on_destruction_state;
 }; // struct session_base::impl
 
 /***************************************************************************/
@@ -245,10 +257,21 @@ buffer_pair session::on_send(const buffer_pair &buffer) {
 }
 
 void session::send(const buffer_pair &buffer) {
+	BOOST_ASSERT_MSG(pimpl->on_destruction_state == false, "session already ON_DESTRUCTION_STATE!");
+
 	if ( !buffer.first.get() || !buffer.second )
 		return;
 
 	pimpl->send(shared_from_this(), on_send(buffer));
+}
+
+/***************************************************************************/
+
+void session::set_on_destruction_state() {
+	boost::system::error_code ec;
+	pimpl->socket->cancel(ec);
+
+	pimpl->on_destruction_state = true;
 }
 
 /***************************************************************************/

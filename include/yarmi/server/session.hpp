@@ -39,9 +39,13 @@
 
 namespace yarmi {
 
+struct server_base;
+
 /***************************************************************************/
 
 struct session: std::enable_shared_from_this<session> {
+	friend struct server_base;
+
 	session(const socket_ptr &socket, server_base &sb);
 	virtual ~session();
 
@@ -57,6 +61,10 @@ struct session: std::enable_shared_from_this<session> {
 	virtual void on_connected() {}
 	virtual void on_disconnected() {}
 	virtual void on_received(const buffer_pair &buffer) = 0;
+
+private:
+	// for private use only
+	void set_on_destruction_state();
 
 private:
 	struct impl;
