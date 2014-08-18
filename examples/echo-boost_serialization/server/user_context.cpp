@@ -57,10 +57,9 @@ void user_context::on_disconnected() {
 	std::cout << YARMI_FORMAT_MESSAGE("on_disconnected() called") << std::endl;
 }
 
-void user_context::on_received(const yarmi::buffer_pair &buffer) {
+void user_context::on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer) {
 	YARMI_TRY(invoke_flag) {
-		yarmi::call_id_type call_id = 0;
-		if ( !yarmi::invoke(buffer, &call_id, *this) ) {
+		if ( !yarmi::invoke(call_id, buffer, *this) ) {
 			std::cerr << YARMI_FORMAT_MESSAGE(
 				 "no handler for call_id \"%1%\""
 				,call_id

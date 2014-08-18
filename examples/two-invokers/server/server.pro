@@ -114,4 +114,9 @@ HEADERS += \
 	../../../include/yarmi/yarmi_fwd.hpp \
 	../../../include/yarmi/detail/endian/endian.hpp \
 	../../../include/yarmi/server/run.hpp \
-    ../../../include/yarmi/serializers/binary_serializer_base.hpp
+    ../../../include/yarmi/serializers/binary_serializer_base.hpp \
+    global_context.hpp \
+    protocol_fwd.hpp \
+    server_first_invoker.hpp \
+    server_second_invoker.hpp \
+    user_context.hpp

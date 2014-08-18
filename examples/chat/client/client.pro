@@ -100,4 +100,6 @@ HEADERS += \
     ../../../include/yarmi/invoke.hpp \
     ../../../include/yarmi/procname.hpp \
     ../../../include/yarmi/yarmi.hpp \
-    ../../../include/yarmi/yarmi_fwd.hpp
+    ../../../include/yarmi/yarmi_fwd.hpp \
+    ../../../include/yarmi/serializers/binary_serializer_base.hpp \
+    ../../../include/yarmi/server/run.hpp

@@ -52,7 +52,7 @@ struct user_context: yarmi::session, yarmi::server_invoker<user_context> {
 
 	void on_connected();
 	void on_disconnected();
-	void on_received(const yarmi::buffer_pair &buffer);
+	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);
 
 	void on_ping(const std::string &msg);
 

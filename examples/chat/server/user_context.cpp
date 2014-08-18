@@ -54,8 +54,8 @@ void user_context::on_disconnected() {
 
 /***************************************************************************/
 
-void user_context::on_received(const yarmi::buffer_pair &buffer) {
-	invoke(buffer);
+void user_context::on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer) {
+	invoke(call_id, buffer);
 }
 
 /***************************************************************************/

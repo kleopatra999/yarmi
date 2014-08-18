@@ -42,7 +42,7 @@
 struct client_session: yarmi::client_base, yarmi::client_invoker<client_session> {
 	client_session(boost::asio::io_service &ios);
 
-	void on_received(const yarmi::buffer_pair &buffer);
+	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);
 
 	void on_registration(const std::string &msg, const std::string &regkey);
 	void on_activation(const std::string &msg);
