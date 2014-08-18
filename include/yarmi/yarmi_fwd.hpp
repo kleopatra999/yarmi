@@ -41,6 +41,8 @@
 
 namespace yarmi {
 
+/***************************************************************************/
+
 using call_id_type = decltype(yarmi::detail::fnv1a(""));
 using buffer_ptr   = std::shared_ptr<char>;
 
@@ -50,8 +52,8 @@ inline buffer_pair allocate_buffer(const std::size_t size) {
 	return {std::move(buffer), size};
 }
 
-struct server_base;
 struct server_statistic;
+struct server_base;
 struct session;
 struct global_context_base;
 
@@ -60,6 +62,8 @@ using session_ptr = std::shared_ptr<session>;
 
 struct _serialize_only { _serialize_only() {} };
 static const _serialize_only serialize_only;
+
+/***************************************************************************/
 
 } // ns yarmi
 

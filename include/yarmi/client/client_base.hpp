@@ -66,7 +66,7 @@ struct client_base: private boost::noncopyable {
 	void disconnect(boost::system::error_code &ec);
 
 	void send(const buffer_pair &buffer);
-	virtual void on_received(const buffer_pair &buffer) = 0;
+	virtual void on_received(const call_id_type call_id, const buffer_pair &buffer) = 0;
 
 private:
 	struct impl;

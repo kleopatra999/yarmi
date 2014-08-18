@@ -34,7 +34,7 @@
 #include <yarmi/server/global_context_base.hpp>
 #include <yarmi/server/handler_allocator.hpp>
 #include <yarmi/server/make_preallocated_handler.hpp>
-#include <yarmi/detail/throw/throw.hpp>
+#include <yarmi/serializers/binary_serializer_base.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -49,7 +49,7 @@ namespace yarmi {
 /***************************************************************************/
 
 struct session::impl {
-	enum { header_size = sizeof(std::uint32_t) };
+	enum { header_size = binary_serializer_base::header_size() };
 
 	impl(const socket_ptr &socket, server_base &sb)
 		:config(sb.get_config())
@@ -57,14 +57,14 @@ struct session::impl {
 		,socket(std::move(socket))
 		,error_handler(sb.get_error_handler())
 		,buffers()
-		,in_process(false)
+		,write_in_process(false)
 		,on_destruction_state(false)
 	{}
 
 	void read_header(const yarmi::session_ptr &self) {
 		boost::asio::async_read(
 			 *socket
-			,boost::asio::buffer(header_buffer.buffer)
+			,boost::asio::buffer(header_buffer)
 			,yarmi::make_preallocated_handler(
 				read_allocator
 				,std::bind(
@@ -77,12 +77,13 @@ struct session::impl {
 			)
 		);
 	}
-
 	void header_readed(
 		 const boost::system::error_code &ec
 		,const std::size_t rd
 		,const yarmi::session_ptr &self
 	) {
+		++stat.read_ops;
+
 		if ( ec == boost::asio::error::operation_aborted )
 			return;
 
@@ -94,19 +95,21 @@ struct session::impl {
 		stat.readed += rd;
 		stat.read_rate += rd;
 
-		// convert to host byte order
-		header_buffer.size = network_to_host(header_buffer.size);
+		const std::pair<std::uint32_t, call_id_type> header = binary_serializer_base::unpack_header(header_buffer, header_size);
+		if ( header.first == 0 ) {
+			invoke(header.second, buffer_pair(), self);
+			read_header(self);
+		} else {
+			if ( header.first > config.max_recv_size ) {
+				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", header.first));
+				return;
+			}
 
-		if ( header_buffer.size > config.max_recv_size ) {
-			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("body size is too long: \"%1%\"", header_buffer.size));
-			return;
+			read_body(header.first, header.second, self);
 		}
-
-		read_body(header_buffer.size, self);
 	}
-	void read_body(const std::size_t body_size, const yarmi::session_ptr &self) {
+	void read_body(const std::size_t body_size, const call_id_type call_id, const yarmi::session_ptr &self) {
 		::yarmi::buffer_pair buffer = allocate_buffer(body_size);
-
 		boost::asio::async_read(
 			 *socket
 			,boost::asio::buffer(buffer.first.get(), buffer.second)
@@ -118,6 +121,7 @@ struct session::impl {
 					,std::placeholders::_1
 					,std::placeholders::_2
 					,self
+					,call_id
 					,buffer
 				)
 			)
@@ -127,8 +131,11 @@ struct session::impl {
 		 const boost::system::error_code &ec
 		,const std::size_t rd
 		,const yarmi::session_ptr &self
+		,const yarmi::call_id_type call_id
 		,const yarmi::buffer_pair &buffer
 	) {
+		++stat.read_ops;
+
 		if ( ec == boost::asio::error::operation_aborted )
 			return;
 
@@ -139,22 +146,23 @@ struct session::impl {
 
 		stat.readed += rd;
 		stat.read_rate += rd;
-		++stat.read_ops;
 
-		try {
-			self->on_received(buffer);
-		} catch (const std::exception &ex) {
-			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("exception is thrown when invoking: \"%1%\"", ex.what()));
-		}
-
+		invoke(call_id, buffer, self);
 		read_header(self);
+	}
+	void invoke(const call_id_type call_id, const buffer_pair &buffer, const session_ptr &self) {
+		try {
+			self->on_received(call_id, buffer);
+		} catch (const std::exception &ex) {
+			error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("invoke error: \"%1%\"", ex.what()));
+		}
 	}
 
 	void send(const yarmi::session_ptr &self, const buffer_pair &buffer) {
 		++stat.write_queue_size;
 
-		if ( !in_process ) {
-			in_process = true;
+		if ( !write_in_process ) {
+			write_in_process = true;
 			boost::asio::async_write(
 				 *socket
 				,boost::asio::buffer(buffer.first.get(), buffer.second)
@@ -181,7 +189,7 @@ struct session::impl {
 		,const yarmi::session_ptr &self
 		,const buffer_pair &buffer
 	) {
-		in_process = false;
+		write_in_process = false;
 
 		--stat.write_queue_size;
 		stat.writen += wr;
@@ -196,7 +204,7 @@ struct session::impl {
 			return;
 		}
 
-		if ( !buffers.empty() ) {
+		if ( !buffers.empty() && !on_destruction_state ) {
 			buffer_pair buffer = buffers.front();
 			buffers.pop();
 
@@ -215,13 +223,12 @@ struct session::impl {
 
 	/** buffers list */
 	std::queue<buffer_pair> buffers;
-	bool in_process;
+	bool write_in_process;
 
-	union {
-		char buffer[header_size];
-		std::uint32_t size;
-	} header_buffer;
+	/** header */
+	char header_buffer[header_size];
 
+	/** on destruction state flag */
 	bool on_destruction_state;
 }; // struct session_base::impl
 
@@ -284,7 +291,7 @@ buffer_pair session::on_send(const buffer_pair &buffer) {
 }
 
 void session::send(const buffer_pair &buffer) {
-	BOOST_ASSERT_MSG(pimpl->on_destruction_state != true, "session already ON_DESTRUCTION_STATE!");
+	BOOST_ASSERT_MSG(!pimpl->on_destruction_state, "session already ON_DESTRUCTION_STATE!");
 
 	if ( !buffer.first.get() || !buffer.second )
 		return;

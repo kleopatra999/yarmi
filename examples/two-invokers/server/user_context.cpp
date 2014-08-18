@@ -35,6 +35,7 @@
 
 #include <yarmi/detail/throw/throw.hpp>
 #include <yarmi/invoke.hpp>
+#include <yarmi/procname.hpp>
 
 #include <iostream>
 
@@ -52,10 +53,9 @@ user_context::~user_context()
 
 /***************************************************************************/
 
-void user_context::on_received(const yarmi::buffer_pair &buffer) {
+void user_context::on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer) {
 	YARMI_TRY(invoke_flag) {
-		yarmi::call_id_type call_id = 0;
-		if ( !yarmi::invoke(buffer, &call_id, first, second) ) {
+		if ( !yarmi::invoke(call_id, buffer, first, second) ) {
 			std::cerr << YARMI_FORMAT_MESSAGE("no handler for call_id \"%1%\"", call_id) << std::endl;
 		}
 	} YARMI_CATCH_LOG(invoke_flag, std::cerr)

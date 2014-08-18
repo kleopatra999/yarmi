@@ -39,20 +39,23 @@ namespace detail {
 
 enum class request_or_handler { request, handler };
 
+const char* get_proc_name(request_or_handler, call_id_type) { return 0; }
 template<typename Invoker, typename... Invokers>
 const char* get_proc_name(request_or_handler d, call_id_type call_id, const Invoker &head, const Invokers&... tail) {
-	const char *res = 0;
-	bool flag  = false;
-	auto apply = [](...) {};
-	auto func  = [&flag, &res, d](const call_id_type call_id, const auto &invoker) {
-		return flag=flag || (
-			d==request_or_handler::request
-				? (res=invoker.meta_request_name(call_id))
-				: (res=invoker.meta_handler_name(call_id))
-		);
-	};
-	apply(func(call_id, head), func(call_id, tail)...);
+//	const char *res = 0;
+//	bool flag  = false;
+//	auto apply = [](...) {};
+//	auto func  = [&flag, &res, d](const call_id_type call_id, const auto &invoker) {
+//		return flag=flag || (
+//			d==request_or_handler::request
+//				? (res=invoker.meta_request_name(call_id))
+//				: (res=invoker.meta_handler_name(call_id))
+//		);
+//	};
+//	apply(func(call_id, head), func(call_id, tail)...);
 
+	const char *res = 0;
+	((d == request_or_handler::request) ? (res=head.meta_request_name(call_id)) : (res=head.meta_handler_name(call_id))) || get_proc_name(d, call_id, tail...);
 	return res;
 }
 

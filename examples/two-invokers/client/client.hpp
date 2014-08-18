@@ -40,7 +40,7 @@
 struct client: yarmi::client_base {
 	client(boost::asio::io_service &ios);
 
-	void on_received(const yarmi::buffer_pair &buffer);
+	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);
 
 	client_first_invoker_impl first;
 	client_second_invoker_impl second;

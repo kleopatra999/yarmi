@@ -77,8 +77,9 @@ using size = boost::mpl::size<V>;
 
 /***************************************************************************/
 
+bool invoke(const call_id_type, const buffer_pair &) { return false; }
 template<typename Invoker, typename... Invokers>
-bool invoke(const buffer_pair &buffer, call_id_type *cid, Invoker &head, Invokers&... tail) {
+bool invoke(const call_id_type call_id, const buffer_pair &buffer, Invoker &head, Invokers&... tail) {
 	using ids    = typename detail::mpl::cat<Invoker, Invokers...>::type;
 	using unique = typename detail::mpl::unique<ids>::type;
 	static_assert(
@@ -86,18 +87,7 @@ bool invoke(const buffer_pair &buffer, call_id_type *cid, Invoker &head, Invoker
 		,"proc IDs collision is detected"
 	);
 
-	typename Invoker::serializer ia(buffer);
-	call_id_type call_id = ia.get_call_id();
-	if ( cid ) *cid = call_id;
-
-	bool flag  = false;
-	auto apply = [](...) {};
-	auto func  = [&flag](const call_id_type call_id, auto &ia, auto &inv) {
-		return flag=flag || inv.invoke(call_id, ia);
-	};
-	apply(func(call_id, ia, head), func(call_id, ia, tail)...);
-
-	return flag;
+	return head.invoke(call_id, buffer) || invoke(call_id, buffer, tail...);
 }
 
 /***************************************************************************/

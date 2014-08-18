@@ -29,60 +29,56 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__detail__pp__generate_invoker_hpp
-#define _yarmi__detail__pp__generate_invoker_hpp
+#ifndef _yarmi__serializers__binary_serializer_base_hpp
+#define _yarmi__serializers__binary_serializer_base_hpp
+
+#include <yarmi/yarmi_fwd.hpp>
+#include <yarmi/detail/throw/throw.hpp>
+
+#include <boost/noncopyable.hpp>
+
+namespace yarmi {
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS(idx, name) \
-	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)(impl);
+struct binary_serializer_base: private boost::noncopyable {
+	static constexpr std::size_t header_size() {
+		static_assert(sizeof(std::uint32_t) == sizeof(yarmi::call_id_type), "bad types");
 
-#define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
-	BOOST_PP_TUPLE_ELEM(idx, tuple) arg##idx;
-
-#define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS(idx, name, tuple) \
-	BOOST_PP_REPEAT( \
-		 BOOST_PP_TUPLE_SIZE(tuple) \
-		,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS \
-		,tuple \
-	) \
-	serializer::deserialize(buffer, BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg)); \
-	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)( \
-		 impl\
-		,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
-	);
-
-#define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, name, tuple) \
-	case static_cast<::yarmi::call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
-		YARMI_LAZY_IF( \
-			 YARMI_TUPLE_IS_EMPTY(tuple) \
-			,(idx, name) \
-			,(idx, name, tuple) \
-			,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS \
-			,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS \
-		) \
-		return true; \
+		return  sizeof(std::uint32_t) // body size
+				+ sizeof(call_id_type)  // call id
+		;
 	}
 
-#define YARMI_GENERATE_INVOKERS_IMPL(unused, idx, seq) \
-	YARMI_GENERATE_INVOKERS_ONE_ITEM( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	)
-
-#define YARMI_GENERATE_INVOKERS(seq) \
-	bool invoke(const ::yarmi::call_id_type call_id, const ::yarmi::buffer_pair &buffer) { \
-		switch ( call_id ) { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_INVOKERS_IMPL \
-				,seq \
-			) \
-			default: return false; \
-		} \
+	template<typename OS>
+	static void reserve_space_for_header(OS &os) {
+		static const char header_buffer[header_size()] = "\0";
+		YARMI_TEST_THROW(os.write(header_buffer, header_size()) == header_size());
 	}
+
+	static void pack_header(const call_id_type call_id, const char *ptr, const std::size_t size) {
+		std::uint32_t *header = (std::uint32_t*)ptr;
+		// set body size
+		header[0] = host_to_network((std::uint32_t)(size-header_size()));
+		// set call id
+		header[1] = host_to_network(call_id);
+	}
+	static std::pair<std::uint32_t, call_id_type>
+	unpack_header(const char *ptr, const std::size_t size) {
+		YARMI_TEST_THROW(size >= header_size());
+		std::pair<std::uint32_t, call_id_type> res;
+		// extract body size
+		const std::uint32_t *header = (std::uint32_t*)ptr;
+		res.first  = network_to_host(header[0]);
+		// extract call id
+		res.second = network_to_host(header[1]);
+
+		return res;
+	}
+};
 
 /***************************************************************************/
 
-#endif // _yarmi__detail__pp__generate_invoker_hpp
+} // ns yarmi
+
+#endif // _yarmi__serializers__binary_serializer_base_hpp

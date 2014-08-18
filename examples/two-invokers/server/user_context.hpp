@@ -46,7 +46,7 @@ struct user_context: yarmi::session {
 	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
 	virtual ~user_context();
 
-	void on_received(const yarmi::buffer_pair &buffer);
+	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);
 
 	global_context<user_context> &gc;
 	two_invokers::server_first_invoker_impl first;

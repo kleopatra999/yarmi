@@ -30,33 +30,43 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <yarmi/client/client_base.hpp>
-#include <yarmi/detail/throw/throw.hpp>
+#include <yarmi/serializers/binary_serializer_base.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#include <list>
+#include <queue>
 
 namespace yarmi {
 
 /***************************************************************************/
 
 struct client_base::impl {
-	enum { header_size = sizeof(std::uint32_t) };
+	enum { header_size = binary_serializer_base::header_size() };
 
 	impl(boost::asio::io_service &ios, yarmi::client_base &self)
 		:socket(ios)
 		,self(self)
 		,buffers()
-		,in_process(false)
+		,write_in_process(false)
 	{}
 
+	void disconnect(boost::system::error_code &ec) {
+		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		if ( ec ) return;
+		socket.close(ec);
+	}
+
 	void start() {
+		read_header();
+	}
+
+	void read_header() {
 		boost::asio::async_read(
 			 socket
-			,boost::asio::buffer(header_buffer.buffer)
+			,boost::asio::buffer(header_buffer)
 			,std::bind(
 				 &client_base::impl::on_header_readed
 				,this
@@ -66,49 +76,48 @@ struct client_base::impl {
 		);
 	}
 
-	void disconnect(boost::system::error_code &ec) {
-		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-		if ( ec ) return;
-		socket.close(ec);
-	}
-
 	void on_header_readed(const boost::system::error_code &ec, std::size_t rd) {
 		if ( ec || rd != header_size )
 			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
-		// convert to host byte order
-		header_buffer.size = network_to_host(header_buffer.size);
-
-		::yarmi::buffer_pair buffer = allocate_buffer(header_buffer.size);
-		boost::asio::async_read(
-			 socket
-			,boost::asio::buffer(buffer.first.get(), buffer.second)
-			,std::bind(
-				&client_base::impl::on_body_readed
-				,this
-				,std::placeholders::_1
-				,std::placeholders::_2
-				,buffer
-			)
-		);
+		const std::pair<std::uint32_t, call_id_type> header = binary_serializer_base::unpack_header(header_buffer, header_size);
+		if ( header.first == 0 ) {
+			self.on_received(header.second, buffer_pair());
+			read_header();
+		} else {
+			::yarmi::buffer_pair buffer = allocate_buffer(header.first);
+			boost::asio::async_read(
+				 socket
+				,boost::asio::buffer(buffer.first.get(), buffer.second)
+				,std::bind(
+					&client_base::impl::on_body_readed
+					,this
+					,std::placeholders::_1
+					,std::placeholders::_2
+					,header.second
+					,buffer
+				)
+			);
+		}
 	}
 
 	void on_body_readed(
 		 const boost::system::error_code &ec
 		,const std::size_t rd
+		,const yarmi::call_id_type call_id
 		,const yarmi::buffer_pair &buffer
 	) {
 		if ( ec || rd != buffer.second )
 			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
-		self.on_received(buffer);
+		self.on_received(call_id, buffer);
 
-		start();
+		read_header();
 	}
 
 	void send(const buffer_pair &buffer) {
-		if ( ! in_process ) {
-			in_process = true;
+		if ( ! write_in_process ) {
+			write_in_process = true;
 
 			boost::asio::async_write(
 				 socket
@@ -122,7 +131,7 @@ struct client_base::impl {
 				)
 			);
 		} else {
-			buffers.push_back(buffer);
+			buffers.push(buffer);
 		}
 	}
 	void sent(
@@ -130,14 +139,14 @@ struct client_base::impl {
 		,const std::size_t wr
 		,const buffer_pair &buffer
 	) {
-		in_process = false;
+		write_in_process = false;
 
 		if ( ec || wr != buffer.second )
 			YARMI_THROW("ec=%1%, message=%2%", ec.value(), ec.message());
 
 		if ( ! buffers.empty() ) {
 			buffer_pair buf = buffers.front();
-			buffers.pop_front();
+			buffers.pop();
 
 			send(buf);
 		}
@@ -146,13 +155,10 @@ struct client_base::impl {
 	boost::asio::ip::tcp::socket socket;
 	yarmi::client_base &self;
 
-	std::list<buffer_pair> buffers;
-	bool in_process;
+	std::queue<buffer_pair> buffers;
+	bool write_in_process;
 
-	union {
-		char buffer[header_size];
-		std::uint32_t size;
-	} header_buffer;
+	char header_buffer[header_size];
 };
 
 /***************************************************************************/

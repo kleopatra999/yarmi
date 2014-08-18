@@ -32,62 +32,44 @@
 #ifndef _yarmi__serializers__yas_serialization_hpp
 #define _yarmi__serializers__yas_serialization_hpp
 
+#include <yarmi/serializers/binary_serializer_base.hpp>
+
 #include <yas/mem_streams.hpp>
 #include <yas/binary_iarchive.hpp>
 #include <yas/binary_oarchive.hpp>
 #include <yas/serializers/std_types_serializers.hpp>
 
-#include <yarmi/yarmi_fwd.hpp>
-
-#include <boost/noncopyable.hpp>
-
 namespace yarmi {
 
 /***************************************************************************/
 
-struct yas_serializer: private boost::noncopyable {
-	yas_serializer(const buffer_pair &buffer)
-		:is(buffer.first.get(), buffer.second)
-		,ia(is)
-	{}
-
+struct yas_serializer: binary_serializer_base {
 	template<typename... Args>
 	static buffer_pair serialize(const call_id_type call_id, const Args&... args) {
-		static const std::uint32_t body_size = 0;
-
 		yas::mem_ostream os;
-		os.write(&body_size, sizeof(body_size));
+		reserve_space_for_header(os);
 
-		yas::binary_oarchive<yas::mem_ostream> oa(os);
-		oa & call_id;
 		if ( sizeof...(Args) ) {
+			yas::binary_oarchive<yas::mem_ostream> oa(os);
 			oa & std::make_tuple(std::cref(args)...);
 		}
 
 		const yas::intrusive_buffer &intrusive_buffer = os.get_intrusive_buffer();
-		std::uint32_t *size = (std::uint32_t*)((char*)intrusive_buffer.data);
-		*size = host_to_network((std::uint32_t)(intrusive_buffer.size-sizeof(body_size)));
+		pack_header(call_id, intrusive_buffer.data, intrusive_buffer.size);
 
 		const yas::shared_buffer &shared_buffer = os.get_shared_buffer();
 		return {shared_buffer.data, shared_buffer.size};
 	}
 
-	call_id_type get_call_id() {
-		call_id_type call_id = 0;
-		ia & call_id;
-		return call_id;
-	}
 	template<typename... Args>
-	void deserialize(Args&... args) {
+	static void deserialize(const buffer_pair &buffer, Args&... args) {
 		if ( sizeof...(Args) ) {
+			yas::mem_istream is(buffer.first.get(), buffer.second);
+			yas::binary_iarchive<yas::mem_istream> ia(is);
 			auto tuple = std::make_tuple(std::ref(args)...);
 			ia & tuple;
 		}
 	}
-
-private:
-	yas::mem_istream is;
-	yas::binary_iarchive<yas::mem_istream> ia;
 };
 
 /***************************************************************************/

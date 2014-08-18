@@ -63,7 +63,7 @@ SOURCES += \
 	../../../src/server_statistic.cpp \
 	server_first_invoker.cpp \
 	server_second_invoker.cpp \
-    ../../../src/session.cpp
+	../../../src/session.cpp
 
 win32:SOURCES += \
 	../../../src/os_resources_win.cpp
@@ -112,5 +112,6 @@ HEADERS += \
 	../../../include/yarmi/procname.hpp \
 	../../../include/yarmi/yarmi.hpp \
 	../../../include/yarmi/yarmi_fwd.hpp \
-    ../../../include/yarmi/detail/endian/endian.hpp \
-    ../../../include/yarmi/server/run.hpp
+	../../../include/yarmi/detail/endian/endian.hpp \
+	../../../include/yarmi/server/run.hpp \
+    ../../../include/yarmi/serializers/binary_serializer_base.hpp
