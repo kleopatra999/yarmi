@@ -29,34 +29,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _yarmi__detail__pp__generate_invokers_sfinae_hpp
-#define _yarmi__detail__pp__generate_invokers_sfinae_hpp
+#ifndef _yarmi__three_invokers__server_first_invoker_impl_hpp
+#define _yarmi__three_invokers__server_first_invoker_impl_hpp
 
-#define YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
-	BOOST_PP_CAT(_, BOOST_PP_CAT(name, BOOST_PP_CAT(_, idx)))
+#include "protocol_fwd.hpp"
+#include "first_proto.hpp"
 
-#define YARMI_GENERATE_INVOKERS_SFINAE_IMPL(idx, name, _tuple) \
-	template<typename Obj, typename... Args> \
-	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
-		(Obj &o, const Args&... args) -> decltype(o.name(args...), void()) \
-	{ \
-		o.name(args...); \
-	} \
-	template<typename Obj, typename... Args> \
-	static void YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)(Obj &, const Args&...) {}
+YARMI_GENERATE_OPEN_NS(INVOKERS_NS)
 
-#define YARMI_GENERATE_INVOKERS_SFINAE_AUX(unused, idx, seq) \
-	YARMI_GENERATE_INVOKERS_SFINAE_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	)
+/***************************************************************************/
 
-#define YARMI_GENERATE_INVOKERS_SFINAE(seq) \
-	BOOST_PP_REPEAT( \
-		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_GENERATE_INVOKERS_SFINAE_AUX \
-		,seq \
-	)
+template<typename Impl>
+struct server_first_invoker_impl: server_first_invoker<server_first_invoker_impl, yarmi::session> {
+	server_first_invoker_impl(Impl &impl)
+		:impl(impl)
+	{}
 
-#endif // _yarmi__detail__pp__generate_invokers_sfinae_hpp
+	void YARMI_DECLARE_PROC(SERVER__FIRST_INVOKER__PONG) {
+
+	}
+
+	Impl &impl;
+};
+
+/***************************************************************************/
+
+YARMI_GENERATE_CLOSE_NS(INVOKERS_NS)
+
+#endif // _yarmi__three_invokers__server_first_invoker_impl_hpp

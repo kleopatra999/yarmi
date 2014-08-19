@@ -51,11 +51,11 @@
 			) \
 		)
 
-#	define YARMI_DECLARE_PROC(pname, ...) \
+#	define YARMI_DECLARE_PROC(tuple, ...) \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY((__VA_ARGS__)) \
-			,(pname) \
-			,(pname, (__VA_ARGS__)) \
+			,(BOOST_PP_TUPLE_ELEM(1, tuple)) \
+			,(BOOST_PP_TUPLE_ELEM(1, tuple), (__VA_ARGS__)) \
 			,YARMI_DECLARE_PROC_WITHOUT_DUMP_FOR_EMPTY_ARGS \
 			,YARMI_DECLARE_PROC_WITHOUT_DUMP_FOR_NONEMPTY_ARGS \
 		)

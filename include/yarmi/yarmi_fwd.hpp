@@ -63,6 +63,25 @@ using session_ptr = std::shared_ptr<session>;
 struct _serialize_only { _serialize_only() {} };
 static const _serialize_only serialize_only;
 
+struct _fake_log { _fake_log() {} };
+static const _fake_log fake_log;
+
+/***************************************************************************/
+
+namespace detail {
+
+template<typename Log, typename... Args>
+auto logging(Log& log, const call_id_type call_id, const std::tuple<const Args&...> &args)
+	-> decltype((log(call_id, args)), void())
+{
+	log(call_id, args);
+}
+
+template<typename Log, typename... Args>
+void logging(Log&, const call_id_type, const std::tuple<const Args&...> &) {}
+
+} // ns detail
+
 /***************************************************************************/
 
 } // ns yarmi

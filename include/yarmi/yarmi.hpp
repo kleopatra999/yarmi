@@ -62,14 +62,25 @@
 	,seq		/* procedures sequence */ \
 	,opposeq	/* opposite procedures sequence */ \
 ) \
-	template<typename Impl, typename IO = Impl> \
+	template< \
+		 typename Impl \
+		,typename IO = Impl \
+		,typename CLog = ::yarmi::_fake_log \
+		,typename ILog = ::yarmi::_fake_log \
+	> \
 	struct cn { \
-		using this_type = cn<Impl, IO>; \
 		using serializer = ser; \
 		\
-		cn(Impl &impl, IO &io) \
+		cn( \
+			 Impl &impl \
+			,IO &io \
+			,CLog clog = ::yarmi::fake_log \
+			,ILog ilog = ::yarmi::fake_log \
+		) \
 			:impl(impl) \
 			,io(io) \
+			,clog(clog) \
+			,ilog(ilog) \
 		{} \
 		\
 		YARMI_GENERATE_METACODE(ns, cn, oppocn, seq, opposeq) \
@@ -79,15 +90,17 @@
 	private: \
 		Impl &impl; \
 		IO &io; \
+		CLog clog; \
+		ILog ilog; \
 		\
 	private: \
 		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
 	}; \
 	\
-	template<typename Impl, typename IO> \
-	constexpr const char* cn<Impl, IO>::_meta_requests_names[]; \
-	template<typename Impl, typename IO> \
-	constexpr const char* cn<Impl, IO>::_meta_handlers_names[];
+	template<typename Impl, typename IO, typename CLog, typename ILog> \
+	constexpr const char* cn<Impl, IO, CLog, ILog>::_meta_requests_names[]; \
+	template<typename Impl, typename IO, typename CLog, typename ILog> \
+	constexpr const char* cn<Impl, IO, CLog, ILog>::_meta_handlers_names[];
 
 /***************************************************************************/
 
@@ -101,7 +114,7 @@
 	,... \
 ) \
 	YARMI_GENERATE_OPEN_NS(invokers_ns) \
-		__VA_ARGS__; \
+		__VA_ARGS__ /* user code expanded here */ \
 		\
 		YARMI_CONSTRUCT_INVOKER( \
 			 serializer \

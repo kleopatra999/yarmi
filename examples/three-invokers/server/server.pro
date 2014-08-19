@@ -57,13 +57,14 @@ win32:LIBS += \
 
 SOURCES += \
 	main.cpp \
-	user_context.cpp \
 	../../../src/global_context_base.cpp \
 	../../../src/server_base.cpp \
 	../../../src/server_statistic.cpp \
-	server_first_invoker.cpp \
-	server_second_invoker.cpp \
-	../../../src/session.cpp
+	../../../src/session.cpp \
+	user_context.cpp \
+	server_first_invoker_impl.cpp \
+	server_second_invoker_impl.cpp \
+	server_third_invoker_impl.cpp
 
 win32:SOURCES += \
 	../../../src/os_resources_win.cpp
@@ -114,11 +115,14 @@ HEADERS += \
 	../../../include/yarmi/yarmi_fwd.hpp \
 	../../../include/yarmi/detail/endian/endian.hpp \
 	../../../include/yarmi/server/run.hpp \
-    ../../../include/yarmi/serializers/binary_serializer_base.hpp \
-    global_context.hpp \
-    protocol_fwd.hpp \
-    server_first_invoker.hpp \
-    server_second_invoker.hpp \
-    user_context.hpp \
-    ../first_proto.hpp \
-    ../second_proto.hpp
+	../../../include/yarmi/serializers/binary_serializer_base.hpp \
+	../third_proto.hpp \
+	../second_proto.hpp \
+	../first_proto.hpp \
+	user_context.hpp \
+	protocol_fwd.hpp \
+	global_context.hpp \
+	../proto_base.hpp \
+	server_first_invoker_impl.hpp \
+	server_second_invoker_impl.hpp \
+	server_third_invoker_impl.hpp

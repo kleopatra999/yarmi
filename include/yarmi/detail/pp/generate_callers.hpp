@@ -34,11 +34,17 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name, opponame) \
+#define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name) \
 	::yarmi::buffer_pair name(::yarmi::_serialize_only) { \
 		return serializer::serialize(static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))); \
 	} \
 	void name() { \
+		::yarmi::detail::logging( \
+			 clog \
+			,static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+			,_meta_requests_names[idx] \
+			,std::make_tuple() \
+		); \
 		io.send(name(::yarmi::serialize_only)); \
 	}
 
@@ -49,12 +55,25 @@
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE(unused, idx, data) \
 	BOOST_PP_CAT(data, idx)
 
+#define YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM(unused1, idx, size) \
+	std::cref(arg##idx) \
+		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+
+#define YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE(tuple) \
+	std::make_tuple( \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_TUPLE_SIZE(tuple) \
+			,YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM \
+			,BOOST_PP_TUPLE_SIZE(tuple) \
+		) \
+	)
+
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS(idx, name, opponame, tuple) \
 	::yarmi::buffer_pair name( \
 		BOOST_PP_REPEAT( \
-			BOOST_PP_TUPLE_SIZE(tuple), \
-			YARMI_GENERATE_REMOTE_CALL_PARAMS, \
-			tuple \
+			 BOOST_PP_TUPLE_SIZE(tuple) \
+			,YARMI_GENERATE_REMOTE_CALL_PARAMS \
+			,tuple \
 		) \
 		,::yarmi::_serialize_only \
 	) { \
@@ -66,18 +85,24 @@
 	\
 	void name( \
 		BOOST_PP_REPEAT( \
-			BOOST_PP_TUPLE_SIZE(tuple), \
-			YARMI_GENERATE_REMOTE_CALL_PARAMS, \
-			tuple \
+			 BOOST_PP_TUPLE_SIZE(tuple) \
+			,YARMI_GENERATE_REMOTE_CALL_PARAMS \
+			,tuple \
 		) \
 	) { \
+		::yarmi::detail::logging( \
+			 clog \
+			,static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+			,_meta_requests_names[idx] \
+			,YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE(tuple) \
+		); \
 		io.send(name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg), ::yarmi::serialize_only)); \
 	}
 
 #define YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL(idx, name, opponame, tuple) \
 	YARMI_LAZY_IF( \
 		YARMI_TUPLE_IS_EMPTY(tuple), \
-		(idx, name, opponame), \
+		(idx, name), \
 		(idx, name, opponame, tuple), \
 		YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS, \
 		YARMI_GENERATE_REMOTE_CALL_WITH_ARGS \
