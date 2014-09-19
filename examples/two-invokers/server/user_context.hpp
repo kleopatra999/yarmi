@@ -37,9 +37,6 @@
 
 #include <yarmi/server/session.hpp>
 
-template<typename>
-struct global_context;
-
 /***************************************************************************/
 
 struct user_context: yarmi::session {
