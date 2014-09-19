@@ -32,7 +32,7 @@
 #include "client_second_invoker.hpp"
 #include "client.hpp"
 
-//#include <iostream>
+/***************************************************************************/
 
 struct client_second_invoker_impl::impl {
 	impl(client &c)
@@ -42,6 +42,8 @@ struct client_second_invoker_impl::impl {
 	client &c;
 }; // struct client_second_invoker_impl::impl
 
+/***************************************************************************/
+
 client_second_invoker_impl::client_second_invoker_impl(client &c)
 	:two_invokers::client_second_invoker<client_second_invoker_impl, client>(*this, c)
 	,pimpl(new impl(c))
@@ -50,7 +52,10 @@ client_second_invoker_impl::client_second_invoker_impl(client &c)
 client_second_invoker_impl::~client_second_invoker_impl()
 { delete pimpl; }
 
+/***************************************************************************/
+
 void client_second_invoker_impl::on_pong(std::uint32_t val) {
-	//std::cout << "client_second_invoker_impl::on_pong(" << str << ")" << std::endl;
 	ping(val);
 }
+
+/***************************************************************************/

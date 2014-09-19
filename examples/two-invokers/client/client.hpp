@@ -37,6 +37,8 @@
 
 #include <yarmi/client/client_base.hpp>
 
+/***************************************************************************/
+
 struct client: yarmi::client_base {
 	client(boost::asio::io_service &ios);
 
@@ -45,5 +47,7 @@ struct client: yarmi::client_base {
 	client_first_invoker_impl first;
 	client_second_invoker_impl second;
 }; // struct client
+
+/***************************************************************************/
 
 #endif // _yarmi__client_hpp

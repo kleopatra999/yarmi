@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+/***************************************************************************/
+
 struct client_first_invoker_impl::impl {
 	impl(client &c)
 		:c(c)
@@ -42,6 +44,8 @@ struct client_first_invoker_impl::impl {
 	client &c;
 }; // struct struct client_first_invoker_impl::impl
 
+/***************************************************************************/
+
 client_first_invoker_impl::client_first_invoker_impl(client &c)
 	:two_invokers::client_first_invoker<client_first_invoker_impl, client>(*this, c)
 	,pimpl(new impl(c))
@@ -49,6 +53,8 @@ client_first_invoker_impl::client_first_invoker_impl(client &c)
 
 client_first_invoker_impl::~client_first_invoker_impl()
 { delete pimpl; }
+
+/***************************************************************************/
 
 void client_first_invoker_impl::on_pong(std::uint32_t val) {
 	//std::cout << "client_first_invoker_impl::on_pong(" << str << ")" << std::endl;
@@ -61,3 +67,5 @@ void client_first_invoker_impl::on_pong(std::uint32_t val) {
 		std::cout << "received: \"" << val << "\"" << std::endl;
 	}
 }
+
+/***************************************************************************/

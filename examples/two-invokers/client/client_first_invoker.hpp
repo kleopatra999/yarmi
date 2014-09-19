@@ -36,6 +36,8 @@
 
 struct client;
 
+/***************************************************************************/
+
 struct client_first_invoker_impl: two_invokers::client_first_invoker<client_first_invoker_impl, client> {
 	client_first_invoker_impl(client &c);
 	virtual ~client_first_invoker_impl();
@@ -46,5 +48,7 @@ private:
 	struct impl;
 	impl *pimpl;
 };
+
+/***************************************************************************/
 
 #endif // _yarmi__client_first_invoker_hpp

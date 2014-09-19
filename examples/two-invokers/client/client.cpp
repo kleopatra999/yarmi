@@ -35,16 +35,22 @@
 
 #include <iostream>
 
+/***************************************************************************/
+
 client::client(boost::asio::io_service &ios)
 	:yarmi::client_base(ios)
 	,first(*this)
 	,second(*this)
 {}
 
+/***************************************************************************/
+
 void client::on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer) {
 	YARMI_TRY(invoke_flag) {
 		if ( !yarmi::invoke(call_id, buffer, first, second) ) {
-			std::cerr << "client::invoke(): no proc for call_id=" << call_id << std::endl;
+			std::cerr << "client::invoke(): no handler for call_id=" << call_id << std::endl;
 		}
 	} YARMI_CATCH_LOG(invoke_flag, std::cerr);
 }
+
+/***************************************************************************/
