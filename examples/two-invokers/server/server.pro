@@ -125,4 +125,5 @@ HEADERS += \
 	../first_proto.hpp \
 	../second_proto.hpp \
 	../../../include/yarmi/detail/pp/generate_base_class.hpp \
-	../../../include/yarmi/detail/pp/generate_usercode.hpp
+	../../../include/yarmi/detail/pp/generate_usercode.hpp \
+    ../../../include/yarmi/detail/pp/generate_tools.hpp

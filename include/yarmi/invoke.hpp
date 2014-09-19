@@ -79,7 +79,7 @@ struct unique {
 
 bool invoke(const call_id_type, const buffer_pair &) { return false; }
 template<typename Invoker, typename... Invokers>
-bool invoke(call_id_type call_id, const buffer_pair &buffer, Invoker &head, Invokers&... tail) {
+bool invoke(const call_id_type call_id, const buffer_pair &buffer, Invoker &head, Invokers&... tail) {
 	using ids    = typename detail::mpl::cat<Invoker, Invokers...>::type;
 	using unique = typename detail::mpl::unique<ids>::type;
 	static_assert(
