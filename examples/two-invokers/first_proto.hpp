@@ -33,16 +33,15 @@
 #define _yarmi__two_invokers__first_proto_hpp
 
 #include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
-	(two_invokers), ::yarmi::yas_serializer
+	(two_invokers)
 	,
 	client_first_invoker,
-	(ping, on_ping, (std::string))
+	(proc(ping, on_ping, (std::uint32_t)))
 	,
 	server_first_invoker,
-	(pong, on_pong, (std::string))
+	(proc(pong, on_pong, (std::uint32_t)))
 )
 
 #endif // _yarmi__two_invokers__first_proto_hpp

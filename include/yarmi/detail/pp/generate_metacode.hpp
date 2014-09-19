@@ -33,141 +33,233 @@
 #define _yarmi__detail__pp__generate_metacode_hpp
 
 #include <boost/mpl/vector.hpp>
+#include <boost/mpl/integral_c.hpp>
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL(idx, name) \
-	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a(_meta_requests_names[idx]) \
-	,
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME_, str)
 
-#define YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_REQUESTS_ENUM_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	)
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS_, str)
 
-#define YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL(idx, name) \
-	BOOST_PP_CAT(name, _##idx) = ::yarmi::detail::fnv1a(_meta_handlers_names[idx]) \
-	,
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_proc
 
-#define YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_HANDLERS_ENUM_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_enum
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_struct
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS_proc(request, handler, tuple) \
+	(request, handler)
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_proc(pref, idx, reqhand, name, names_arr) \
+	static constexpr const ::yarmi::call_id_type \
+		BOOST_PP_CAT(pref, BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(reqhand, name), _##idx)) \
+			= ::yarmi::hash(names_arr[idx]);
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_enum(...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GEN_struct(...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_EXPAND_MACRO(pref, idx, reqhand, pname, names_arr, name) \
+	pname(pref, idx, reqhand, name, names_arr)
+//[pref|idx|pname|names_arr|name]
+
+#define YARMI_GENERATE_METACODE_GENERATE_CALL_IDS(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_EXPAND_MACRO( \
+		 BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,idx \
+		,BOOST_PP_TUPLE_ELEM(3, tuple) \
+		,YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
+		,BOOST_PP_TUPLE_ELEM(2, tuple) \
+		,YARMI_GENERATE_METACODE_GENERATE_CALL_IDS_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
 	)
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL(idx, size, name) \
-	::boost::mpl::size_t<static_cast<std::size_t>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))> \
-		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME_, str)
 
-#define YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_IMPL( \
-		 idx \
-		,BOOST_PP_SEQ_SIZE(seq) \
-		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	)
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS_, str)
 
-#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL(idx, size, name) \
-	::boost::mpl::size_t<static_cast<std::size_t>(_meta_handlers_ids::BOOST_PP_CAT(on_, BOOST_PP_CAT(name, _##idx)))> \
-		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_proc
 
-#define YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_IMPL( \
-		 idx \
-		,BOOST_PP_SEQ_SIZE(seq) \
-		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
-	)
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_enum
 
-/***************************************************************************/
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_struct
 
-#define YARMI_GENERATE_METACODE_HANDLERS_NAMES_IMPL(ns, cn, tuple) \
-	YARMI_NS_TO_STRING(ns, cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple)) \
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS_proc(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_proc(ns, cn, tuple) \
+	YARMI_GENERATE_NS_TO_STRING(ns, cn::BOOST_PP_TUPLE_ELEM(1, (tuple))BOOST_PP_TUPLE_ELEM(2, (tuple))) \
 	,
 
-#define YARMI_GENERATE_METACODE_HANDLERS_NAMES_AUX(unused, idx, tuple) \
-	YARMI_GENERATE_METACODE_HANDLERS_NAMES_IMPL( \
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_enum(...) \
+	"",
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GEN_struct(...) \
+	"",
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_EXPAND_MACRO(ns, cn, name, args) \
+	name(ns, cn, args)
+
+#define YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_EXPAND_MACRO( \
 		 BOOST_PP_TUPLE_ELEM(0, tuple) \
 		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
-	)
-
-#define YARMI_GENERATE_METACODE_REQUESTS_NAMES_IMPL(ns, cn, tuple) \
-	YARMI_NS_TO_STRING(ns, cn::BOOST_PP_TUPLE_ELEM(1, tuple) BOOST_PP_TUPLE_ELEM(2, tuple)) \
-	,
-
-#define YARMI_GENERATE_METACODE_REQUESTS_NAMES_AUX(unused, idx, tuple) \
-	YARMI_GENERATE_METACODE_REQUESTS_NAMES_IMPL( \
-		 BOOST_PP_TUPLE_ELEM(0, tuple) \
-		,BOOST_PP_TUPLE_ELEM(1, tuple) \
-		,BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
+		,YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
+		,YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(2, tuple)) \
 	)
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL(idx, name) \
-	BOOST_PP_IF(idx,:,) call_id == static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
-		? _meta_requests_names[idx]
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME_, str)
 
-#define YARMI_GENERATE_METACODE_HAS_REQUEST_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_HAS_REQUEST_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS_, str)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_proc
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_enum
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_struct
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS_proc(request, handler, tuple) \
+	(request, handler)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_proc(pref, idx, reqhand, size, tuple) \
+	::boost::mpl::integral_c<::yarmi::call_id_type, BOOST_PP_CAT(pref, BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(reqhand, tuple), _##idx))> \
+		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_enum(...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GEN_struct(...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_EXPAND_MACRO(pref, idx, reqhand, size, pname, tuple) \
+	pname(pref, idx, reqhand, size, tuple)
+
+#define YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_EXPAND_MACRO( \
+		 BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,idx \
+		,BOOST_PP_TUPLE_ELEM(2, tuple) \
+		,BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(0, tuple)) \
+		,YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
+		,YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
 	)
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL(idx, name) \
-	BOOST_PP_IF(idx,:,) call_id == static_cast<::yarmi::call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)) \
-		? _meta_handlers_names[idx]
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME_, str)
 
-#define YARMI_GENERATE_METACODE_HAS_HANDLER_AUX(unused, idx, seq) \
-	YARMI_GENERATE_METACODE_HAS_HANDLER_IMPL( \
-		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS_, str)
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_proc
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_enum
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_struct
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS_proc(request, handler, tuple) \
+	(request, handler)
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_proc(pref, idx, name, names_arr) \
+	call_id == BOOST_PP_CAT(pref, BOOST_PP_CAT(name, _##idx)) ? names_arr[idx] :
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_enum(pref, idx, ...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GEN_struct(pref, idx, ...)
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_EXPAND_MACRO(pref, idx, reqhand, names_arr, pname, tuple) \
+	pname(pref, idx, BOOST_PP_TUPLE_ELEM(reqhand, tuple), names_arr)
+
+#define YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY(unused, idx, tuple) \
+	YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_EXPAND_MACRO( \
+		 BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,idx \
+		,BOOST_PP_TUPLE_ELEM(3, tuple) \
+		,BOOST_PP_TUPLE_ELEM(2, tuple) \
+		,YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
+		,YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
 	)
 
 /***************************************************************************/
 
 #define YARMI_GENERATE_METACODE(ns, cn, oppocn, seq, opposeq) \
-	private: \
+	protected: \
 		static constexpr const char *_meta_requests_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_METACODE_REQUESTS_NAMES_AUX \
+				,YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS \
 				,(ns, oppocn, seq) \
 			) \
-			0 \
+			nullptr \
 		}; \
-		enum class _meta_requests_ids: ::yarmi::call_id_type { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_METACODE_REQUESTS_ENUM_AUX \
-				,seq \
-			) \
-		}; \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(seq) \
+			,YARMI_GENERATE_METACODE_GENERATE_CALL_IDS \
+			,(seq, _request_id_, _meta_requests_names, 0 /* requests */ ) \
+		) \
 		\
 		static constexpr const char *_meta_handlers_names[] = { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
-				,YARMI_GENERATE_METACODE_HANDLERS_NAMES_AUX \
+				,YARMI_GENERATE_METACODE_GENERATE_PROC_STRINGS \
 				,(ns, cn, opposeq) \
 			) \
-			0 \
+			nullptr \
 		}; \
-		enum class _meta_handlers_ids: ::yarmi::call_id_type { \
-			BOOST_PP_REPEAT( \
-				 BOOST_PP_SEQ_SIZE(opposeq) \
-				,YARMI_GENERATE_METACODE_HANDLERS_ENUM_AUX \
-				,opposeq \
-			) \
-		}; \
+		BOOST_PP_REPEAT( \
+			 BOOST_PP_SEQ_SIZE(opposeq) \
+			,YARMI_GENERATE_METACODE_GENERATE_CALL_IDS \
+			,(opposeq, _handler_id_, _meta_handlers_names, 1 /* handlers */ ) \
+		) \
 		\
 		static void dump(std::ostream &os, const char *const *list) { \
-			os << "invoker: \"" YARMI_NS_TO_STRING(ns, cn) "\"" << std::endl; \
+			os << "invoker: \"" YARMI_GENERATE_NS_TO_STRING(ns, cn) "\"" << std::endl; \
 			for ( ; *list; ++list ) { \
-				os << "  " << *list << ": 0x" << std::hex << ::yarmi::detail::fnv1a(*list) << std::endl; \
+				os << "  " << *list << ": 0x" << std::hex << ::yarmi::hash(*list) << std::endl; \
 			} \
 		} \
 		\
@@ -175,16 +267,16 @@
 		using _meta_requests_ids_vec = ::boost::mpl::vector< \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_METACODE_REQUESTS_IDS_ARRAY_AUX \
-				,seq \
+				,YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR \
+				,(seq, _request_id_, 0 /* requests */ ) \
 			) \
 		>; \
 		\
 		using _meta_handlers_ids_vec = ::boost::mpl::vector< \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(opposeq) \
-				,YARMI_GENERATE_METACODE_HANDLERS_IDS_ARRAY_AUX \
-				,opposeq \
+				,YARMI_GENERATE_METACODE_GENERATE_IDS_MPL_VECTOR \
+				,(opposeq, _handler_id_, 1 /* handlers */ ) \
 			) \
 		>; \
 		\
@@ -194,14 +286,14 @@
 			return ( \
 				BOOST_PP_REPEAT( \
 					 BOOST_PP_SEQ_SIZE(seq) \
-					,YARMI_GENERATE_METACODE_HAS_REQUEST_AUX \
-					,seq \
+					,YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY \
+					,(seq, _request_id_, _meta_requests_names, 0 /* requests */ ) \
 				) \
-				: 0 \
+				nullptr \
 			); \
 		} \
-		static constexpr bool meta_has_request(const ::yarmi::call_id_type call_id) { return meta_request_name(call_id) != 0; } \
-		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::detail::fnv1a(str)); } \
+		static constexpr bool meta_has_request(const ::yarmi::call_id_type call_id) { return meta_request_name(call_id) != nullptr; } \
+		static constexpr bool meta_has_request(const char *str) { return meta_has_request(::yarmi::hash(str)); } \
 		static void dump_requests(std::ostream &os) { dump(os, meta_requests()); } \
 		\
 		static constexpr const char* const* meta_handlers() { return _meta_handlers_names; } \
@@ -210,14 +302,14 @@
 			return ( \
 				BOOST_PP_REPEAT( \
 					 BOOST_PP_SEQ_SIZE(opposeq) \
-					,YARMI_GENERATE_METACODE_HAS_HANDLER_AUX \
-					,opposeq \
+					,YARMI_GENERATE_METACODE_GENERATE_HAS_PROC_TERNARY \
+					,(opposeq, _handler_id_, _meta_handlers_names, 1 /* handlers */ ) \
 				) \
-				: 0 \
+				nullptr \
 			); \
 		} \
-		static constexpr bool meta_has_handler(const ::yarmi::call_id_type call_id) { return meta_handler_name(call_id) != 0; } \
-		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::detail::fnv1a(str)); } \
+		static constexpr bool meta_has_handler(const ::yarmi::call_id_type call_id) { return meta_handler_name(call_id) != nullptr; } \
+		static constexpr bool meta_has_handler(const char *str) { return meta_has_handler(::yarmi::hash(str)); } \
 		static void dump_handlers(std::ostream &os) { dump(os, meta_handlers()); }
 
 /***************************************************************************/

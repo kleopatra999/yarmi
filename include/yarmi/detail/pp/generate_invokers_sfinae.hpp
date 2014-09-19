@@ -32,24 +32,72 @@
 #ifndef _yarmi__detail__pp__generate_invokers_sfinae_hpp
 #define _yarmi__detail__pp__generate_invokers_sfinae_hpp
 
-#define YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
-	BOOST_PP_CAT(_, BOOST_PP_CAT(name, BOOST_PP_CAT(_, idx)))
+/***************************************************************************/
 
-#define YARMI_GENERATE_INVOKERS_SFINAE_IMPL(idx, name, _tuple) \
-	template<typename Obj, typename... Args> \
-	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
-		(Obj &o, const Args&... args) -> decltype(o.name(args...), void()) \
-	{ \
-		o.name(args...); \
-	} \
-	template<typename Obj, typename... Args> \
-	static void YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)(Obj &, const Args&...) {}
+#define YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name) \
+	_##name##_##idx
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME_, str)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS_, str)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_INVOKERS_SFINAE_GEN_proc
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_INVOKERS_SFINAE_GEN_enum
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_INVOKERS_SFINAE_GEN_struct
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS_proc(request, handler, tuple) \
+	handler
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS_enum(...)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS_struct(...)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GEN_proc(idx, handler) \
+	template<typename Obj, typename Tuple, std::size_t... Ids> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, handler) \
+		(Obj &o, const Tuple &t, std::index_sequence<Ids...>) \
+		-> decltype(o.handler(t), void()) \
+	{ o.handler(t); } \
+	\
+	template<typename Obj, typename Tuple, std::size_t... Ids> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, handler) \
+		(Obj &o, const Tuple &t, std::index_sequence<Ids...>) \
+		-> decltype(o.handler(std::get<Ids+2>(t)..., t), void()) \
+	{ o.handler(std::get<Ids+2>(t)..., t); } \
+	\
+	template<typename Obj, typename Tuple, std::size_t... Ids> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, handler) \
+		(Obj &o, const Tuple &t, std::index_sequence<Ids...>) \
+		-> decltype(o.handler(std::get<Ids+2>(t)..., std::get<0>(t), std::get<1>(t)), void()) \
+	{ o.handler(std::get<Ids+2>(t)..., std::get<0>(t), std::get<1>(t)); } \
+	\
+	template<typename Obj, typename Tuple, std::size_t... Ids> \
+	static auto YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, handler) \
+		(Obj &o, const Tuple &t, std::index_sequence<Ids...>) \
+		-> decltype(o.handler(std::get<Ids+2>(t)...), void()) \
+	{ o.handler(std::get<Ids+2>(t)...); }
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GEN_enum(...)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_GEN_struct(...)
+
+#define YARMI_GENERATE_INVOKERS_SFINAE_EXPAND_MACRO(idx, pname, handler) \
+	pname(idx, handler)
 
 #define YARMI_GENERATE_INVOKERS_SFINAE_AUX(unused, idx, seq) \
-	YARMI_GENERATE_INVOKERS_SFINAE_IMPL( \
+	YARMI_GENERATE_INVOKERS_SFINAE_EXPAND_MACRO( \
 		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
+		,YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, seq) \
+		,YARMI_GENERATE_INVOKERS_SFINAE_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, seq) \
 	)
 
 #define YARMI_GENERATE_INVOKERS_SFINAE(seq) \
@@ -58,5 +106,7 @@
 		,YARMI_GENERATE_INVOKERS_SFINAE_AUX \
 		,seq \
 	)
+
+/***************************************************************************/
 
 #endif // _yarmi__detail__pp__generate_invokers_sfinae_hpp

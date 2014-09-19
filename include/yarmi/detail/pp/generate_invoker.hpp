@@ -35,10 +35,25 @@
 /***************************************************************************/
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_EMPTY_ARGS(idx, name) \
-	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)(impl);
+	const auto packet_args = std::make_tuple(call_id, call_name); \
+	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)( \
+		 impl \
+		,packet_args \
+		,std::make_index_sequence<0>() \
+	);
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS(unused, idx, tuple) \
 	BOOST_PP_TUPLE_ELEM(idx, tuple) arg##idx;
+
+#define YARMI_GENERATE_INVOKERS_GENERATE_ENUM_ARGS_FOR_TUPLE_PLACE_ELEM(unused1, idx, size) \
+	std::cref(arg##idx) YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
+
+#define YARMI_GENERATE_INVOKERS_GENERATE_ENUM_ARGS_FOR_TUPLE(tuple) \
+	BOOST_PP_REPEAT( \
+		 BOOST_PP_TUPLE_SIZE(tuple) \
+		,YARMI_GENERATE_INVOKERS_GENERATE_ENUM_ARGS_FOR_TUPLE_PLACE_ELEM \
+		,BOOST_PP_TUPLE_SIZE(tuple) \
+	)
 
 #define YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_FOR_NONEMPTY_ARGS(idx, name, tuple) \
 	BOOST_PP_REPEAT( \
@@ -46,14 +61,46 @@
 		,YARMI_GENERATE_INVOKERS_GENERATE_INVOKING_MEMBERS \
 		,tuple \
 	) \
-	serializer::deserialize(buffer, BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg)); \
+	Serializer::deserialize(buffer, BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg)); \
+	const auto packet_args = std::make_tuple( \
+			 call_id \
+			,call_name \
+			,YARMI_GENERATE_INVOKERS_GENERATE_ENUM_ARGS_FOR_TUPLE(tuple) \
+		); \
 	YARMI_GENERATE_INVOKERS_SFINAE_GENERATE_SFINAE_NAME(idx, name)( \
 		 impl\
-		,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
+		,packet_args \
+		,std::make_index_sequence<BOOST_PP_TUPLE_SIZE(tuple)>() \
 	);
 
-#define YARMI_GENERATE_INVOKERS_ONE_ITEM(idx, name, tuple) \
-	case static_cast<::yarmi::call_id_type>(_meta_handlers_ids::BOOST_PP_CAT(name, _##idx)): { \
+/***************************************************************************/
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_GET_PROC_NAME_, str)
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_INVOKERS_GET_PROC_ARGS_, str)
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_INVOKERS_GEN_proc
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_INVOKERS_GEN_enum
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_INVOKERS_GEN_struct
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_ARGS_proc(request, handler, tuple) \
+	(handler, tuple)
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_INVOKERS_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_INVOKERS_GEN_proc(idx, name, tuple) \
+	case BOOST_PP_CAT(_handler_id_, BOOST_PP_CAT(name, _##idx)): { \
 		YARMI_LAZY_IF( \
 			 YARMI_TUPLE_IS_EMPTY(tuple) \
 			,(idx, name) \
@@ -64,19 +111,31 @@
 		return true; \
 	}
 
-#define YARMI_GENERATE_INVOKERS_IMPL(unused, idx, seq) \
-	YARMI_GENERATE_INVOKERS_ONE_ITEM( \
+#define YARMI_GENERATE_INVOKERS_GEN_enum(...)
+
+#define YARMI_GENERATE_INVOKERS_GEN_struct(...)
+
+#define YARMI_GENERATE_INVOKERS_EXPAND_MACRO(idx, pname, tuple) \
+	pname( \
 		 idx \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
+		,BOOST_PP_TUPLE_ELEM(0, tuple) \
+		,BOOST_PP_TUPLE_ELEM(1, tuple) \
+	)
+
+#define YARMI_GENERATE_INVOKERS_AUX(unused, idx, seq) \
+	YARMI_GENERATE_INVOKERS_EXPAND_MACRO( \
+		 idx \
+		,YARMI_GENERATE_INVOKERS_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, seq) \
+		,YARMI_GENERATE_INVOKERS_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, seq) \
 	)
 
 #define YARMI_GENERATE_INVOKERS(seq) \
-	bool invoke(const ::yarmi::call_id_type call_id, const ::yarmi::buffer_pair &buffer) { \
+	bool invoke(const ::yarmi::call_id_type call_id, const ::yarmi::buffer_pair &buffer) override { \
+		::yarmi::call_name_type call_name = meta_handler_name(call_id); \
 		switch ( call_id ) { \
 			BOOST_PP_REPEAT( \
 				 BOOST_PP_SEQ_SIZE(seq) \
-				,YARMI_GENERATE_INVOKERS_IMPL \
+				,YARMI_GENERATE_INVOKERS_AUX \
 				,seq \
 			) \
 			default: return false; \

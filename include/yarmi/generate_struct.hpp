@@ -45,13 +45,6 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_STRUCT_WRAP_X(...) \
-	((__VA_ARGS__)) YARMI_GENERATE_STRUCT_WRAP_Y
-#define YARMI_GENERATE_STRUCT_WRAP_Y(...) \
-	((__VA_ARGS__)) YARMI_GENERATE_STRUCT_WRAP_X
-#define YARMI_GENERATE_STRUCT_WRAP_X0
-#define YARMI_GENERATE_STRUCT_WRAP_Y0
-
 #define YARMI_GENERATE_STRUCT_DECLARE_MEMBER(unused, idx, seq) \
 	BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_POP_FRONT(BOOST_PP_TUPLE_TO_SEQ(BOOST_PP_SEQ_ELEM(idx, seq)))) /* type */ \
 		BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)); /* var */
@@ -65,16 +58,13 @@
 		"\"" BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq))) "\":"; \
 	::yarmi::detail::jsonify(s, o.BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)));
 
-#define YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS(unused, data, elem) \
-	data(BOOST_PP_TUPLE_ELEM(0, elem));
+#define YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS(unused, idx, seq) \
+	func(BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)));
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_STRUCT_IMPL(struct_name, seq, ...) \
+#define YARMI_GENERATE_STRUCT_IMPL(struct_name, seq) \
 	struct struct_name { \
-		/* user code expanded here */ \
-		__VA_ARGS__ \
-		\
 		BOOST_PP_REPEAT( \
 			 BOOST_PP_SEQ_SIZE(seq) \
 			,YARMI_GENERATE_STRUCT_DECLARE_MEMBER \
@@ -94,17 +84,17 @@
 		\
 		template<typename F> \
 		void apply(F func) const { \
-			BOOST_PP_SEQ_FOR_EACH( \
-				 YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS \
-				,func \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS \
 				,seq \
 			) \
 		} \
 		template<typename F> \
 		void transform(F func) { \
-			BOOST_PP_SEQ_FOR_EACH( \
-				 YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS \
-				,func \
+			BOOST_PP_REPEAT( \
+				 BOOST_PP_SEQ_SIZE(seq) \
+				,YARMI_GENERATE_STRUCT_ENUMERATE_MEMBERS \
 				,seq \
 			) \
 		} \
@@ -130,12 +120,10 @@
 #define YARMI_GENERATE_STRUCT( \
 	 struct_name /* struct  name */ \
 	,seq /* types sequence */ \
-	,... /* user code */ \
 ) \
 	YARMI_GENERATE_STRUCT_IMPL( \
 		 struct_name \
-		,BOOST_PP_CAT(YARMI_GENERATE_STRUCT_WRAP_X seq, 0) \
-		,__VA_ARGS__ \
+		,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X seq, 0) \
 	)
 
 /***************************************************************************/

@@ -71,24 +71,23 @@ struct some {};
 template<std::size_t idx, typename... Args>
 void print_item(std::ostream& s, const std::tuple<Args...> &o, std::true_type) {
 	s << '\"' << demangle<typename std::tuple_element<idx, std::tuple<Args...>>::type>() << "\":";
-	quoting(s, std::get<idx>(o));
+	yarmi::detail::jsonify(s, std::get<idx>(o));
 }
 
 template<std::size_t idx, typename... Args>
 void print_item(std::ostream& s, const std::tuple<Args...> &o, std::false_type) {
 	s << '\"' << demangle<typename std::tuple_element<idx, std::tuple<Args...>>::type>() << "\":";
-	quoting(s, std::get<idx>(o));
+	yarmi::detail::jsonify(s, std::get<idx>(o));
 	s << yarmi::detail::default_delimiter;
 	print_item<idx + 1>(s, o, std::integral_constant<bool, idx + 1 == sizeof...(Args) - 1>());
 }
 
 template<typename ... Args>
-void print_tuple(std::ostream&, const std::tuple<Args...>&, types::zero) {
-}
+void print_tuple(std::ostream&, const std::tuple<Args...>&, types::zero) {}
 
 template<typename ... Args>
 void print_tuple(std::ostream& s, const std::tuple<Args...>& o, types::one) {
-	quoting(s, std::get<0>(o));
+	yarmi::detail::jsonify(s, std::get<0>(o));
 }
 
 template<typename ... Args>
@@ -108,7 +107,11 @@ std::ostream& operator<<(std::ostream& s, const std::tuple<Args...>& o) {
 	using tuple_size = typename std::conditional<
 		 sizeof...(Args) == 0
 		,types::zero
-		,typename std::conditional<sizeof...(Args) == 1,types::one,types::some>::type
+		,typename std::conditional<
+			 sizeof...(Args) == 1
+			,types::one
+			,types::some
+		>::type
 	>::type;
 
 	s << detail::object_open_symbol;

@@ -7,6 +7,13 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += \
 	-std=c++1y
 
+gcc: {
+} else:msvc {
+} else {
+	DEFINES += \
+		BOOST_PP_VARIADICS=1
+}
+
 LIBS += \
 	-lboost_system
 
@@ -52,7 +59,6 @@ HEADERS += \
 	../../../include/yarmi/detail/pp/generate_metacode.hpp \
 	../../../include/yarmi/detail/pp/generate_ns.hpp \
 	../../../include/yarmi/detail/pp/generate_ns_to_string.hpp \
-	../../../include/yarmi/detail/pp/generate_proc_helper.hpp \
 	../../../include/yarmi/detail/pp/generate_tuple_is_empty.hpp \
 	../../../include/yarmi/detail/throw/throw.hpp \
 	../../../include/yarmi/serializers/boost_serialization.hpp \
@@ -72,7 +78,7 @@ HEADERS += \
 	../../../include/yarmi/procname.hpp \
 	../../../include/yarmi/yarmi.hpp \
 	../../../include/yarmi/yarmi_fwd.hpp \
-    ../../../include/yarmi/serializers/binary_serializer_base.hpp \
-    ../../../include/yarmi/detail/endian/endian.hpp \
-    ../../../include/yarmi/detail/pp/generate_tools.hpp \
-    ../../../include/yarmi/server/run.hpp
+	 ../../../include/yarmi/serializers/binary_serializer_base.hpp \
+	 ../../../include/yarmi/detail/endian/endian.hpp \
+	 ../../../include/yarmi/detail/pp/generate_tools.hpp \
+	 ../../../include/yarmi/server/run.hpp

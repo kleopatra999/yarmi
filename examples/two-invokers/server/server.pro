@@ -37,6 +37,9 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += \
 	-std=c++1y
 
+QMAKE_LFLAGS += \
+	-pthread
+
 INCLUDEPATH += \
 	../ \
 	../../../include
@@ -92,7 +95,6 @@ HEADERS += \
 	../../../include/yarmi/detail/pp/generate_metacode.hpp \
 	../../../include/yarmi/detail/pp/generate_ns.hpp \
 	../../../include/yarmi/detail/pp/generate_ns_to_string.hpp \
-	../../../include/yarmi/detail/pp/generate_proc_helper.hpp \
 	../../../include/yarmi/detail/pp/generate_tuple_is_empty.hpp \
 	../../../include/yarmi/detail/throw/throw.hpp \
 	../../../include/yarmi/serializers/boost_serialization.hpp \
@@ -114,11 +116,13 @@ HEADERS += \
 	../../../include/yarmi/yarmi_fwd.hpp \
 	../../../include/yarmi/detail/endian/endian.hpp \
 	../../../include/yarmi/server/run.hpp \
-    ../../../include/yarmi/serializers/binary_serializer_base.hpp \
-    global_context.hpp \
-    protocol_fwd.hpp \
-    server_first_invoker.hpp \
-    server_second_invoker.hpp \
-    user_context.hpp \
-    ../first_proto.hpp \
-    ../second_proto.hpp
+	../../../include/yarmi/serializers/binary_serializer_base.hpp \
+	global_context.hpp \
+	protocol_fwd.hpp \
+	server_first_invoker.hpp \
+	server_second_invoker.hpp \
+	user_context.hpp \
+	../first_proto.hpp \
+	../second_proto.hpp \
+	../../../include/yarmi/detail/pp/generate_base_class.hpp \
+	../../../include/yarmi/detail/pp/generate_usercode.hpp

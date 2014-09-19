@@ -34,6 +34,8 @@
 #include <yarmi/client/client_base.hpp>
 #include <yarmi/invoke.hpp>
 
+#include <yarmi/detail/generate_struct/jsonify.hpp>
+
 #include <iostream>
 
 /***************************************************************************/
@@ -45,8 +47,7 @@ struct client_impl: yarmi::client_invoker<client_impl, yarmi::client_base> {
 	{}
 
 	void on_pong(const std::string &msg) {
-		//std::cout << "received: \"" << msg << "\"" << std::endl;
-		this->ping("my message "+std::to_string(++msg_index));
+		ping("my message "+std::to_string(++msg_index));
 
 		static std::size_t i = 0;
 		if ( ++i == 1024 ) {

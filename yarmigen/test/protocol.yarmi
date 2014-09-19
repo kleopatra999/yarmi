@@ -13,16 +13,17 @@ proto(api) { // maybe one of 'api' or 'service'
    enum myenum5{ e1 , e2 , e3=2 }; // enum declaration
    enum myenum1{};
 
-   const u32 myu32 = 0;
-   const myenum1 mye1 = myenum1::e1;
+   const u32 myu32 = 0;// const
+   const myenum1 mye1 = myenum1::e1; // const
 
-   using ms1=mystruct1; // using/typedef
+   using ms1=mystruct1;// using/typedef
    using ms2= mystruct1; // using/typedef
    using ms3 =  mystruct1; // using/typedef
-   using ms4  =mystruct1; // using/typedef
-   using ms5 = array<mystruct1>; // using/typedef
-   using ms6 = set<mystruct1>; // using/typedef
-   using ms7 = map<u32, mystruct1>; // using/typedef
+   using ms4  =mystruct1;// using/typedef
+   using ms5 = array< mystruct1>; // using/typedef
+   using ms6 = set<mystruct1 >; // using/typedef
+   using ms7 = set< mystruct1 >; // using/typedef
+   using ms8 = map<u32, mystruct1>; // using/typedef
 
    struct mystruct1 { // struct declaration
 	  const u32 g = 33;

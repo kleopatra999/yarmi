@@ -37,8 +37,12 @@
 namespace yarmi {
 namespace detail {
 
-constexpr std::uint32_t fnv1a(const char *s, std::uint32_t h = 0x811c9dc5) {
-	return (*s == 0) ? h : fnv1a(s+1, ((h ^ (*s)) * 0x01000193));
+constexpr std::uint32_t fnv1a_32(const char *s, std::uint32_t h = 0x811c9dc5) {
+	return (*s == 0) ? h : fnv1a_32(s+1, ((h ^ (*s)) * 0x01000193));
+}
+
+constexpr std::uint64_t fnv1a_64(const char *s, std::uint64_t h = 0xCBF29CE484222325) {
+	return (*s == 0) ? h : fnv1a_64(s+1, ((h ^ (*s)) * 0x100000001B3));
 }
 
 } // ns detail

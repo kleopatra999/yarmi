@@ -63,9 +63,9 @@ server_second_invoker_impl::~server_second_invoker_impl()
 
 /***************************************************************************/
 
-void server_second_invoker_impl::on_ping(const std::string &str) {
+void server_second_invoker_impl::on_ping(std::uint32_t val) {
 //	std::cout << "server_second_invoker_impl::on_ping(" << str << ")" << std::endl;
-	pimpl->uc.first.pong(str);
+	pimpl->uc.first.pong(val);
 }
 
 /***************************************************************************/

@@ -40,7 +40,7 @@ struct client_first_invoker_impl: two_invokers::client_first_invoker<client_firs
 	client_first_invoker_impl(client &c);
 	virtual ~client_first_invoker_impl();
 
-	void on_pong(const std::string &str);
+	void on_pong(std::uint32_t val);
 
 private:
 	struct impl;

@@ -43,7 +43,7 @@ struct server_first_invoker_impl: server_first_invoker<server_first_invoker_impl
 	server_first_invoker_impl(user_context &uc, global_context<user_context> &gc);
 	virtual ~server_first_invoker_impl();
 
-	void on_ping(const std::string &str);
+	void on_ping(std::uint32_t val);
 
 private:
 	struct impl;

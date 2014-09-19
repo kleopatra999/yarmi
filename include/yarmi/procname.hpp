@@ -35,54 +35,20 @@
 #include <yarmi/yarmi_fwd.hpp>
 
 namespace yarmi {
-namespace detail {
-
-enum class request_or_handler { request, handler };
-
-const char* get_proc_name(request_or_handler, call_id_type) { return 0; }
-template<typename Invoker, typename... Invokers>
-const char* get_proc_name(request_or_handler d, call_id_type call_id, const Invoker &head, const Invokers&... tail) {
-
-	const char *res = 0;
-	((d == request_or_handler::request)
-		? (res=head.meta_request_name(call_id))
-		: (res=head.meta_handler_name(call_id))) || get_proc_name(d, call_id, tail...)
-	;
-	return res;
-}
-
-} // ns detail
-
-/***************************************************************************/
 
 template<typename Invoker, typename... Invokers>
-const char* get_request_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	return detail::get_proc_name(detail::request_or_handler::request, call_id, invoker, invokers...);
+inline const char* get_request_name(const call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	return invoker.meta_request_name(call_id) || get_request_name(call_id, invokers...);
 }
 
 template<typename Invoker, typename... Invokers>
-const char* get_handler_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	return detail::get_proc_name(detail::request_or_handler::handler, call_id, invoker, invokers...);
+inline const char* get_handler_name(const call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	return invoker.meta_handler_name(call_id) || get_handler_name(call_id, invokers...);
 }
 
 template<typename Invoker, typename... Invokers>
-const char* get_proc_name(call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
-	const char *r = get_request_name(call_id, invoker, invokers...);
-	if ( r ) return r;
-
-	const char *h = get_handler_name(call_id, invoker, invokers...);
-	return h;
-}
-
-/***************************************************************************/
-
-template<typename... Args>
-auto get_call_id(const std::tuple<Args...> &args) -> decltype(std::get<0>(args)) {
-	return std::get<0>(args);
-}
-template<typename... Args>
-auto get_call_name(const std::tuple<Args...> &args) -> decltype(std::get<1>(args)) {
-	return std::get<1>(args);
+inline const char* get_proc_name(const call_id_type call_id, const Invoker &invoker, const Invokers&... invokers) {
+	return get_handler_name(call_id, invoker, invokers...) || get_request_name(call_id, invoker, invokers...);
 }
 
 /***************************************************************************/

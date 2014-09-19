@@ -33,25 +33,34 @@
 #define _yarmi__chat__protocol_hpp
 
 #include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/yas_serialization.hpp>
 
 YARMI_CONSTRUCT(
 	(yarmi),        // invokers namespace
-	yas_serializer, // used serializer name
 	client_invoker, // name of the client invoker
-	(registration , on_registration, (std::string)                           ) // username
-	(activation   , on_activation  , (std::string, std::string, std::string) ) // registration key : username : password
-	(login        , on_login       , (std::string, std::string)              ) // username : password
-	(logout       , on_logout      , ()                                      ) // without args
-	(users_online , on_users_online, ()                                      ) // without args
-	(users_online , on_users_online, (std::string)                           ) // substring of username
+	(enum(
+			 e_status
+			,std::uint8_t
+			,
+			(ok)
+			(already_exists)
+			(already_activated)
+			(already_logged_in)
+			(not_logged_in)
+			(bad_username_or_password)
+	)) /* enum */
+	(proc(registration , on_registration, (std::string)                           )) // username
+	(proc(activation   , on_activation  , (std::string, std::string, std::string) )) // registration key : username : password
+	(proc(login        , on_login       , (std::string, std::string)              )) // username : password
+	(proc(logout       , on_logout      , ()                                      )) // without args
+	(proc(users_online , on_users_online, ()                                      )) // without args
+	(proc(users_online , on_users_online, (std::string)                           )) // substring of username
 	,
 	server_invoker, // name of the server invoker
-	(registration , on_registration, (std::string, std::string)              ) // message : registration key
-	(activation   , on_activation  , (std::string)                           ) // message
-	(login        , on_login       , (std::string)                           ) // message
-	(logout       , on_logout      , (std::string)                           ) // message
-	(users_online , on_users_online, (std::vector<std::string>)              ) // vector of usernames
+	(proc(registration , on_registration, (e_status, std::string)                 )) // status : registration key
+	(proc(activation   , on_activation  , (e_status)                              )) // status
+	(proc(login        , on_login       , (e_status)                              )) // status
+	(proc(logout       , on_logout      , (e_status)                              )) // status
+	(proc(users_online , on_users_online, (e_status, std::vector<std::string>)    )) // status : vector of usernames
 );
 
 #endif // _yarmi__chat__protocol_hpp

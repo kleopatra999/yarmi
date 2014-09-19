@@ -41,7 +41,7 @@ int main() {
 	client c(ios);
 	c.connect(ip, port);
 	c.start();
-	c.first.ping("message 0");
+	c.first.ping(0);
 
 	ios.run();
 }

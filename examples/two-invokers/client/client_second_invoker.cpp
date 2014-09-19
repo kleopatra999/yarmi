@@ -50,7 +50,7 @@ client_second_invoker_impl::client_second_invoker_impl(client &c)
 client_second_invoker_impl::~client_second_invoker_impl()
 { delete pimpl; }
 
-void client_second_invoker_impl::on_pong(const std::string &str) {
+void client_second_invoker_impl::on_pong(std::uint32_t val) {
 	//std::cout << "client_second_invoker_impl::on_pong(" << str << ")" << std::endl;
-	ping(str);
+	ping(val);
 }

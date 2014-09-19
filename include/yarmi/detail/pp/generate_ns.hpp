@@ -56,4 +56,29 @@
 
 /***************************************************************************/
 
+#define YARMI_GENERATE_USERCODE_NS(client_or_server, client_invoker_name, server_invoker_name) \
+	BOOST_PP_IF( \
+		 client_or_server \
+		,BOOST_PP_CAT(server_invoker_name, BOOST_PP_CAT(__, BOOST_PP_CAT(client_invoker_name, __usercode))) \
+		,BOOST_PP_CAT(client_invoker_name, BOOST_PP_CAT(__, BOOST_PP_CAT(server_invoker_name, __usercode))) \
+	)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_NS_TO_STRING_ITEM(unused, idx, seq) \
+	BOOST_PP_IF(idx,::BOOST_PP_SEQ_ELEM(idx, seq),BOOST_PP_SEQ_ELEM(idx, seq))
+
+#define YARMI_GENERATE_NS_TO_STRING(seq, sym) \
+	BOOST_PP_STRINGIZE(BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(seq),YARMI_GENERATE_NS_TO_STRING_ITEM,seq)::sym)
+
+/***************************************************************************/
+
+#define YARMI_GENERATE_USING_NS_ITEM(unused, idx, seq) \
+	BOOST_PP_IF(idx,::BOOST_PP_SEQ_ELEM(idx, seq),BOOST_PP_SEQ_ELEM(idx, seq))
+
+#define YARMI_GENERATE_USING_NS(seq) \
+	BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(seq),YARMI_GENERATE_USING_NS_ITEM,seq)
+
+/***************************************************************************/
+
 #endif // _yarmi__detail__pp__generate_ns_hpp

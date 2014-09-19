@@ -42,7 +42,10 @@ namespace yarmi{
 namespace detail {
 
 template<typename T>
-struct _is_string: std::integral_constant<bool, std::is_same<T, std::string>::value>
+struct _is_string: std::integral_constant<
+	 bool
+	,std::is_same<T, std::string>::value || std::is_same<T, const char*>::value
+>
 {};
 
 template<typename T>
@@ -58,8 +61,8 @@ struct _is_char: std::integral_constant<
 
 template<typename T>
 struct _is_not_string_bool_char: std::integral_constant<
-	  bool
-	 ,!(_is_string<T>::value || _is_bool<T>::value || _is_char<T>::value)
+	 bool
+	,!(_is_string<T>::value || _is_bool<T>::value || _is_char<T>::value)
 >
 {};
 
@@ -79,9 +82,9 @@ void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_bool<T>::v
 template<typename T>
 void jsonify(std::ostream& s, const T &o, typename std::enable_if<_is_char<T>::value>::type* = 0) {
 	 if ( std::is_signed<T>::value )
-		  s << static_cast<std::int64_t>(o);
+		  s << static_cast<char>(o);
 	 else
-		  s << static_cast<std::uint64_t>(o);
+		  s << static_cast<std::size_t>(o);
 }
 // for other types
 template<typename T>

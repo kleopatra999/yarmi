@@ -62,7 +62,7 @@ struct session: std::enable_shared_from_this<session> {
 	virtual buffer_pair on_send(const buffer_pair &buffer);
 	virtual void on_connected() {}
 	virtual void on_disconnected() {}
-	virtual void on_received(const call_id_type call_id, const buffer_pair &buffer) = 0;
+	virtual void on_received(call_id_type call_id, const buffer_pair &buffer) = 0;
 
 	// for checking
 	bool on_destruction_state() const;

@@ -37,87 +37,74 @@
 #include <yarmi/yarmi_fwd.hpp>
 
 #include <yarmi/detail/pp/generate_tools.hpp>
+#include <yarmi/detail/pp/generate_base_class.hpp>
 #include <yarmi/detail/pp/generate_ns.hpp>
 #include <yarmi/detail/pp/generate_lazy_if.hpp>
 #include <yarmi/detail/pp/generate_tuple_is_empty.hpp>
-#include <yarmi/detail/pp/generate_ns_to_string.hpp>
 #include <yarmi/detail/pp/generate_metacode.hpp>
 #include <yarmi/detail/pp/generate_callers.hpp>
 #include <yarmi/detail/pp/generate_invoker.hpp>
 #include <yarmi/detail/pp/generate_invokers_sfinae.hpp>
-#include <yarmi/detail/pp/generate_proc_helper.hpp>
-
-#include <yarmi/detail/throw/throw.hpp>
+#include <yarmi/detail/pp/generate_usercode.hpp>
 
 #include <yarmi/generate_struct.hpp>
 #include <yarmi/generate_enum.hpp>
 
+#include <yarmi/detail/throw/throw.hpp>
+
+#include <yarmi/serializers/yas_serialization.hpp>
+
 /***************************************************************************/
 
 #define YARMI_CONSTRUCT_INVOKER( \
-	 ser		/* serializer name */ \
-	,ns		/* namespace */ \
-	,cn		/* class name */ \
-	,oppocn	/* name of opposite class */ \
-	,seq		/* procedures sequence */ \
-	,opposeq	/* opposite procedures sequence */ \
+	 client_or_server	/* client or server: 0 == client, 1 == server */ \
+	,ns					/* namespace */ \
+	,cn					/* class name */ \
+	,oppocn				/* name of opposite class */ \
+	,seq				/* procedures sequence */ \
+	,opposeq			/* opposite procedures sequence */ \
 ) \
-	template< \
-		 typename Impl \
-		,typename IO = Impl \
-		,typename CLog = ::yarmi::_fake_log \
-		,typename ILog = ::yarmi::_fake_log \
-	> \
-	struct cn { \
-		using serializer = ser; \
+	YARMI_GENERATE_BASE_CLASS(ns, cn, oppocn, seq, opposeq) \
+	\
+	template<typename Impl, typename IO = Impl, typename Serializer = ::yarmi::yas_serializer> \
+	struct cn: YARMI_GENERATE_BASE_CLASS_NAME(cn)<void> { \
 		\
-		cn( \
-			 Impl &impl \
-			,IO &io \
-			,CLog clog = ::yarmi::fake_log \
-			,ILog ilog = ::yarmi::fake_log \
+		YARMI_GENERATE_USERCODE_USING( \
+			 YARMI_GENERATE_USERCODE_NS(client_or_server, cn, oppocn) \
+			,seq opposeq \
 		) \
+		\
+		cn(Impl &impl, IO &io) \
 			:impl(impl) \
 			,io(io) \
-			,clog(clog) \
-			,ilog(ilog) \
 		{} \
 		\
-		YARMI_GENERATE_METACODE(ns, cn, oppocn, seq, opposeq) \
 		YARMI_GENERATE_CALLERS(ns, oppocn, seq) \
 		YARMI_GENERATE_INVOKERS(opposeq) \
 		\
 	private: \
 		Impl &impl; \
 		IO &io; \
-		CLog clog; \
-		ILog ilog; \
-		\
 	private: \
 		YARMI_GENERATE_INVOKERS_SFINAE(opposeq) \
-	}; \
-	\
-	template<typename Impl, typename IO, typename CLog, typename ILog> \
-	constexpr const char* cn<Impl, IO, CLog, ILog>::_meta_requests_names[]; \
-	template<typename Impl, typename IO, typename CLog, typename ILog> \
-	constexpr const char* cn<Impl, IO, CLog, ILog>::_meta_handlers_names[];
+	};
 
 /***************************************************************************/
 
 #define YARMI_CONSTRUCT( \
 	 invokers_ns \
-	,serializer \
 	,client_invoker_name \
 	,client_apis_seq \
 	,server_invoker_name \
 	,server_apis_seq \
-	,... \
 ) \
 	YARMI_GENERATE_OPEN_NS(invokers_ns) \
-		__VA_ARGS__ /* user code expanded here */ \
+		namespace YARMI_GENERATE_USERCODE_NS(0, client_invoker_name, server_invoker_name) { \
+			YARMI_GENERATE_USERCODE(client_apis_seq server_apis_seq) \
+		} \
 		\
 		YARMI_CONSTRUCT_INVOKER( \
-			 serializer \
+			 0 /* client */ \
 			,invokers_ns \
 			,client_invoker_name \
 			,server_invoker_name \
@@ -126,7 +113,7 @@
 		) \
 		\
 		YARMI_CONSTRUCT_INVOKER( \
-			 serializer \
+			 1 /* server */ \
 			,invokers_ns \
 			,server_invoker_name \
 			,client_invoker_name \

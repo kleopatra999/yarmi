@@ -33,16 +33,14 @@
 #define _yarmi__echo__protocol_hpp
 
 #include <yarmi/yarmi.hpp>
-#include <yarmi/serializers/boost_serialization.hpp>
 
 YARMI_CONSTRUCT(
 	(yarmi),
-	boost_serializer,
 	client_invoker, // name of the client invoker
-	(ping, on_ping, (std::string))
+	(proc(ping, on_ping, (std::string)))
 	,
 	server_invoker, // name of the server invoker
-	(pong, on_pong, (std::string))
+	(proc(pong, on_pong, (std::string)))
 );
 
 #endif // _yarmi__echo__protocol_hpp

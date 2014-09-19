@@ -55,47 +55,52 @@ void client_session::on_received(const yarmi::call_id_type call_id, const yarmi:
 
 /***************************************************************************/
 
-void client_session::on_registration(const std::string &msg, const std::string &regkey) {
-	if ( msg.empty() ) {
+void client_session::on_registration(e_status stat, const std::string &regkey) {
+	if ( stat == e_status::ok ) {
 		std::cout << "> OK -> you activation key is: " << regkey << std::endl;
 	} else {
-		std::cout << "> ERROR -> " << msg << std::endl;
+		std::cout << "> ERROR -> " << enum_cast(stat) << std::endl;
 	}
 }
 
 /***************************************************************************/
 
-void client_session::on_activation(const std::string &msg) {
-	if ( msg.empty() ) {
+void client_session::on_activation(e_status stat) {
+	if ( stat == e_status::ok ) {
 		std::cout << "> OK -> you successfully registered" << std::endl;
 	} else {
-		std::cout << "> ERROR -> " << msg << std::endl;
+		std::cout << "> ERROR -> " << enum_cast(stat) << std::endl;
 	}
 }
 
 /***************************************************************************/
 
-void client_session::on_login(const std::string &msg) {
-	if ( msg.empty() ) {
+void client_session::on_login(e_status stat) {
+	if ( stat == e_status::ok ) {
 		std::cout << "> OK -> you successfully logged in" << std::endl;
 	} else {
-		std::cout << "> ERROR -> " << msg << std::endl;
+		std::cout << "> ERROR -> " << enum_cast(stat) << std::endl;
 	}
 }
 
 /***************************************************************************/
 
-void client_session::on_logout(const std::string &msg) {
-	if ( msg.empty() ) {
+void client_session::on_logout(e_status stat) {
+	if ( stat == e_status::ok ) {
 		std::cout << "> OK -> you successfully logged out" << std::endl;
 	} else {
-		std::cout << "> ERROR -> " << msg << std::endl;
+		std::cout << "> ERROR -> " << enum_cast(stat) << std::endl;
 	}
 }
 
 /***************************************************************************/
 
-void client_session::on_users_online(const std::vector<std::string> &users) {
+void client_session::on_users_online(e_status stat, const std::vector<std::string> &users) {
+	if ( stat != e_status::ok ) {
+		std::cout << "> ERROR -> " << enum_cast(stat) << std::endl;
+		return;
+	}
+
 	if ( users.empty() ) {
 		std::cout << "no users online" << std::endl;
 		return;

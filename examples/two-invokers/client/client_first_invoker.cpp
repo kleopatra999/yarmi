@@ -50,14 +50,14 @@ client_first_invoker_impl::client_first_invoker_impl(client &c)
 client_first_invoker_impl::~client_first_invoker_impl()
 { delete pimpl; }
 
-void client_first_invoker_impl::on_pong(const std::string &str) {
+void client_first_invoker_impl::on_pong(std::uint32_t val) {
 	//std::cout << "client_first_invoker_impl::on_pong(" << str << ")" << std::endl;
 	static std::size_t msgidx = 0;
-	ping("message " + std::to_string(++msgidx));
+	ping(++msgidx);
 
 	static std::size_t idx = 0;
 	if ( ++idx == 1024 ) {
 		idx = 0;
-		std::cout << "received: \"" << str << "\"" << std::endl;
+		std::cout << "received: \"" << val << "\"" << std::endl;
 	}
 }

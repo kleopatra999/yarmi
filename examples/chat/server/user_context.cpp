@@ -62,7 +62,7 @@ void user_context::on_received(const yarmi::call_id_type call_id, const yarmi::b
 
 void user_context::on_registration(const std::string &username) {
 	if ( gc.user_registered(username) ) {
-		registration("username "+username+" already registered", "");
+		registration(e_status::already_exists, "username "+username+" already registered");
 	} else {
 
 	}

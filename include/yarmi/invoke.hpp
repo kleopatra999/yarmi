@@ -42,6 +42,9 @@
 #include <yarmi/yarmi_fwd.hpp>
 
 namespace yarmi {
+
+/***************************************************************************/
+
 namespace detail {
 namespace mpl {
 
@@ -69,9 +72,6 @@ struct unique {
 	>::type;
 };
 
-template<typename V>
-using size = boost::mpl::size<V>;
-
 } // ns mpl
 } // ns detail
 
@@ -79,11 +79,11 @@ using size = boost::mpl::size<V>;
 
 bool invoke(const call_id_type, const buffer_pair &) { return false; }
 template<typename Invoker, typename... Invokers>
-bool invoke(const call_id_type call_id, const buffer_pair &buffer, Invoker &head, Invokers&... tail) {
+bool invoke(call_id_type call_id, const buffer_pair &buffer, Invoker &head, Invokers&... tail) {
 	using ids    = typename detail::mpl::cat<Invoker, Invokers...>::type;
 	using unique = typename detail::mpl::unique<ids>::type;
 	static_assert(
-		 detail::mpl::size<ids>::value == detail::mpl::size<unique>::value
+		 boost::mpl::size<ids>::value == boost::mpl::size<unique>::value
 		,"proc IDs collision is detected"
 	);
 

@@ -35,8 +35,6 @@
 #include <yarmi/server/global_context_base.hpp>
 
 template<typename UC>
-struct global_context: yarmi::global_context_base {
-
-};
+struct global_context: yarmi::global_context_base {};
 
 #endif // _yarmi__two_invokers__global_context_hpp

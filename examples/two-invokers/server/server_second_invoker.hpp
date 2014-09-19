@@ -43,7 +43,7 @@ struct server_second_invoker_impl: server_second_invoker<server_second_invoker_i
 	server_second_invoker_impl(user_context &uc, global_context<user_context> &gc);
 	virtual ~server_second_invoker_impl();
 
-	void on_ping(const std::string &str);
+	void on_ping(std::uint32_t val);
 
 private:
 	struct impl;

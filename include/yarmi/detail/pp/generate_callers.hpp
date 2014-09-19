@@ -36,15 +36,9 @@
 
 #define YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS(idx, name) \
 	::yarmi::buffer_pair name(::yarmi::_serialize_only) { \
-		return serializer::serialize(static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx))); \
+		return Serializer::serialize(BOOST_PP_CAT(_request_id_, BOOST_PP_CAT(name, _##idx))); \
 	} \
 	void name() { \
-		::yarmi::detail::logging( \
-			 clog \
-			,static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
-			,_meta_requests_names[idx] \
-			,std::make_tuple() \
-		); \
 		io.send(name(::yarmi::serialize_only)); \
 	}
 
@@ -55,17 +49,15 @@
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS_SERIALIZE(unused, idx, data) \
 	BOOST_PP_CAT(data, idx)
 
-#define YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM(unused1, idx, size) \
+#define YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM(unused, idx, size) \
 	std::cref(arg##idx) \
 		YARMI_COMMA_IF_NOT_LAST_ITERATION(size, idx)
 
 #define YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE(tuple) \
-	std::make_tuple( \
-		BOOST_PP_REPEAT( \
-			 BOOST_PP_TUPLE_SIZE(tuple) \
-			,YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM \
-			,BOOST_PP_TUPLE_SIZE(tuple) \
-		) \
+	BOOST_PP_REPEAT( \
+		 BOOST_PP_TUPLE_SIZE(tuple) \
+		,YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE_PLACE_ELEM \
+		,BOOST_PP_TUPLE_SIZE(tuple) \
 	)
 
 #define YARMI_GENERATE_REMOTE_CALL_WITH_ARGS(idx, name, opponame, tuple) \
@@ -77,8 +69,8 @@
 		) \
 		,::yarmi::_serialize_only \
 	) { \
-		return serializer::serialize( \
-			 static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
+		return Serializer::serialize( \
+			 BOOST_PP_CAT(_request_id_, BOOST_PP_CAT(name, _##idx)) \
 			,BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg) \
 		); \
 	} \
@@ -90,36 +82,67 @@
 			,tuple \
 		) \
 	) { \
-		::yarmi::detail::logging( \
-			 clog \
-			,static_cast<::yarmi::call_id_type>(_meta_requests_ids::BOOST_PP_CAT(name, _##idx)) \
-			,_meta_requests_names[idx] \
-			,YARMI_GENERATE_REMOTE_CALL_MAKE_TUPLE(tuple) \
-		); \
 		io.send(name(BOOST_PP_ENUM_PARAMS(BOOST_PP_TUPLE_SIZE(tuple), arg), ::yarmi::serialize_only)); \
 	}
 
-#define YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL(idx, name, opponame, tuple) \
+/***************************************************************************/
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_NAME(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_CALLERS_GET_PROC_NAME_, str)
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_ARGS(str) \
+	BOOST_PP_CAT(YARMI_GENERATE_CALLERS_GET_PROC_ARGS_, str)
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_NAME_proc(...) \
+	YARMI_GENERATE_CALLERS_GEN_proc
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_NAME_enum(...) \
+	YARMI_GENERATE_CALLERS_GEN_enum
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_NAME_struct(...) \
+	YARMI_GENERATE_CALLERS_GEN_struct
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_ARGS_proc(request, handler, tuple) \
+	(request, handler, tuple)
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_ARGS_enum(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_CALLERS_GET_PROC_ARGS_struct(...) \
+	__VA_ARGS__
+
+#define YARMI_GENERATE_CALLERS_GEN_proc(idx, request, handler, tuple) \
 	YARMI_LAZY_IF( \
 		YARMI_TUPLE_IS_EMPTY(tuple), \
-		(idx, name), \
-		(idx, name, opponame, tuple), \
+		(idx, request), \
+		(idx, request, handler, tuple), \
 		YARMI_GENERATE_REMOTE_CALL_WITHOUT_ARGS, \
 		YARMI_GENERATE_REMOTE_CALL_WITH_ARGS \
 	)
 
-#define YARMI_GENERATE_CALLERS_ONE_ITEM(unused, idx, seq) \
-	YARMI_GENERATE_CALLERS_ONE_ITEM_IMPL( \
+#define YARMI_GENERATE_CALLERS_GEN_enum(...)
+
+#define YARMI_GENERATE_CALLERS_GEN_struct(...)
+
+#define YARMI_GENERATE_CALLERS_EXPAND_MACRO(idx, pname, tuple) \
+	pname( \
 		 idx \
-		,BOOST_PP_TUPLE_ELEM(0, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(1, BOOST_PP_SEQ_ELEM(idx, seq)) \
-		,BOOST_PP_TUPLE_ELEM(2, BOOST_PP_SEQ_ELEM(idx, seq)) \
+		,BOOST_PP_TUPLE_ELEM(0, tuple) \
+		,BOOST_PP_TUPLE_ELEM(1, tuple) \
+		,BOOST_PP_TUPLE_ELEM(2, tuple) \
+	)
+
+#define YARMI_GENERATE_CALLERS_AUX(unused, idx, seq) \
+	YARMI_GENERATE_CALLERS_EXPAND_MACRO( \
+		 idx \
+		,YARMI_GENERATE_CALLERS_GET_PROC_NAME BOOST_PP_SEQ_ELEM(idx, seq) \
+		,YARMI_GENERATE_CALLERS_GET_PROC_ARGS BOOST_PP_SEQ_ELEM(idx, seq) \
 	)
 
 #define YARMI_GENERATE_CALLERS(ns, cn, seq) \
 	BOOST_PP_REPEAT( \
 		 BOOST_PP_SEQ_SIZE(seq) \
-		,YARMI_GENERATE_CALLERS_ONE_ITEM \
+		,YARMI_GENERATE_CALLERS_AUX \
 		,seq \
 	)
 

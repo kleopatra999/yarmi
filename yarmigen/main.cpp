@@ -42,7 +42,7 @@
 
 #include "checks.hpp"
 
-#include <yarmi/throw.hpp>
+#include <yarmi/detail/throw/throw.hpp>
 
 #include <iostream>
 #include <fstream>

@@ -32,10 +32,9 @@
 #ifndef _yarmi__client_session_hpp
 #define _yarmi__client_session_hpp
 
-#include <protocol.hpp>
-#include <yarmi/client/client_base.hpp>
+#include "protocol.hpp"
 
-#include <boost/noncopyable.hpp>
+#include <yarmi/client/client_base.hpp>
 
 /***************************************************************************/
 
@@ -44,11 +43,11 @@ struct client_session: yarmi::client_base, yarmi::client_invoker<client_session>
 
 	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);
 
-	void on_registration(const std::string &msg, const std::string &regkey);
-	void on_activation(const std::string &msg);
-	void on_login(const std::string &msg);
-	void on_logout(const std::string &msg);
-	void on_users_online(const std::vector<std::string> &users);
+	void on_registration(e_status stat, const std::string &regkey);
+	void on_activation(e_status stat);
+	void on_login(e_status stat);
+	void on_logout(e_status stat);
+	void on_users_online(e_status stat, const std::vector<std::string> &users);
 };
 
 /***************************************************************************/

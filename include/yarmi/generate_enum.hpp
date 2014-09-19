@@ -60,23 +60,23 @@
 
 /***************************************************************************/
 
-#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM(unused, data, elem) \
-	inline BOOST_PP_TUPLE_ELEM(0, data) operator elem ( \
-		 const BOOST_PP_TUPLE_ELEM(0, data) &l \
-		,const BOOST_PP_TUPLE_ELEM(0, data) &r \
+#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM(unused, idx, tuple) \
+	inline BOOST_PP_TUPLE_ELEM(1, tuple) operator BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) ( \
+		 const BOOST_PP_TUPLE_ELEM(1, tuple) &l \
+		,const BOOST_PP_TUPLE_ELEM(1, tuple) &r \
 	) { \
-		return static_cast<BOOST_PP_TUPLE_ELEM(0, data)>( \
-			static_cast<BOOST_PP_TUPLE_ELEM(1, data)>(l) \
-			elem \
-			static_cast<BOOST_PP_TUPLE_ELEM(1, data)>(r)) \
+		return static_cast<BOOST_PP_TUPLE_ELEM(1, tuple)>( \
+			static_cast<BOOST_PP_TUPLE_ELEM(2, tuple)>(l) \
+			BOOST_PP_SEQ_ELEM(idx, BOOST_PP_TUPLE_ELEM(0, tuple)) \
+			static_cast<BOOST_PP_TUPLE_ELEM(2, tuple)>(r)) \
 		; \
 	}
 
-#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, ...) \
-	BOOST_PP_SEQ_FOR_EACH( \
-		 YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM \
-		,(name, type) \
-		,BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__)) \
+#define YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, seq) \
+	BOOST_PP_REPEAT( \
+		 BOOST_PP_SEQ_SIZE(seq) \
+		,YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS_ELEM \
+		,(seq, name, type) \
 	)
 
 /***************************************************************************/
@@ -90,8 +90,8 @@
 		) \
 	}; \
 	\
-	inline const char* enum_cast(const name &o) { \
-		switch (o) { \
+	inline const char* enum_cast(const name &e) { \
+		switch (e) { \
 			BOOST_PP_REPEAT( \
 				BOOST_PP_SEQ_SIZE(seq), \
 				YARMI_GENERATE_ENUM_WRITE_CASES, \
@@ -101,16 +101,16 @@
 		return "\"" #name "::unknown\""; \
 	} \
 	\
-	inline std::ostream& operator<< (std::ostream &s, const name &o) { \
-		return s << enum_cast(o); \
+	inline std::ostream& operator<< (std::ostream &s, const name &e) { \
+		return s << enum_cast(e); \
 	} \
-	YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, &, |, ^, <<, >>)
+	YARMI_GENERATE_ENUM_CLASS_GENERATE_OPERATORS(name, type, (&)(|)(^))
 
 #define YARMI_GENERATE_ENUM_CLASS(name, type, seq) \
 	YARMI_GENERATE_ENUM_CLASS_IMPL( \
 		 name \
 		,type \
-		,BOOST_PP_CAT(YARMI_GENERATE_STRUCT_WRAP_X seq, 0) \
+		,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X seq, 0) \
 	)
 
 /***************************************************************************/
@@ -124,8 +124,8 @@
 		) \
 	}; \
 	\
-	inline const char* enum_cast(const name &o) { \
-		switch (o) { \
+	inline const char* enum_cast(const name &e) { \
+		switch (e) { \
 			BOOST_PP_REPEAT( \
 				BOOST_PP_SEQ_SIZE(seq), \
 				YARMI_GENERATE_ENUM_WRITE_CASES, \
@@ -135,14 +135,14 @@
 		return "\"" #name "::unknown\""; \
 	} \
 	\
-	inline std::ostream& operator<< (std::ostream &s, const name &o) { \
-		return s << enum_cast(o); \
+	inline std::ostream& operator<< (std::ostream &s, const name &e) { \
+		return s << enum_cast(e); \
 	}
 
 #define YARMI_GENERATE_ENUM(name, seq) \
 	YARMI_GENERATE_ENUM_IMPL( \
 		 name \
-		,BOOST_PP_CAT(YARMI_GENERATE_STRUCT_WRAP_X seq, 0) \
+		,BOOST_PP_CAT(YARMI_WRAP_SEQUENCE_X seq, 0) \
 	)
 
 /***************************************************************************/

@@ -40,7 +40,7 @@ struct client_second_invoker_impl: two_invokers::client_second_invoker<client_se
 	client_second_invoker_impl(client &c);
 	virtual ~client_second_invoker_impl();
 
-	void on_pong(const std::string &str);
+	void on_pong(std::uint32_t val);
 
 private:
 	struct impl;

@@ -36,6 +36,8 @@
 #include <yarmi/detail/endian/endian.hpp>
 
 #include <memory>
+#include <tuple>
+#include <utility>
 
 #include <boost/asio/ip/tcp.hpp>
 
@@ -43,10 +45,15 @@ namespace yarmi {
 
 /***************************************************************************/
 
-using call_id_type = decltype(yarmi::detail::fnv1a(""));
-using buffer_ptr   = std::shared_ptr<char>;
+constexpr auto hash(const char *s) -> decltype(detail::fnv1a_32(s)) {
+	return detail::fnv1a_32(s);
+}
+using call_id_type   = decltype(hash(""));
+using call_name_type = const char*;
 
-using buffer_pair  = std::pair<buffer_ptr, std::size_t>;
+using buffer_ptr  = std::shared_ptr<char>;
+using buffer_pair = std::pair<buffer_ptr, std::size_t>;
+
 inline buffer_pair allocate_buffer(const std::size_t size) {
 	buffer_ptr buffer(new char[size], [](char *p){delete[] p;});
 	return {std::move(buffer), size};
@@ -60,27 +67,59 @@ struct global_context_base;
 using socket_ptr  = std::shared_ptr<boost::asio::ip::tcp::socket>;
 using session_ptr = std::shared_ptr<session>;
 
+/***************************************************************************/
+
 struct _serialize_only { _serialize_only() {} };
 static const _serialize_only serialize_only;
 
-struct _fake_log { _fake_log() {} };
-static const _fake_log fake_log;
+/***************************************************************************/
+
+namespace {
+
+template<
+	 typename CallID
+	,typename CallName
+	,typename... Args
+	,std::size_t... Ids
+>
+inline std::tuple<const Args&...>
+get_call_args_impl(const std::tuple<CallID, CallName, Args...> &args, std::index_sequence<Ids...>) {
+	return std::tie(std::get<Ids+2>(args)...);
+}
+
+} // ns anon
+
+template<typename Tuple>
+inline auto get_call_id(const Tuple &tp) { return std::get<0>(tp); }
+
+template<typename Tuple>
+inline auto get_call_name(const Tuple &tp) { return std::get<1>(tp); }
+
+struct call_id_name {
+	call_id_type   call_id;
+	call_name_type call_name;
+};
+
+template<typename Tuple>
+inline call_id_name get_call_id_name(const Tuple &tp) {
+	return {get_call_id(tp), get_call_name(tp)};
+}
+
+template<
+	 typename CallID
+	,typename CallName
+	,typename... Args
+>
+inline std::tuple<const Args&...>
+get_call_args(const std::tuple<CallID, CallName, Args...> &args) {
+	return get_call_args_impl(args, std::index_sequence_for<Args...>());
+}
 
 /***************************************************************************/
 
-namespace detail {
-
-template<typename Log, typename... Args>
-auto logging(Log& log, const call_id_type call_id, const std::tuple<const Args&...> &args)
-	-> decltype((log(call_id, args)), void())
-{
-	log(call_id, args);
-}
-
-template<typename Log, typename... Args>
-void logging(Log&, const call_id_type, const std::tuple<const Args&...> &) {}
-
-} // ns detail
+struct invoker_base {
+	virtual bool invoke(const call_id_type call_id, const buffer_pair &buffer) = 0;
+};
 
 /***************************************************************************/
 

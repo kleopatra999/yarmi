@@ -29,7 +29,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <yarmi/throw.hpp>
+#include <yarmi/detail/throw/throw.hpp>
 #include "checks.hpp"
 #include "records.hpp"
 #include "protoinfo.hpp"

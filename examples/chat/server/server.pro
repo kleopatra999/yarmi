@@ -41,6 +41,13 @@ INCLUDEPATH += \
 	../ \
 	../../../include
 
+gcc: {
+} else:msvc {
+} else {
+	DEFINES += \
+		BOOST_PP_VARIADICS=1
+}
+
 LIBS += \
 	-lboost_system
 
@@ -108,4 +115,7 @@ HEADERS += \
 	../../../include/yarmi/procname.hpp \
 	../../../include/yarmi/yarmi.hpp \
 	../../../include/yarmi/yarmi_fwd.hpp \
-    ../../../include/yarmi/serializers/binary_serializer_base.hpp
+	 ../../../include/yarmi/serializers/binary_serializer_base.hpp \
+    ../../../include/yarmi/detail/pp/generate_base_class.hpp \
+    ../../../include/yarmi/detail/pp/generate_tools.hpp \
+    ../../../include/yarmi/detail/pp/generate_usercode.hpp

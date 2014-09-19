@@ -66,12 +66,13 @@ struct binary_serializer_base: private boost::noncopyable {
 	static std::pair<std::uint32_t, call_id_type>
 	unpack_header(const char *ptr, const std::size_t size) {
 		YARMI_TEST_THROW(size >= header_size());
-		std::pair<std::uint32_t, call_id_type> res;
-		// extract body size
 		const std::uint32_t *header = (std::uint32_t*)ptr;
-		res.first  = network_to_host(header[0]);
-		// extract call id
-		res.second = network_to_host(header[1]);
+		std::pair<std::uint32_t, call_id_type> res = {
+			// extract body size
+			network_to_host(header[0]),
+			// extract call id
+			network_to_host(header[1])
+		};
 
 		return res;
 	}
