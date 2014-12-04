@@ -34,6 +34,7 @@
 
 #include <yarmi/yarmi_fwd.hpp>
 
+#include <boost/noncopyable.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
@@ -43,7 +44,7 @@ struct server_base;
 
 /***************************************************************************/
 
-struct session: std::enable_shared_from_this<session> {
+struct session: private boost::noncopyable, public std::enable_shared_from_this<session> {
 	friend struct server_base;
 
 	session(const socket_ptr &socket, server_base &sb);
