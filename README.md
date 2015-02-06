@@ -23,11 +23,11 @@ YARMI_CONSTRUCT(
 		(bad_username_or_password)
 	)) /* enum */
 	(struct(
-        	mystruct
-        	,
-        	(a, int)
-        	(b, double)
-        	(c, std::pair<int, long>)
+		mystruct
+		,
+		(a, int)
+		(b, double)
+		(c, std::pair<int, long>)
 	)) /* struct */
 	(proc(registration , on_registration, (std::string)                           )) // username
 	(proc(activation   , on_activation  , (std::string, std::string, std::string) )) // registration key : username : password
