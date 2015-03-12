@@ -69,7 +69,7 @@ int get_usage(struct pstat* result) {
 		YARMI_THROW("fopen(\"%1%\") error", self_stat);
 
 	std::size_t rss = 0;
-	int res = fscanf(fstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %ld %ld %*d %*d %*d %*d %*u %lu %ld"
+	int res = fscanf(fstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %zu %zu %zd %zd %*d %*d %*d %*d %*u %zu %zd"
 		,&result->utime_ticks
 		,&result->stime_ticks
 		,&result->cutime_ticks
@@ -88,7 +88,7 @@ int get_usage(struct pstat* result) {
 	if ( ! fstat )
 		YARMI_THROW("fopen(\"%1%\") error", stat);
 
-	res = fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
+	res = fscanf(fstat, "%*s %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu %zu"
 		,&cpu_times[0 ]
 		,&cpu_times[1 ]
 		,&cpu_times[2 ]
