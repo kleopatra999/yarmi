@@ -106,39 +106,47 @@ struct server_base::impl {
 			const boost::asio::ip::tcp::endpoint &ep = socket->remote_endpoint(ec2);
 			if ( ec2 ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
+				
+				/** start accepting next connection */
+				start();
+				return;
 			}
 
 			if ( !connection_pred(ep) ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("IP \"%1%\" is in backlist", ep.address().to_string()));
-			} else {
-				std::ostringstream os;
-				yarmi::session_ptr session_ptr;
-
-				YARMI_TRY(allocate_session_flag) {
-					session_ptr.reset(session_factory(socket), [this](session *session_ptr){ session_deleter(session_ptr); });
-				} YARMI_CATCH_LOG(allocate_session_flag, os,
-					error_handler(os.str());
-				);
-				if ( allocate_session_flag ) {
-					error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("stop accepting"));
-					return;
-				}
-
-				YARMI_TRY(add_session_flag) {
-					gcb.add_session(session_ptr.get());
-				} YARMI_CATCH_LOG(add_session_flag, os,
-					error_handler(os.str());
-				);
-
-				YARMI_TRY(on_connected_flag) {
-					session_ptr->on_connected();
-				} YARMI_CATCH_LOG(on_connected_flag, os,
-					error_handler(os.str());
-				);
-
-				/** start session */
-				session_ptr->start();
+				
+				/** start accepting next connection */
+				start();
+				return;
 			}
+			
+			std::ostringstream os;
+			yarmi::session_ptr session_ptr;
+
+			YARMI_TRY(allocate_session_flag) {
+				session_ptr.reset(session_factory(socket), [this](session *session_ptr){ session_deleter(session_ptr); });
+			} YARMI_CATCH_LOG(allocate_session_flag, os,
+				error_handler(os.str());
+			);
+			if ( allocate_session_flag ) {
+				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("stop accepting"));
+				return;
+			}
+
+			YARMI_TRY(add_session_flag) {
+				gcb.add_session(session_ptr.get());
+			} YARMI_CATCH_LOG(add_session_flag, os,
+				error_handler(os.str());
+			);
+
+			YARMI_TRY(on_connected_flag) {
+				session_ptr->on_connected();
+			} YARMI_CATCH_LOG(on_connected_flag, os,
+				error_handler(os.str());
+			);
+
+			/** start session */
+			session_ptr->start();
 		}
 
 		/** start accepting next connection */
