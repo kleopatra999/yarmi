@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -51,10 +51,10 @@ namespace yarmi {
 struct session::impl {
 	enum { header_size = binary_serializer_base::header_size() };
 
-	impl(const socket_ptr &socket, server_base &sb)
+	impl(socket sock, server_base &sb)
 		:config(sb.get_config())
 		,stat(sb.get_server_statistic())
-		,socket(std::move(socket))
+		,sock(std::move(sock))
 		,error_handler(sb.get_error_handler())
 		,buffers()
 		,write_in_process(false)
@@ -63,7 +63,7 @@ struct session::impl {
 
 	void read_header(const yarmi::session_ptr &self) {
 		boost::asio::async_read(
-			 *socket
+			 sock
 			,boost::asio::buffer(header_buffer)
 			,yarmi::make_preallocated_handler(
 				read_allocator
@@ -111,7 +111,7 @@ struct session::impl {
 	void read_body(const std::size_t body_size, const call_id_type call_id, const yarmi::session_ptr &self) {
 		::yarmi::buffer_pair buffer = allocate_buffer(body_size);
 		boost::asio::async_read(
-			 *socket
+			 sock
 			,boost::asio::buffer(buffer.first.get(), buffer.second)
 			,yarmi::make_preallocated_handler(
 				read_allocator
@@ -164,7 +164,7 @@ struct session::impl {
 		if ( !write_in_process ) {
 			write_in_process = true;
 			boost::asio::async_write(
-				 *socket
+				 sock
 				,boost::asio::buffer(buffer.first.get(), buffer.second)
 				,yarmi::make_preallocated_handler(
 					write_allocator
@@ -217,7 +217,7 @@ struct session::impl {
 
 	const server_config &config;
 	server_statistic &stat;
-	socket_ptr socket;
+	socket sock;
 
 	server_base::error_handler_type error_handler;
 
@@ -234,8 +234,8 @@ struct session::impl {
 
 /***************************************************************************/
 
-session::session(const socket_ptr &socket, server_base &sb)
-	:pimpl(new impl(socket, sb))
+session::session(yarmi::socket sock, server_base &sb)
+	:pimpl(new impl(std::move(sock), sb))
 {}
 
 session::~session() {
@@ -247,8 +247,7 @@ session::~session() {
 
 /***************************************************************************/
 
-typename socket_ptr::element_type& session::get_socket()
-{ return *(pimpl->socket); }
+typename socket_ptr::element_type& session::get_socket() { return pimpl->sock; }
 
 /***************************************************************************/
 
@@ -267,7 +266,7 @@ void session::stop() {
 }
 
 void session::stop(boost::system::error_code &ec) {
-	pimpl->socket->cancel(ec);
+	pimpl->sock.cancel(ec);
 }
 
 void session::close() {
@@ -279,9 +278,9 @@ void session::close() {
 }
 
 void session::close(boost::system::error_code &ec) {
-	pimpl->socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+	pimpl->sock.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 	if ( ec ) return;
-	pimpl->socket->close(ec);
+	pimpl->sock.close(ec);
 }
 
 /***************************************************************************/
@@ -305,7 +304,7 @@ bool session::on_destruction_state() const { return pimpl->on_destruction_state;
 
 void session::set_on_destruction_state() {
 	boost::system::error_code ec;
-	pimpl->socket->cancel(ec);
+	pimpl->sock.cancel(ec);
 
 	pimpl->on_destruction_state = true;
 }

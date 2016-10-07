@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -64,7 +64,8 @@ struct server_base;
 struct session;
 struct global_context_base;
 
-using socket_ptr  = std::shared_ptr<boost::asio::ip::tcp::socket>;
+using socket      = boost::asio::ip::tcp::socket;
+using socket_ptr  = std::shared_ptr<socket>;
 using session_ptr = std::shared_ptr<session>;
 
 /***************************************************************************/

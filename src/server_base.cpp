@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -63,6 +63,7 @@ struct server_base::impl {
 		,gcb(gcb)
 		,allocator()
 		,acceptor(ios, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(config.ip), config.port))
+		,sock(ios)
 		,stat_timer(ios)
 		,connection_pred(connection_pred)
 		,error_handler(error_handler)
@@ -83,16 +84,15 @@ struct server_base::impl {
 	}
 
 	void start() {
-		yarmi::socket_ptr socket = std::make_shared<typename socket_ptr::element_type>(ios);
 		acceptor.async_accept(
-			 *socket
+			 sock
 			,yarmi::make_preallocated_handler(
 				 allocator
-				,[this, socket](const boost::system::error_code &ec) { on_accepted(ec, socket); }
+				,[this](const boost::system::error_code &ec) { on_accepted(ec); }
 			)
 		);
 	}
-	void on_accepted(const boost::system::error_code &ec, const yarmi::socket_ptr &socket) {
+	void on_accepted(const boost::system::error_code &ec) {
 		if ( !ec ) {
 			if ( gcb.sessions() == config.max_connections ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("more connections than are set by 'max_connections'(%1%)", config.max_connections));
@@ -103,7 +103,7 @@ struct server_base::impl {
 			}
 
 			boost::system::error_code ec2;
-			const boost::asio::ip::tcp::endpoint &ep = socket->remote_endpoint(ec2);
+			const boost::asio::ip::tcp::endpoint &ep = sock.remote_endpoint(ec2);
 			if ( ec2 ) {
 				error_handler(YARMI_FORMAT_MESSAGE_AS_STRING("cannot get remote endpoint: \"%1%\"", ec2.message()));
 				
@@ -124,7 +124,7 @@ struct server_base::impl {
 			yarmi::session_ptr session_ptr;
 
 			YARMI_TRY(allocate_session_flag) {
-				session_ptr.reset(session_factory(socket), [this](session *session_ptr){ session_deleter(session_ptr); });
+				session_ptr.reset(session_factory(std::move(sock)), [this](session *session_ptr){ session_deleter(session_ptr); });
 			} YARMI_CATCH_LOG(allocate_session_flag, os,
 				error_handler(os.str());
 			);
@@ -208,6 +208,7 @@ struct server_base::impl {
 
 	yarmi::handler_allocator<512> allocator;
 	boost::asio::ip::tcp::acceptor acceptor;
+	socket sock;
 
 	boost::asio::deadline_timer stat_timer;
 

@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -37,8 +37,8 @@
 
 /***************************************************************************/
 
-user_context::user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc)
-	:yarmi::session(socket, sb)
+user_context::user_context(yarmi::socket socket, yarmi::server_base &sb, global_context<user_context> &gc)
+	:yarmi::session(std::move(socket), sb)
 	,gc(gc)
 	,first(*this, gc)
 	,second(*this, gc)

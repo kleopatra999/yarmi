@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -70,7 +70,7 @@ struct server_base: boost::noncopyable {
 	using connection_pred_type   = std::function<bool(const boost::asio::ip::tcp::endpoint &)>;
 	using error_handler_type     = std::function<void(const std::string &)>;
 	using statistic_handler_type = std::function<void(const server_statistic &)>;
-	using session_factory_type   = std::function<session* (const socket_ptr &)>;
+	using session_factory_type   = std::function<session* (socket)>;
 
 	server_base(
 		 boost::asio::io_service &ios

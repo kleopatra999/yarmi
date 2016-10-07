@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -42,23 +42,18 @@ namespace yarmi {
 
 template<std::size_t alloc_size>
 struct handler_allocator: private boost::noncopyable {
+	handler_allocator(const handler_allocator&) = delete;
+	handler_allocator& operator=(const handler_allocator&) = delete;
+
 	handler_allocator()
 		:in_use(false)
 	{}
 
 	void* allocate(std::size_t size) {
-		//std::cout << "handler_allocator::allocate(): " << size << std::endl;
-		if ( size <= alloc_size ) {
-			if ( ! in_use ) {
-				in_use = true;
-				return std::addressof(storage);
-			}
+		if ( !in_use && size <= alloc_size ) {
+			in_use = true;
+			return std::addressof(storage);
 		}
-
-//		std::cerr
-//		<< "handler_allocator::allocate() allocate using operator new(). "
-//		<< "handler_allocator::size=" << alloc_size << ", requested size=" << size
-//		<< std::endl;
 
 		return ::operator new(size);
 	}
@@ -66,10 +61,9 @@ struct handler_allocator: private boost::noncopyable {
 	void deallocate(void *pointer) {
 		if ( std::addressof(storage) == pointer ) {
 			in_use = false;
-			return;
+		} else {
+			::operator delete(pointer);
 		}
-
-		::operator delete(pointer);
 	}
 
 private:

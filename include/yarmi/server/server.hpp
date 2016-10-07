@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -52,7 +52,7 @@ struct server: server_base {
 		,error_handler_type     eh = [](const std::string &) {}
 		,statistic_handler_type sh = [](const yarmi::server_statistic &) {}
 	)
-		:server_base(ios, config, gc, cp, eh, sh, [this, &gc](const socket_ptr &socket){ return new UC(socket, *this, gc); })
+		:server_base(ios, config, gc, cp, eh, sh, [this, &gc](socket sock){ return new UC(std::move(sock), *this, gc); })
 	{}
 };
 

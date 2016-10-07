@@ -35,7 +35,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-	-std=c++1y
+    -std=c++14
 
 QMAKE_LFLAGS += \
 	-pthread

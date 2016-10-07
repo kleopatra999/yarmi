@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -47,7 +47,7 @@ struct server_base;
 struct session: private boost::noncopyable, public std::enable_shared_from_this<session> {
 	friend struct server_base;
 
-	session(const socket_ptr &socket, server_base &sb);
+	session(socket sock, server_base &sb);
 	virtual ~session();
 
 	typename socket_ptr::element_type& get_socket();

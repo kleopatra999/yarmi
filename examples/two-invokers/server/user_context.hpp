@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -40,7 +40,7 @@
 /***************************************************************************/
 
 struct user_context: yarmi::session {
-	user_context(const yarmi::socket_ptr &socket, yarmi::server_base &sb, global_context<user_context> &gc);
+	user_context(yarmi::socket socket, yarmi::server_base &sb, global_context<user_context> &gc);
 	virtual ~user_context();
 
 	void on_received(const yarmi::call_id_type call_id, const yarmi::buffer_pair &buffer);

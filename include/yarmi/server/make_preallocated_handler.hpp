@@ -1,5 +1,5 @@
 
-// Copyright (c) 2013,2014, niXman (i dotty nixman doggy gmail dotty com)
+// Copyright (c) 2013-2016, niXman (i dotty nixman doggy gmail dotty com)
 // All rights reserved.
 //
 // This file is part of YARMI(https://github.com/niXman/yarmi) project.
@@ -41,7 +41,7 @@ namespace yarmi {
 template <typename Allocator, typename F>
 preallocated_handler_invoker<Allocator, F>
 make_preallocated_handler(Allocator &allocator, F f) {
-	return preallocated_handler_invoker<Allocator, F>(allocator, f);
+	return preallocated_handler_invoker<Allocator, F>(allocator, std::move(f));
 }
 
 /***************************************************************************/
